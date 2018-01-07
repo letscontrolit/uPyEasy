@@ -11,7 +11,7 @@ Check here to learn how to use this branch and help us improving uPyEasy: http:/
 
 ## Binary releases
 
-New binary release: https://github.com/letscontrolit/ESPEasy/releases
+New binary release: https://github.com/letscontrolit/uPyEasy/releases
 
 The releases are named something like 'upyeasy_01022018' (last number is the build date)
 
