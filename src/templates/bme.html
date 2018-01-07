@@ -1,0 +1,17 @@
+{% args info, plugindata %}
+<!- DO NOT CHANGE LINE ABOVE! -->
+<TR>
+   <TD>I2C Address:
+   <TD>
+      <select name='bme_i2c'>
+         <option value=118 {% if plugindata['bme_i2c'] == 118 %}selected{% endif %}>0x76 - (default)</option>
+         <option value=119 {% if plugindata['bme_i2c'] == 119 %}selected{% endif %}>0x77</option>
+      </select>
+<TR>
+   <TD>
+   <TD>
+      <div class='note'>Note: SDO Low=0x76, High=0x77</div>
+<TR>
+   <TD>Altitude:
+   <TD><input type='number' name='bme_elev' style='width:5em;' value=plugindata['bme_elev']> [m]
+{{plugindata['content']}}

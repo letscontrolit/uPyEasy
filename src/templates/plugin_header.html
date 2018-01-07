@@ -1,0 +1,60 @@
+{% args info, controllers, plugins, plugindata, device, dxpin, dx_label, hardware %}
+<form name='frmselect' method='post'>
+<table>
+<TH>Device Setting
+<TH>Value
+<TR>
+   <TD>PlugIn:
+   <TD>
+      <select name='pluginid' LANGUAGE=javascript onchange="return dept_onchange(frmselect)">
+      {% for plugin in plugins %}
+      <option value='{{plugin["id"]}}' {% if info["pluginname"] == plugin["name"] %}selected{% endif %}>{{plugin["name"]}}</option>
+      {% endfor %}
+      </select>
+      <input type='hidden' name='currentpluginid' maxlength='40' value='{{info["pluginid"]}}'>
+      <a class="button link" href="" target="_blank">?</a>
+<TR>
+   <TD>Name:
+   <TD><input type='text' name='name' maxlength='40' value='{{device["name"]}}'>
+<TR>
+   <TD>Delay:
+   <TD><input type='number' name='delay' min=0 max=86400 style='width: 80px;' value='{{device["delay"]}}'> (sec)
+{% if plugindata["pincnt"] > 0 %}
+{% for dxcnt in range(0,plugindata["pincnt"]) %}
+<TR>
+   <TD>Dx Pin {{dxcnt+1}}:
+   <TD>
+      <select name='dxpin{{str(dxcnt)}}'>
+      {% for cnt in range(0, dx_label["count"]) %}
+      <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8 or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if device["dxpin"+str(dxcnt)] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+      {% endfor %}
+      </select>
+{% endfor %}
+{% endif %}
+<TR>
+   <TD>Pull UP:
+   <TD><input type=checkbox id='pullup' name='pullup' {% if device["pullup"] == 'on' %}checked{% endif %}>
+<TR>
+   <TD>Inversed:
+   <TD><input type=checkbox id='inverse' name='inverse' {% if device["inverse"] == 'on' %}checked{% endif %}>
+<TR>
+   <TD>Send Boot state:
+   <TD><input type=checkbox id='bootstate' name='bootstate' {% if device["bootstate"] == 'on' %}checked{% endif %}>
+<TR>
+   <TD>Send Data to controller
+   <TD><select name='controller'>
+      <option value='0' {% if device["controller"] == 0 %}selected{% endif %}>- None -</option>
+      {% for controller in controllers %}
+      <option value='{{controller["id"]}}' {% if int(controller["id"]) == device["controller"] %}selected{% endif %}>{{controller["protocol"]}} - {{controller["hostname"]}}</option>
+      {% endfor %}
+      </select>
+      ID: <input type='number' name='controllerid' style='width: 80px;' value='{{device["controllerid"]}}'>
+<TR>
+   <TD>Global Sync:
+   <TD><input type=checkbox id='sync' name='sync'{% if device["sync"] == 'on' %}checked{% endif %}>
+<TR>
+   <TD>Enabled:
+   <TD><input type=checkbox id='enable' name='enable' {% if device["enable"] == 'on' %}checked{% endif %}>
+<TR>
+   <TH>Sensor Setting
+   <TH>Value

@@ -1,0 +1,20 @@
+{% args info, plugins %}
+<form name='frmselect' method='post'>
+<table>
+<TH>Device Plugin
+<TH>Value
+<TR>
+   <TD>PlugIn:
+   <TD>
+      <select name='pluginid'>
+      {% for plugin in plugins %}
+      <option value='{{plugin["id"]}}'>{{plugin["name"]}}</option>
+      {% endfor %}
+      </select>
+      <input type='hidden' name='id' maxlength='40' value='0'>
+      <a class="button link" href="" target="_blank">?</a>
+    <TR>
+       <TD>
+       <TD><a class="button link" href="devices">Close</a><input class="button link" type='submit' value='Submit'>
+</table>
+</form>

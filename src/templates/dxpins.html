@@ -1,0 +1,26 @@
+{% args info,dxpin,hardware, dx_label %}
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH>Dx
+       <TH>In/Out
+       <TH>State
+       <TH>Reserved by
+       {% for cnt in range(0, dx_label["count"]) %}
+       <TR>
+          <td class="pin">{{dx_label['d'+str(cnt)]}}
+          <TD>{% if hardware['d'+str(cnt)] == 0 %}Off{% endif %}
+              {% if hardware['d'+str(cnt)] == 1 %}Input{% endif %}
+              {% if hardware['d'+str(cnt)] == 2 %}Output Pull None{% endif %}
+              {% if hardware['d'+str(cnt)] == 3 %}Output Pull Up{% endif %}
+              {% if hardware['d'+str(cnt)] == 4 %}Output Pull Down{% endif %}
+              {% if hardware['d'+str(cnt)] == 5 %}Output Open Drain{% endif %}
+              {% if hardware['d'+str(cnt)] == 6 %}Output Alt Pull Up{% endif %}
+              {% if hardware['d'+str(cnt)] == 7 %}Output Alt Pull Down{% endif %}
+              {% if hardware['d'+str(cnt)] == 8 %}Disabled{% endif %}
+          <TD align="center">{% if hardware['d'+str(cnt)] != 1 %}-{% endif %}
+          <TD>{{dxpin['d'+str(cnt)]}}
+       {% endfor %}
+       <TR>
+          <TD colspan="2"><a class="button link" href="/tools">close</a>
+          <TD>
+          <TD><a class="button link" href="/dxpins">reload</a>
+    </table>

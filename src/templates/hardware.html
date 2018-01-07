@@ -1,0 +1,126 @@
+{% args info, hardware, dx_label, dxpin %}
+   <form  method='post'>
+   <table>
+      <TH>Hardware Settings
+      <TH>
+      <TR>
+         <TD>Status LED:
+         <TD>
+            <select name='boardled'>
+               <option value=''{% if hardware['boardled'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['boardled'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>Inversed LED:
+         <TD><input type=checkbox id='inverseled' name='inverseled'{% if hardware['inverseled'] == 'on' %} checked{% endif %}>
+      <TR>
+         <TD colspan='2'>
+            <h3>I2C Interface</h3>
+      <TR>
+         <TD>SDA:
+         <TD>
+            <select name='sda'>
+               <option value=''{% if hardware['sda'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['sda'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>SCL:
+         <TD>
+            <select name='scl'>
+               <option value=''{% if hardware['scl'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['scl'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD colspan='2'>
+            <h3>SPI Interface</h3>
+      <TR>
+         <TD>MOSI:
+         <TD>
+            <select name='mosi'>
+               <option value=''{% if hardware['mosi'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['mosi'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>MISO:
+         <TD>
+            <select name='miso'>
+               <option value=''{% if hardware['miso'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['miso'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>SCK:
+         <TD>
+            <select name='sck'>
+               <option value=''{% if hardware['sck'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['sck'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>NSS:
+         <TD>
+            <select name='nss'>
+               <option value=''{% if hardware['nss'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['nss'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD colspan='2'>
+            <h3>UART Interface</h3>
+      <TR>
+         <TD>TX:
+         <TD>
+            <select name='tx'>
+               <option value=''{% if hardware['tx'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['tx'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>RX:
+         <TD>
+            <select name='rx'>
+               <option value=''{% if hardware['rx'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['rx'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD colspan='2'>
+            <h3>Dx boot states</h3>
+         {% for cnt in range(0,dx_label["count"]) %}
+      <TR>
+         <TD>Pin mode D{{cnt}}:
+         <TD>
+            <select name='d{{cnt}}'>
+               <option value='0'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 0 %} selected{% endif %}>Off</option>
+               <option value='1'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 1 %} selected{% endif %}>Input</option>
+               <option value='2'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 2 %} selected{% endif %}>Output Pull None</option>
+               <option value='3'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 3 %} selected{% endif %}>Output Pull Up</option>
+               <option value='4'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 4 %} selected{% endif %}>Output Pull Down</option>
+               <option value='5'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 5 %} selected{% endif %}>Output Open Drain</option>
+               <option value='6'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 6 %} selected{% endif %}>Output Alt Pull Up</option>
+               <option value='7'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 7 %} selected{% endif %}>Output Alt Pull Down</option>
+               <option value='8'{% if dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['d'+str(cnt)] == 8 %} selected{% endif %}>Disabled</option>
+            </select>
+          {% endfor %}
+      <TR>
+         <TD colspan='2'>
+            <hr>
+      <TR>
+         <TD colspan='2'><a class="button link" href="hardware">Close</a><input class="button link" type='submit' value='Submit'>
+      <TR>
+         <TD>
+   </table>
+</form>
