@@ -1,0 +1,18 @@
+{% args info, plugindata %}
+<!- DO NOT CHANGE LINE ABOVE! -->
+<TR>
+   <TD>GPIO Type:
+   <TD>
+      <select name='gpiotype'>
+      <option value='input'{% if plugindata['gpiotype'] == 'input' %}selected{% endif %}>Input</option>
+      <option value='output'{% if plugindata['gpiotype'] == 'output' %}selected{% endif %}>Output</option>
+      </select>
+<TR>
+   <TD>Input Type:
+   <TD>
+      <select name='inputtype'>
+      <option value='normal'{% if plugindata['inputtype'] == 'normal' %}selected{% endif %}>Normal Switch</option>
+      <option value='low'{% if plugindata['inputtype'] == 'low' %}selected{% endif %}>Push Button Active Low</option>
+      <option value='high'{% if plugindata['inputtype'] == 'high' %}selected{% endif %}>Push Button Active High</option>
+      </select>
+{{plugindata['content']}}

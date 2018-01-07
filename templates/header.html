@@ -1,0 +1,28 @@
+{% args info, menu %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>uPuEasy</title>
+    <link rel="stylesheet" href="static/upyeasy.css" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="static/upyeasy.js"></script>
+  </head>
+   <body class='bodymenu'>
+      <header class="headermenu">
+         <h1>uPyEasy: {{info['name']}} </h1>
+         <div class="menubar">
+             <a class="menu{% if menu==1 %} active{% endif %}" href=".">Main</a>
+             <a class="menu{% if menu==2 %} active{% endif %}" href="config">Config</a>
+             <a class="menu{% if menu==3 %} active{% endif %}" href="controllers">Controllers</a>
+             <a class="menu{% if menu==4 %} active{% endif %}" href="hardware">Hardware</a>
+             <a class="menu{% if menu==5 %} active{% endif %}" href="devices">Devices</a>
+             <a class="menu{% if menu==6 %} active{% endif %}" href="scripts">Scripts</a>
+             <a class="menu{% if menu==7 %} active{% endif %}" href="notifications">Notifications</a>
+             <a class="menu{% if menu==8 %} active{% endif %}" href="tools">Tools</a>
+             <a class="menu{% if menu==9 %} active{% endif %}" href="advanced">Advanced</a>
+         </div>
+      </header>

@@ -1,0 +1,20 @@
+{% args wifilist %}
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH>SSID
+       <TH>Channel
+       <TH>Strength
+       <TH>Security
+       <TH>Hidden
+       {% for wifi in wifilist %}
+           <TR>
+              <TD>{{wifi['ssid']}}
+              <TD>{{wifi['channel']}}
+              <TD>{{wifi['strength']}} db
+              <TD>{{wifi['security']}}
+              <TD>{{wifi['hidden']}}
+       {% endfor %}
+       <TR>
+          <TD><a class="button link" href="/tools">close</a>
+          <TD colspan="3">
+          <TD><a class="button link" href="/tools?ucmd=wifiscanner">reload</a>
+    </table>

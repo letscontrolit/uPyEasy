@@ -1,0 +1,11 @@
+{% args info, plugindata %}
+<!- DO NOT CHANGE LINE ABOVE! -->
+<TR>
+   <TD>DHT Type:
+   <TD>
+      <select name='dhttype'>
+         <option value=11 {% if plugindata['dhttype'] == 11 %}selected{% endif %}>DHT 11</option>
+         <option value=12{% if plugindata['dhttype'] == 12 %}selected{% endif %}>DHT 12</option>
+         <option value=22{% if plugindata['dhttype'] == 22 %}selected{% endif %}>DHT 22</option>
+      </select>
+{{plugindata['content']}}

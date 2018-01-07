@@ -1,0 +1,29 @@
+{% args info, services, notifications %}
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH>
+       <TH>ID
+       <TH>Service
+       <TH>Server
+       <TH>Port
+       <TH>Enabled
+       <TH>
+       {% for notification in notifications %}
+           {% if notification['id'] != 0 %} 
+               <TR>
+                  <TD><a class="button link" href="/notification_setting?id={{notification['id']}}">Edit</a>
+                  <TD>{{notification['id']}}
+               {% for service in services %}
+                  {% if notification['serviceid'] == service['id'] %} 
+                  <TD>{{service['name']}}
+                  <TD>{{service['server']}}
+                  <TD>{{service['port']}}
+                  {% endif %}
+               {% endfor %}
+                  <TD><span style="color:{% if notification['enable'] %}green{% else %}red{% endif %}">{% if notification['enable'] %}Yes{% else %}No{% endif %}</span>
+                  <TD><a class="button link" href="/notification_setting?id={{notification['id']}}&oper=del">Del</a>
+           {% endif %}
+       {% endfor %}
+       <TR>
+          <TD><a class="button link" href="/notification_setting?id=0">Add</a>
+          <TD colspan="6">
+    </table>

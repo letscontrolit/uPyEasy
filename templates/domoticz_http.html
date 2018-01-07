@@ -1,0 +1,45 @@
+{% args info,protocols,controller %}
+    <form name='frmselect' method='post'>
+       <table>
+          <TH>Controller Settings
+          <TH>
+          <TR>
+             <TD>Protocol:
+             <TD>
+                <select name='protocol' LANGUAGE=javascript onchange="return dept_onchange(frmselect)">
+                   {% for protocol in protocols %}
+                        <option value='{{protocol['name']}}' {% if info['id'] == protocol['id'] %}selected{% endif %}>{{protocol['name']}}</option>
+                   {% endfor %}
+                </select>
+                <input type='hidden' name='currentprotocol' maxlength='64' value='{{info['protocolname']}}'>
+                <a class="button link" href="" target="_blank">?</a>
+         <TR>
+             <TD>Locate Controller:
+             <TD>
+                <select name='usedns'>
+                   <option value='off' {% if controller['usedns'] == '' %}selected{% endif %}>Use IP address</option>
+                   <option value='on' {% if controller['usedns'] == 'on' %}selected{% endif %}>Use Hostname</option>
+                </select>
+          <TR>
+             <TD>Controller Hostname:
+             <TD><input type='text' name='hostname' maxlength='64' value='{{controller['hostname']}}'>
+          <TR>
+             <TD>Controller Port:
+             <TD><input type='number' name='port' min='1' max='65535' style='width: 80px;' value='{{controller['port']}}'>
+          <TR>
+             <TD>Controller User:
+             <TD><input type='text' name='user' maxlength='26' value='{{controller['user']}}'>
+          <TR>
+             <TD>Controller Password:
+             <TD><input type='password' name='password' maxlength='64' value='{{controller['password']}}'>
+          <TR>
+             <TD>Enabled:
+             <TD><input type=checkbox id='enable' name='enable' {% if controller['enable'] == 'on' %}checked{% endif %}>
+          <TR>
+             <TD colspan='2'>
+                <hr>
+          <TR>
+             <TD>
+             <TD><a class="button link" href="controllers">Close</a><input class="button link" type='submit' value='Submit'>
+       </table>
+    </form>
