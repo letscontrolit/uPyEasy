@@ -19,7 +19,7 @@ Depending on your needs, we release different types of files:
 
 Firmware name                         | Hardware                | Included plugins            |
 --------------------------------------|-------------------------|-----------------------------|
-upyeasy_01022018_test_ESP32_2048.bin  | ESP32 with 4Mb flash    | Alpha                       |
+upyeasy_01022018_test_ESP32_2048.bin  | ESP32 with 2Mb flash    | Alpha                       |
 upyeasy_01022018_test_STM32_1024.bin  | STM32 with 1Mb flash    | Alpha                       |
 
 ## More info
