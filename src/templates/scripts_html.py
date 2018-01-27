@@ -5,29 +5,43 @@ def render(info, scripts):
     <table cellpadding='4' border='1' frame='box' rules='all'>
        <TH width=\"30\">
        <TH>Name
-       <TH width=\"30\">
+       <TH>Status
+       <TH>
+       <TH>
         """
     for script in scripts:
         yield """
             """
-        if script[0] != '..' and script[0] != '.' and script[0] != '__init__.py':
+        if script["name"] != '..' and script["name"] != '.':
             yield """ 
                <TR>
-                    <TD><a class=\"button link\" href=\"/script_setting?name="""
-            yield str(script[0])
+                    <TD><a class=\"button link\" href=\"/script_setting?id="""
+            yield str(script["id"])
             yield """&oper=edit\">Edit</a>
-                    <TD>"""
-            yield str(script[0])
+                    <TD style=\"font-size: 12pt; font-weight: bold;\" >"""
+            yield str(script["name"])
             yield """
-                    <TD><a class=\"button link\" href=\"/script_setting?name="""
-            yield str(script[0])
+                    <TD style=\"font-size: 12pt; font-weight: bold;\" ><span style=\"color:"""
+            if script['enable'] == 'on':
+                yield """Green"""
+            else:
+                yield """Red"""
+            yield """\">"""
+            yield str(script["enable"])
+            yield """
+                    <TD><a class=\"button link\" href=\"/script_setting?id="""
+            yield str(script["id"])
             yield """&oper=del\">Del</a>
+                    <TD><a class=\"button link\" href=\"/script_setting?id="""
+            yield str(script["id"])
+            yield """&oper=enable\">On/Off</a>
             """
         yield """
         """
     yield """            
        <TR>
           <TD colspan=\"3\"><a class=\"button link\" href=\"/script_setting?oper=add\">Add</a>
+          <TD colspan=\"2\"><a class=\"button link\" href=\"/script_setting?oper=refresh\">Refresh</a>
    </table>
 </form>
 """

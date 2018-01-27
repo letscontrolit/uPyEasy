@@ -10,15 +10,15 @@ def render(info, script):
     if script['operation'] == 'edit':
         yield """ 
                 <B>"""
-        yield str(script['scriptname'])
+        yield str(script['filename'])
         yield """</B>
-                <input type='hidden' name='scriptname' maxlength='26' value='"""
-        yield str(script['scriptname'])
+                <input type='hidden' name='filename' maxlength='26' value='"""
+        yield str(script['filename'])
         yield """'>
             """
     else:
         yield """
-                Scriptname: <input type='text' name='scriptname' maxlength='26' value=''>
+                Filename: <input type='text' name='filename' maxlength='26' value=''>
             """
     yield """
        <TR>

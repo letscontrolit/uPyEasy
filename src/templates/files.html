@@ -1,0 +1,36 @@
+{% args info, files %}
+<form name = 'frmselect' method = 'post'>
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH>Name
+       <TH width="30">
+       <TH width="30">
+       <TH width="30">
+        {% if info["rootdir"] == 'N' %}
+               <TR>
+                    <TD style="font-size: 12pt; font-weight: bold;" >[<a style="font-size: 12pt; font-weight: bold;" href="/files?name=..">..</a>]
+                    <TD>
+                    <TD>
+                    <TD>
+        {% endif %}
+        {% for file in files %}
+            {% if file[0] != '.' and file[0] != '..' and (file[1] == 4 or file[1] == 16384) %}
+               <TR>
+                    <TD style="font-size: 12pt; font-weight: bold;">[<a style="font-size: 12pt; font-weight: bold;" href="/files?name={{file[0]}}">{{file[0]}}</a>]
+                    <TD><a class="button link" href="/file_setting?name={{file[0]}}&oper=edit">Edit</a>
+                    <TD><a class="button link" href="/file_setting?name={{file[0]}}&oper=del&ftype=dir">Del</a>
+                    <TD>
+            {% endif %}
+        {% endfor %}            
+        {% for file in files %}
+            {% if file[1] == 8 or file[1] == 32768 %}
+               <TR>
+                    <TD style="font-size: 12pt; font-weight: bold;">{{file[0]}}
+                    <TD><a class="button link" href="/file_setting?name={{file[0]}}&oper=edit">Edit</a>
+                    <TD><a class="button link" href="/file_setting?name={{file[0]}}&oper=del&ftype=file">Del</a>
+                    <TD><a class="button link" href="/file_setting?name={{file[0]}}&oper=download">Download</a>
+            {% endif %}
+        {% endfor %}            
+       <TR>
+          <TD colspan="4"><a class="button link" href="/file_setting?oper=add">Add</a>
+   </table>
+</form>

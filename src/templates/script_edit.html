@@ -5,10 +5,10 @@
        <TR>
             <TD>
             {% if script['operation'] == 'edit'  %} 
-                <B>{{script['scriptname']}}</B>
-                <input type='hidden' name='scriptname' maxlength='26' value='{{script['scriptname']}}'>
+                <B>{{script['filename']}}</B>
+                <input type='hidden' name='filename' maxlength='26' value='{{script['filename']}}'>
             {% else %}
-                Scriptname: <input type='text' name='scriptname' maxlength='26' value=''>
+                Filename: <input type='text' name='filename' maxlength='26' value=''>
             {% endif %}
        <TR>
           <TD><textarea name='content' rows='15' cols='80' wrap='off'>{{script['content']}}</textarea>

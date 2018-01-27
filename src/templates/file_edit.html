@@ -1,0 +1,23 @@
+{% args info, file %}
+<form name = 'frmselect' method = 'post'>
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH>Name
+       <TR>
+            <TD>
+            {% if file['operation'] == 'edit'  %} 
+                <B>{{file['filename']}}</B>
+                <input type='hidden' name='filename' maxlength='26' value='{{file['filename']}}'>
+            {% else %}
+                Filename: <input type='text' name='filename' maxlength='26' value=''>
+            {% endif %}
+       <TR>
+          <TD><textarea name='content' rows='15' cols='80' wrap='on'>{{file['content']}}</textarea>
+       <TR>
+          <TD>Current size: {{file['size']}} characters
+       <TR>
+          <TD>
+            <hr>
+       <TR>
+          <TD><a class="button link" href="files">Close</a><input class="button link" type='submit' value='Submit'>
+   </table>
+</form>

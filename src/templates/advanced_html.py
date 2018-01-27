@@ -8,6 +8,27 @@ def render(info, advanced):
                   <h2>Advanced Settings</h2>
             <TR>
                <TD colspan='2'>
+                  <h3>Menu Settings</h3>
+            <TR>
+               <TD>Scripts:
+               <TD><input type=checkbox id='scripts' name='scripts' """
+    if advanced['scripts'] == 'on':
+        yield """checked"""
+    yield """>
+            <TR>
+               <TD>Rules:
+               <TD><input type=checkbox id='rules' name='rules' """
+    if advanced['rules'] == 'on':
+        yield """checked"""
+    yield """>
+            <TR>
+               <TD>Notifications:
+               <TD><input type=checkbox id='notifications' name='notifications' """
+    if advanced['notifications'] == 'on':
+        yield """checked"""
+    yield """>
+            <TR>
+               <TD colspan='2'>
                   <h3>Controller Settings</h3>
             <TR>
                <TD>MQTT Retain Msg:

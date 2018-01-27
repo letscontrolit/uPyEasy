@@ -1,0 +1,2 @@
+if event['Rules#Timer'] == 1 :
+     gpio('d12',0)

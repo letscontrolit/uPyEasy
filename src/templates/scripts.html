@@ -3,16 +3,21 @@
     <table cellpadding='4' border='1' frame='box' rules='all'>
        <TH width="30">
        <TH>Name
-       <TH width="30">
+       <TH>Status
+       <TH>
+       <TH>
         {% for script in scripts %}
-            {% if script[0] != '..' and script[0] != '.' and script[0] != '__init__.py'  %} 
+            {% if script["name"] != '..' and script["name"] != '.' %} 
                <TR>
-                    <TD><a class="button link" href="/script_setting?name={{script[0]}}&oper=edit">Edit</a>
-                    <TD>{{script[0]}}
-                    <TD><a class="button link" href="/script_setting?name={{script[0]}}&oper=del">Del</a>
+                    <TD><a class="button link" href="/script_setting?id={{script["id"]}}&oper=edit">Edit</a>
+                    <TD style="font-size: 12pt; font-weight: bold;" >{{script["name"]}}
+                    <TD style="font-size: 12pt; font-weight: bold;" ><span style="color:{% if script['enable'] == 'on' %}Green{% else %}Red{% endif %}">{{script["enable"]}}
+                    <TD><a class="button link" href="/script_setting?id={{script["id"]}}&oper=del">Del</a>
+                    <TD><a class="button link" href="/script_setting?id={{script["id"]}}&oper=enable">On/Off</a>
             {% endif %}
         {% endfor %}            
        <TR>
           <TD colspan="3"><a class="button link" href="/script_setting?oper=add">Add</a>
+          <TD colspan="2"><a class="button link" href="/script_setting?oper=refresh">Refresh</a>
    </table>
 </form>

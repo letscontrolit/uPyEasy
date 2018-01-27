@@ -1,0 +1,153 @@
+* {
+	font-family: sans-serif;
+	font-size: 12pt;
+}
+
+h1 {
+	font-size: 16pt;
+	color: #07D;
+	margin: 8px 0;
+	font-weight: bold;
+}
+
+h2 {
+	font-size: 12pt;
+	margin: 0 -4px;
+	padding: 6px;
+	background-color: #444;
+	color: #FFF;
+	font-weight: bold;
+}
+
+h3 {
+	font-size: 12pt;
+	margin: 16px -4px 0 -4px;
+	padding: 4px;
+	background-color: #EEE;
+	color: #444;
+	font-weight: bold;
+}
+
+h6 {
+	font-size: 10pt;
+	color: #07D;
+	font-weight: bold;
+}
+
+.button {
+	margin: 4px;
+	padding: 4px 16px;
+	background-color: #07D;
+	color: #FFF;
+	text-decoration: none;
+	border-radius: 4px
+}
+
+.button.link {}
+
+.button.help {
+	padding: 2px 4px;
+	border: solid 1px #FFF;
+	border-radius: 50%
+}
+
+.button:hover {
+	background: #369;
+}
+
+th {
+	padding: 4px 7px;
+	background-color: #444;
+	color: #FFF;
+	border: solid 2px #FFF;
+	border-color: #FFF;
+	font-weight: bold;
+	text-align: center;
+}
+
+td {
+	padding: 4px;
+}
+
+tr {
+	padding: 4px;
+}
+
+table {
+	color: #000;
+}
+
+.pin {
+	color: red;
+	font-weight: bold;
+	text-align: left;
+}
+
+.headermenu {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 64px;
+	padding: 8px 12px;
+	background-color: #F8F8F8;
+	border-bottom: 1px solid #DDD;
+}
+
+.bodymenu {
+	margin-top: 96px;
+	margin-left: 8px;
+}
+
+.menubar {
+	position: inherit;
+	top: 44px;
+}
+
+.menu {
+	float: left;
+	height: 20px;
+	padding: 4px 16px 8px 16px;
+	color: #444;
+	white-space: nowrap;
+	border: solid transparent;
+	border-width: 4px 1px 1px;
+	border-radius: 4px 4px 0 0;
+	text-decoration: none;
+}
+
+.menu.active {
+	color: #000;
+	background-color: #FFF;
+	border-color: #07D #DDD #FFF;
+}
+
+.menu:hover {
+	color: #000;
+	background: #DEF;
+}
+
+.on {
+	color: green;
+}
+
+.off {
+	color: red;
+}
+
+.div_l {
+	float: left;
+}
+
+.div_r {
+	float: right;
+	margin: 2px;
+	padding: 1px 10px;
+	border-radius: 4px;
+	background-color: #080;
+	color: white;
+}
+
+.div_br {
+	clear: both;
+}

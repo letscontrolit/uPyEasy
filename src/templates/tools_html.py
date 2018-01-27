@@ -39,10 +39,10 @@ def render(info):
                <TD colspan='2'>
                   <h3>Settings</h3>
             <TR>
-               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=upload'>Load</a>
+               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=loadsettings'>Load</a>
                <TD>Loads a settings file
             <TR>
-               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=download'>Save</a>
+               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=savesettings'>Save</a>
                <TD>Saves a settings file
             <TR>
                <TD colspan='2'>
@@ -54,11 +54,8 @@ def render(info):
                <TD colspan='2'>
                   <h3>Filesystem</h3>
             <TR>
-               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=filelist'>Flash</a>
+               <TD HEIGHT=\"30\"><a class='button link' href='/files'>Files</a>
                <TD>Show files on internal flash
-            <TR>
-               <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=SDfilelist'>SD Card</a>
-               <TD>Show files on SD-Card
             <TR>
                <TD>
          </table>

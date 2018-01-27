@@ -1,0 +1,1 @@
+{"bootstate": "off", "controllerid": 0, "i2c": "", "delay": 60, "port": "", "sync": "off", "enable": "on", "name": "Test", "pullup": "off", "dxpin": "d0", "controller": 0, "pluginid": 3, "timestamp": "2018-01-24_20-04-35462973906", "dxpin0": "d0", "inverse": "off", "id": 1}

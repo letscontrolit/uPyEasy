@@ -1,4 +1,4 @@
-{% args info, menu %}
+{% args info, menu, advanced %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -20,9 +20,16 @@
              <a class="menu{% if menu==3 %} active{% endif %}" href="controllers">Controllers</a>
              <a class="menu{% if menu==4 %} active{% endif %}" href="hardware">Hardware</a>
              <a class="menu{% if menu==5 %} active{% endif %}" href="devices">Devices</a>
-             <a class="menu{% if menu==6 %} active{% endif %}" href="scripts">Scripts</a>
-             <a class="menu{% if menu==7 %} active{% endif %}" href="notifications">Notifications</a>
-             <a class="menu{% if menu==8 %} active{% endif %}" href="tools">Tools</a>
-             <a class="menu{% if menu==9 %} active{% endif %}" href="advanced">Advanced</a>
+             {% if advanced["rules"] == 'on' %}
+             <a class="menu{% if menu==6 %} active{% endif %}" href="rules">Rules</a>
+             {% endif %}
+             {% if advanced["scripts"] == 'on' %}
+             <a class="menu{% if menu==7 %} active{% endif %}" href="scripts">Scripts</a>
+             {% endif %}
+             {% if advanced["notifications"] == 'on' %}
+             <a class="menu{% if menu==8 %} active{% endif %}" href="notifications">Notifications</a>
+             {% endif %}
+             <a class="menu{% if menu==9 %} active{% endif %}" href="tools">Tools</a>
+             <a class="menu{% if menu==10 %} active{% endif %}" href="advanced">Advanced</a>
          </div>
       </header>

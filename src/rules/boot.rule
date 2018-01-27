@@ -1,0 +1,3 @@
+if event['System#Boot']:
+     gpio('d12',0)
+     timerSet(1,60) 

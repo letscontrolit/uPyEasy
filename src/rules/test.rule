@@ -1,0 +1,4 @@
+if event['Test#GPIO'] > 15 :
+ gpio('d12',1)
+ timerSet(1,60)
+

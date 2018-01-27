@@ -1,0 +1,21 @@
+{% args info, rules %}
+<form name = 'frmselect' method = 'post'>
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TH width="30">
+       <TH>Name
+       <TH>Status
+       <TH>
+       <TH>
+        {% for rule in rules %}
+           <TR>
+                <TD><a class="button link" href="/rule_setting?id={{rule["id"]}}&oper=edit">Edit</a>
+                <TD style="font-size: 12pt; font-weight: bold;" >{{rule["name"]}}
+                <TD style="font-size: 12pt; font-weight: bold;" ><span style="color:{% if rule['enable'] == 'on' %}Green{% else %}Red{% endif %}">{{rule["enable"]}}
+                <TD><a class="button link" href="/rule_setting?id={{rule["id"]}}&oper=del">Del</a>
+                <TD><a class="button link" href="/rule_setting?id={{rule["id"]}}&oper=enable">On/Off</a>
+        {% endfor %}            
+       <TR>
+          <TD colspan="3"><a class="button link" href="/rule_setting?oper=add">Add</a>
+          <TD colspan="2"><a class="button link" href="/rule_setting?oper=refresh">Refresh</a>
+   </table>
+</form>
