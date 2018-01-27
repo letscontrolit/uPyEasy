@@ -2,7 +2,7 @@
 
 uPyEasy allows you to turn an ESP module into a multifunction sensor and switch device. Configuration of uPyEasy is web-based. This means that after you've got the firmware loaded, the set up of the device can be done with a web browser. New sensors can be added on-the-fly as well as the configuration for your home automation solution.
 
-Build status: **ALPHA**
+Build status: **BETA**
 
 Introduction and wiki: https://www.letscontrolit.com/wiki/index.php/uPyEasy#Introduction
 
@@ -19,10 +19,10 @@ The releases are named something like `upyeasy_v[Release]_[Date]_test_[Hardware]
 
 Depending on your needs, we release different types of files:
 
-Firmware name                             | Hardware                | Included plugins            |
-------------------------------------------|-------------------------|-----------------------------|
-upyeasy_v53_20180106_test_esp32_2048.bin  | ESP32 with 2Mb flash    | Alpha                       |
-upyeasy_v53_20180106_test_stm32_1024.dfu  | STM32 with 1Mb flash    | Alpha                       |
+Firmware name                                    | Hardware                | Included plugins            |
+-------------------------------------------------|-------------------------|-----------------------------|
+upyeasy_v020_20180127_test_esp32_2048.bin        | ESP32 with 2Mb flash    | Beta                        |
+upyeasy_v020_20180127_test_stm32-pybv3_1024.dfu  | STM32 with 1Mb flash    | Beta                        |
 
 ## Usage
 
