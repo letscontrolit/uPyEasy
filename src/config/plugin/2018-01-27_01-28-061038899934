@@ -1,1 +1,0 @@
-{"senddata": "off", "port": "off", "formula": "off", "valuecnt": 3, "sync": "off", "pullup": "off", "name": "BME280", "stype": "SENSOR_TYPE_TEMP_HUM_BARO", "pincnt": 0, "template": "bme.html", "timer": "off", "timestamp": "2018-01-27_01-28-061038899934", "inverse": "off", "id": 2, "dtype": "DEVICE_TYPE_I2C"}
