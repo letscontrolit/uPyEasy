@@ -274,7 +274,7 @@ class utils(object):
             # Put start message in protocol queue
             queuedata.queue.put_nowait(core.QUEUE_MESSAGE_START)
             # put sensor type in queue
-            queuedata.queue.put_nowait(stype)
+            queuedata.queue.put_nowait(queuedata.stype)
             # put HA server id in queue
             queuedata.queue.put_nowait(queuedata.queue_sid)
 
