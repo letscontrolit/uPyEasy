@@ -1,6 +1,6 @@
 # uPyEasy
 
-uPyEasy allows you to turn an ESP module into a multifunction sensor and switch device. Configuration of uPyEasy is web-based. This means that after you've got the firmware loaded, the set up of the device can be done with a web browser. New sensors can be added on-the-fly as well as the configuration for your home automation solution.
+uPyEasy allows you to turn an ESP or STM32 module into a multifunction sensor and switch device. Configuration of uPyEasy is web-based. This means that after you've got the firmware loaded, the set up of the device can be done with a web browser. New sensors can be added on-the-fly as well as the configuration for your home automation solution.
 
 Build status: **BETA**
 
