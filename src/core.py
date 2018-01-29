@@ -20,7 +20,7 @@ __credits__             = ["Lisa Esselink"]
 __license__             = "Creative Commons Attribution-NonCommercial 4.0 International License"
 __version__             = "0.2.0"
 __email__               = "info@upyeasy.com"
-__status__              = "Alpha"
+__status__              = "Beta"
 __logname__             = "uPyEasy"
 __build__               = "59"
 

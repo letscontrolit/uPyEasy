@@ -67,6 +67,9 @@ class ds18_plugin:
         self._log.debug("Plugin: ds18 init")
         # generic section
         self._utils.plugin_initdata(self, plugin, device, queue, scriptqueue)
+        self.pincnt             = pincnt
+        self.valuecnt           = valuecnt
+        self.stype              = stype
         self.content            = plugin.get('content',content)
         self.dxpin              = device.get('dxpin',dxpin)
         plugin['dtype']         = dtype
