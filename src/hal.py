@@ -88,7 +88,7 @@ class hal(object):
                         return False
                     while not core._nic.isconnected():
                         pass
-                core._nic.active(1)
+                #core._nic.active(1)
                 self._nic = core._nic
                 if network['ip']: 
                     self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))
