@@ -290,10 +290,10 @@ class utils(object):
             # case SENSOR_TYPE_SINGLE
             if queuedata.stype == core.SENSOR_TYPE_SINGLE:
                 if queuedata.queue:
-                    # put valuename in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD1"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD1"])
+                    # put valuedata in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
                 break
 
             # case SENSOR_TYPE_LONG
@@ -307,73 +307,73 @@ class utils(object):
             # case SENSOR_TYPE_TEMP_HUM
             if queuedata.stype == core.SENSOR_TYPE_TEMP_HUM:
                 if queuedata.queue:
-                    # put valuenames in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD1"])
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD2"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD1"])
+                    # put valuedata in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
                 # Put start message in script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
                 # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
                 # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD2"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
                 break
 
             # case SENSOR_TYPE_TEMP_BARO
             if queuedata.stype == core.SENSOR_TYPE_TEMP_BARO:
                 if queuedata.queue:
-                    # put valuename in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD1"])
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD2"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD1"])
+                    # put valuedata in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
                 # Put start message in script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
                 # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
                 # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD2"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
                 break
 
             # case SENSOR_TYPE_TEMP_HUM_BARO
             if queuedata.stype == core.SENSOR_TYPE_TEMP_HUM_BARO:
                 if queuedata.queue:
-                    # put valuename in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD1"])
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD2"])
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD3"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD1"])
+                    # put valuedata in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV3"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
                 # Put start message in script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
                 # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
                 # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD2"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
                 # Put start message in script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
                 # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
                 # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN3"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD3"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV3"])
                 break
 
             # case SENSOR_TYPE_SWITCH
             if queuedata.stype == core.SENSOR_TYPE_SWITCH:
                 if queuedata.queue:
-                    # put valuename in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueD1"])
-                # put valuename in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueD1"])
+                    # put valuedata in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                # put valuedata in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
                 break
 
             # case SENSOR_TYPE_DIMMER

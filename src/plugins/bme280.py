@@ -142,19 +142,19 @@ class bme280_plugin:
                 dvalues = self.bme280_values()
             except Exception as e:
                 self._log.debug("Plugin: bme280 read exception: "+repr(e))
-                values['valueD1'] = ''
-                values['valueD2'] = ''
-                values['valueD3'] = ''
+                values['valueV1'] = ''
+                values['valueV2'] = ''
+                values['valueV3'] = ''
                 return values
-            values["valueD1"] = dvalues[0]
-            values["valueD2"] = dvalues[2]
-            values["valueD3"] = dvalues[1]
+            values["valueV1"] = dvalues[0]
+            values["valueV2"] = dvalues[2]
+            values["valueV3"] = dvalues[1]
         else:
             self._log.debug("Plugin: ds18 read, empty values")
             # empty values
-            values['valueD1'] = ''
-            values['valueD2'] = ''
-            values['valueD3'] = ''
+            values['valueV1'] = ''
+            values['valueV2'] = ''
+            values['valueV3'] = ''
         return values
    
     def write(self):
@@ -172,9 +172,9 @@ class bme280_plugin:
                 self._lock.clear()
                 return
             # send data to protocol and script/rule queues
-            self.valuenames["valueD1"] = t/100       
-            self.valuenames["valueD2"] = h/1024        
-            self.valuenames["valueD3"] = p/25600       
+            self.valuenames["valueV1"] = t/100       
+            self.valuenames["valueV2"] = h/1024        
+            self.valuenames["valueV3"] = p/25600       
             self._utils.plugin_senddata(self)
         # release lock, ready for next measurement
         self._lock.clear()
@@ -328,5 +328,5 @@ class bme280_plugin:
 
         hi = h // 1024
         hd = h * 100 // 1024 - hi * 100
-        return ("{}C".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
+        return ("{}c".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
                 "{}.{:02d}%".format(hi, hd))

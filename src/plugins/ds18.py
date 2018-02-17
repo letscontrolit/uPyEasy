@@ -149,12 +149,12 @@ class ds18_plugin:
                 utime.sleep_ms(750)
                 # Read temp
                 values['valueN1'] = ''.join('{:02x}-'.format(x) for x in rom)[:-1]
-                values["valueD1"] = self.ds18.read_temp(rom)
+                values["valueV1"] = "{}c".format(self.ds18.read_temp(rom))
         else:
             self._log.debug("Plugin: ds18 read, empty values")
             # dummy values
             values['valueN1'] = ''
-            values["valueD1"] = ''
+            values["valueV1"] = ''
    
     def write(self, values):
         self._log.debug("Plugin: ds18 write")
@@ -172,7 +172,7 @@ class ds18_plugin:
                 ds18temp = self.ds18.read_temp(rom)
                 self._log.debug("Plugin: ds18 data read: "+str(ds18temp))
                 # send data to protocol and script/rule queues
-                self.valuenames["valueD1"] = ds18temp        
+                self.valuenames["valueV1"] = ds18temp        
                 self._utils.plugin_senddata(self)
         # release lock, ready for next measurement
         self._lock.clear()

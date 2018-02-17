@@ -8,7 +8,7 @@ def render(info, menu, advanced):
     <meta http-equiv=\"cache-control\" content=\"no-cache\" />
     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-    <title>uPuEasy</title>
+    <title>uPyEasy</title>
     <link rel=\"stylesheet\" href=\"static/upyeasy.css\" type=\"text/css\" />
     <script src=\"https://code.jquery.com/jquery-1.10.2.js\"></script>
     <script type=\"text/javascript\" src=\"static/upyeasy.js\"></script>

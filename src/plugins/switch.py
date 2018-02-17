@@ -154,7 +154,7 @@ class switch_plugin:
         self._log.debug("Plugin: switch read")
         # generic section
         values['valueN1'] = self.valuenames["valueN1"]
-        values['valueD1'] = self.switch_status
+        values['valueV1'] = self.switch_status
 
     def write(self, values):
         self._log.debug("Plugin: switch write")
@@ -165,7 +165,7 @@ class switch_plugin:
         # If a switch occured
         if self.switch_status:
             # send data to protocol and script/rule queues
-            self.valuenames["valueD1"] = self.switch_status        
+            self.valuenames["valueV1"] = self.switch_status        
             self._utils.plugin_senddata(self)
             # erase status
             self.switch_status = ""

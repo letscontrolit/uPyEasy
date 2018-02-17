@@ -95,7 +95,7 @@ class test_plugin:
         # generic section
         values['valueN1'] = self.valuenames["valueN1"]
         # plugin specific section
-        values['valueD1'] = 17
+        values['valueV1'] = 17
 
     def write(self, values):
         self._log.debug("Plugin: test write")
@@ -103,7 +103,7 @@ class test_plugin:
     async def asyncprocess(self):
         self._log.debug("Plugin: test process")
         # send data to protocol and script/rule queues
-        self.valuenames["valueD1"] = 17        
+        self.valuenames["valueV1"] = 17        
         self._utils.plugin_senddata(self)
         # release lock, ready for next measurement
         self._lock.clear()

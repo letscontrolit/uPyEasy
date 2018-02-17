@@ -768,8 +768,10 @@ def devicespage(request, response):
                     break
             deval = ''
             if values:
+                deval += "<table>"
                 for cnt in range(1,plugin['valuecnt']+1):
-                    deval += "<div class='div_l'>"+values['valueN'+str(cnt)]+"</div>:<div class='div_r'>"+str(values['valueD'+str(cnt)])+"</div><BR>"
+                    deval += "<TR><TD><div class='div_l'>"+values['valueN'+str(cnt)]+"</div>:</TD><TD><div class='div_r'>"+str(values['valueV'+str(cnt)])+"</div></TD></TR>"
+                deval += "</table>"
             device['values'] = deval
         else:
             device['values'] = ''
