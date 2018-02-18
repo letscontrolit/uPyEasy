@@ -1425,7 +1425,7 @@ def rulesettingpage(request, response):
             rule['operation'] = 'edit'
 
             # menu settings
-            menu = 7
+            menu = 6
             advanced = db.advancedTable.getrow()
             gc.collect()
 
@@ -1507,7 +1507,7 @@ def rulesettingpage(request, response):
             rule['id'] = 0
             
             # menu settings
-            menu = 7
+            menu = 6
             advanced = db.advancedTable.getrow()
             gc.collect()
 

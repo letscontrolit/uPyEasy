@@ -68,6 +68,9 @@ class switch_plugin:
         # generic section
         self._utils.plugin_initdata(self, plugin, device, queue, scriptqueue)
         self.content            = plugin.get('content',content)
+        self.pincnt             = pincnt
+        self.valuecnt           = valuecnt
+        self.stype              = stype
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
@@ -169,8 +172,6 @@ class switch_plugin:
             self._utils.plugin_senddata(self)
             # erase status
             self.switch_status = ""
-        # release lock, ready for next measurement
-        self._lock.clear()
 
     #
     #CUSTOM SENSOR CODE...    
