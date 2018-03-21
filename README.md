@@ -21,6 +21,7 @@ Depending on your needs, we release different types of files:
 
 Firmware name                                    | Hardware                | Included plugins            |
 -------------------------------------------------|-------------------------|-----------------------------|
+upyeasy_v021_20180218_test_esp32_4096.bin        | ESP32 with 4Mb flash    | Beta                        |
 upyeasy_v021_20180218_test_esp32_2048.bin        | ESP32 with 2Mb flash    | Beta                        |
 upyeasy_v021_20180218_test_stm32-pybv3_1024.dfu  | STM32 with 1Mb flash    | Beta                        |
 
