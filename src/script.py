@@ -59,9 +59,10 @@ class scripts(object):
 
     def loadscripts(self):
         # get all filenames in scripts dir
+        orgdir = os.getcwd()
         os.chdir('scripts')
         listdir = os.listdir()
-        os.chdir('..')
+        os.chdir(orgdir)
 
         # delete scripts records
         self._log.debug("Scripts: init scripts records")
@@ -114,9 +115,10 @@ class scripts(object):
     
     def loadrules(self):
         # get all filenames in rules dir
+        orgdir = os.getcwd()
         os.chdir('rules')
         listdir = os.listdir()
-        os.chdir('..')
+        os.chdir(orgdir)
 
         # delete rules records
         self._log.debug("Scripts: init rules records")

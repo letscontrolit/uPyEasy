@@ -169,7 +169,7 @@ class init (object):
         if not network:
             self._log.debug("Init: Create Network Record")
             #create table
-            cid = db.networkTable.create(wifissid="")
+            cid = db.networkTable.create(ssid="")
 
         #Hardware table init
         hardware = db.hardwareTable.public()
@@ -216,9 +216,13 @@ class init (object):
         self._plugins.init()
         
         # Init all devices
-        devices = db.deviceTable.public()
-        for device in devices:
-            self._plugins.initdevice(device)
+        try:
+            self._log.debug("Init: Init devices")
+            devices = db.deviceTable.public()
+            for device in devices:
+                self._plugins.initdevice(device)
+        except OSError as e:
+            self._log.debug("Init: Init devices exception: "+repr(e))
         
         # Init all scripts
         self._scripts = scripts()

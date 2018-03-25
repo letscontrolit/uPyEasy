@@ -18,7 +18,11 @@ from asyn import Event
 # CUSTOM SENSOR GLOBALS
 #
 
-import onewire, ds18x20
+try:
+    import onewire
+except ImportError:
+    pass
+import ds18x20
 
 name                = "DS18B20"
 dtype               = core.DEVICE_TYPE_SINGLE

@@ -82,7 +82,7 @@ class hal(object):
                         return False
                 if not core._nic:
                     if board == "PYBv3 with STM32F405RG":
-                        core._nic = ethernet.WIZNET5K(pyb.SPI(network['spi']), network['pin_cs'], network['pin_rst'])
+                        core._nic = ethernet.WIZNET5K(pyb.SPI(network['spi']), network['cs'], network['rst'])
                     else: 
                         self._log.debug("Hal: pyboard, unknown board: "+ board)
                         return False
@@ -267,8 +267,8 @@ class hal(object):
                 res = s.sendto(NTP_QUERY, addr)
                 msg = s.recv(48)
                 s.close()
-            except OSError as e:
-                self._log.debug("Hal: NTP Time OSError exception: "+repr(e))
+            except (OSError,IndexError) as e:
+                self._log.debug("Hal: NTP Time Error exception: "+repr(e))
                 return rtctime
             
             # collect socket
@@ -362,7 +362,7 @@ class hal(object):
 
             # Set RTC time, if present
             if hasattr(machine,'RTC'):
-                machine.RTC().datetime(tm)
+                if hasattr(machine.RTC,'datetime'): machine.RTC().datetime(tm)
             else:
                 self._log.debug("Hal: SetTime: NO RTC!")
                 

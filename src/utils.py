@@ -27,7 +27,7 @@ class utils(object):
         network = db.networkTable.getrow()
 
         # update network
-        cid = db.networkTable.update({"timestamp":network['timestamp']},spi=spi_nr,pin_cs=cs, pin_rst=rst,ip=ip,gateway=gtw,subnet=mask,dns=dns)
+        cid = db.networkTable.update({"timestamp":network['timestamp']},spi=spi_nr,cs=cs, rst=rst,ip=ip,gateway=gtw,subnet=mask,dns=dns)
 
         _dbc.close()
 
@@ -43,7 +43,7 @@ class utils(object):
  
         #Get config record key
         config = db.configTable.getrow()
-        db.configTable.update({"timestamp":network['timestamp']},port = wport)
+        db.configTable.update({"timestamp":config['timestamp']},port = wport)
         
         _dbc.close()
         
@@ -173,6 +173,7 @@ class utils(object):
         import sys
 
         platform = sys.platform
+        if platform[:5] == 'esp32': platform = platform[:5]
      
         return platform
         

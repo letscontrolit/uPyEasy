@@ -61,8 +61,8 @@ class networkTable(uorm.Model):
     __schema__ = OrderedDict([
         ("timestamp", uorm.now),
         ("spi", 0),
-        ("pin_cs", ""),
-        ("pin_rst", ""),
+        ("cs", ""),
+        ("rst", ""),
         ("ssid", ""),
         ("key", ""),
         ("fbssid", ""),
