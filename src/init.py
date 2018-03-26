@@ -10,7 +10,7 @@
 # See LICENSE file in the project root for full license information.  
 #
 
-import uos, gc, time, sys, ulog
+import uos, gc, time, sys, ulog, uasyncio as asyncio
 from . import core
 from . import db
 from .utils import utils

@@ -63,11 +63,6 @@ class protocol(object):
                 self._log.debug("Protocols: Exception creating protocol record:"+modname)
             cnt += 1
 
-        self._log.debug("Protocols: Init protocol records, run async loop")
-        # Reschedule coroutine
-        loop = asyncio.get_event_loop()
-        loop.call_later(1, self.asynccontrollers())
-
     def initcontroller(self, controller):
         self._log.debug("Protocols: Init controller "+controller["hostname"]+"-"+controller["protocol"]+"-"+str(controller["id"]))
 
@@ -114,7 +109,3 @@ class protocol(object):
                 await asyncio.sleep(0)
             #self._hal.idle()  # Yield to underlying RTOS
             await asyncio.sleep(1)
-
-        # Reschedule coroutine
-        loop = asyncio.get_event_loop()
-        loop.call_later(1, self.asynccontrollers())

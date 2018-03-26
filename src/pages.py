@@ -211,11 +211,11 @@ def configpage(request, response):
            info['sleep'] = ""
         elif _utils.get_platform() == 'esp32':
            info['wifi'] = ""
-           info['ethernet'] = "disabled"
+           info['ethernet'] = ""
            info['sleep'] = ""
         elif _utils.get_platform() == 'esp8266':
            info['wifi'] = ""
-           info['ethernet'] = "disabled"
+           info['ethernet'] = ""
            info['sleep'] = ""
         else:
            info['wifi'] = ""
@@ -2437,7 +2437,7 @@ def filesettingpage(request, response):
             gc.collect()
 
             yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu))
+            yield from app.render_template(response, "header.html",(info, menu, advanced))
             yield from app.render_template(response, "file_edit.html",(info,file))
             yield from app.render_template(response, "footer.html",(info,))
             
@@ -2497,7 +2497,7 @@ def filesettingpage(request, response):
             gc.collect()
 
             yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu))
+            yield from app.render_template(response, "header.html",(info, menu, advanced))
             yield from app.render_template(response, "file_edit.html",(info,file))
             yield from app.render_template(response, "footer.html",(info,))
 

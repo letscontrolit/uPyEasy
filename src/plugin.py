@@ -73,13 +73,7 @@ class plugins(object):
             del plugin
             del self._mod[modname]
             del sys.modules["upyeasy.plugins."+modname]
-            
-        self._log.debug("Plugins: Init plugin records, run async loop")
-        # get loop
-        loop = asyncio.get_event_loop()
-        # Reschedule coroutine every 10ms
-        loop.call_later(1, self.asyncdevices())
-        
+                    
     def initdevice(self, device): 
         self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid']))
         from . import plugins 
@@ -198,6 +192,3 @@ class plugins(object):
                         await asyncio.sleep(0)
             #self._hal.idle()  # Yield to underlying RTOS
             await asyncio.sleep_ms(10)
-            
-        # Reschedule coroutine every 10ms
-        loop.call_later_ms(10, self.asyncdevices())

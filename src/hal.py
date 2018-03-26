@@ -139,6 +139,9 @@ class hal(object):
                         self._nic.connect(network['ssid'], network['key'])
                         while not self._nic.isconnected():
                             pass
+                    # if ip address set: use it!
+                    if network['ip']: 
+                        self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))                    
                 ip_address_v4 = self._nic.ifconfig()[0]
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
                 

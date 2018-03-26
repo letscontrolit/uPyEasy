@@ -173,11 +173,14 @@ class ds18_plugin:
                 # wait 750ms for value to return
                 await asyncio.sleep_ms(750)
                 # put temperature value(s) in queue
-                ds18temp = self.ds18.read_temp(rom)
-                self._log.debug("Plugin: ds18 data read: "+str(ds18temp))
-                # send data to protocol and script/rule queues
-                self.valuenames["valueV1"] = ds18temp        
-                self._utils.plugin_senddata(self)
+                try:
+                    ds18temp = self.ds18.read_temp(rom)
+                    self._log.debug("Plugin: ds18 data read: "+str(ds18temp))
+                    # send data to protocol and script/rule queues
+                    self.valuenames["valueV1"] = ds18temp        
+                    self._utils.plugin_senddata(self)
+                except Exception as e:
+                    self._log.debug("Plugin: ds18 readtemp failed! Error: "+repr(e))
         # release lock, ready for next measurement
         self._lock.clear()
 

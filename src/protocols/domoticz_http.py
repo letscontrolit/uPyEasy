@@ -137,12 +137,17 @@ class domoticz_http_protocol:
                     break
 
                 # Switches can have many values, domoticz only two: on or off
-                switch_on  = ['closed','press','double','long']
-                switch_off = ['open','release']    
+                switch_on  = ['closed','press','double','long', 'on']
+                switch_off = ['open','release', 'off']    
                 
-                if devicedata["value1"] in switch_on: devicedata["value1"] = 'On'
-                elif devicedata["value1"] in switch_off: devicedata["value1"] = 'Off'
-                else: break
+                if devicedata["value1"].lower() in switch_on: 
+                    devicedata["value1"] = 'On'
+                elif devicedata["value1"].lower() in switch_off: 
+                    devicedata["value1"] = 'Off'
+                else: 
+                    self._log.debug("Protocol "+name+" SENSOR_TYPE_SWITCH error: Value1 break!")
+                    print(devicedata["value1"])
+                    break
 
                 # Assemble http message
                 message = "/json.htm?type=command&param=switchlight&idx="+str(devicedata["serverid"])+"&switchcmd="+devicedata["value1"]

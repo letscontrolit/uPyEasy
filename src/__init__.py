@@ -10,7 +10,7 @@
 # See LICENSE file in the project root for full license information.  
 #
 
-import gc
+import gc, uasyncio as asyncio
 from . import core, db, ssl
 from .init import init
 from .hal import hal
@@ -51,9 +51,18 @@ def main(**params):
         #get ip address
         ip_address = core._hal.get_ip_address()
         config = db.configTable.getrow()
+
+        # Schedule plugin/protocol async coro's!
+        core._log.debug("Main: Schedule async loops")
+        # get loop
+        loop = asyncio.get_event_loop()
+        # Create async tasks
+        loop.create_task(core._plugins.asyncdevices())
+        loop.create_task(core._protocols.asynccontrollers())
+        loop.create_task(core._scripts.asyncscripts())
         
         core._log.debug("Main: uPyEasy Main Async Loop")
-        app.run(host=ip_address, port=config["port"],debug=True, **params)
+        app.run(host=ip_address, port=config["port"],debug=False, log=core._log, **params)
         #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert, **params)   # SSL version
     else:
         #No network, exit!

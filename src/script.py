@@ -51,12 +51,6 @@ class scripts(object):
         #create all rule records
         self.loadrules()
 
-        self._log.debug("Scripts: Init script/rule records, run async loop")
-        # get loop
-        loop = asyncio.get_event_loop()
-        # Reschedule coroutine every 100ms
-        loop.call_later_ms(100, self.asyncscripts())
-
     def loadscripts(self):
         # get all filenames in scripts dir
         orgdir = os.getcwd()
@@ -288,9 +282,6 @@ class scripts(object):
                     self._log.debug("Rules: Scheduling Async processing rule: "+rule['name'])
                     # run rule
                     self.runrule(rule, devicedata)
-                    
-        # Reschedule coroutine every 100ms
-        loop.call_later_ms(100, self.asyncscripts())
 
     async def asynctimer(self, timer):
         # put timer1 message in queue!
