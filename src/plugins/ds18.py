@@ -1,7 +1,7 @@
 #          
 # Filename: ds18.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.11
+# Author  : Lisa Esselink / Andrew Jackson changes for OHmqtt
 # Purpose : Plugin DS18B20
 # Usage   : Get DS18b20 sensor data
 #
@@ -76,6 +76,7 @@ class ds18_plugin:
         self.stype              = stype
         self.content            = plugin.get('content',content)
         self.dxpin              = device.get('dxpin',dxpin)
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template

@@ -1,7 +1,7 @@
 #          
 # Filename: bme280.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.11
+# Author  : Lisa Esselink / Andrew Jackson changes for OHmqtt
 # Purpose : Plugin BME280
 # Usage   : Get BME280 sensor data
 #
@@ -89,6 +89,7 @@ class bme280_plugin:
         self.pincnt             = pincnt
         self.valuecnt           = valuecnt
         self.stype              = stype
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
