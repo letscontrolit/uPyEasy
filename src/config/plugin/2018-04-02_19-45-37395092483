@@ -1,0 +1,1 @@
+{"senddata": "off", "port": "off", "formula": "off", "valuecnt": 1, "sync": "off", "pullup": "off", "name": "DS18B20", "stype": "SENSOR_TYPE_SINGLE", "pincnt": 1, "template": "ds18.html", "timer": "off", "timestamp": "2018-04-02_19-45-37395092483", "inverse": "off", "id": 4, "dtype": "DEVICE_TYPE_SINGLE"}

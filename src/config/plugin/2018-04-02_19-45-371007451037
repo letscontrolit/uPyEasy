@@ -1,0 +1,1 @@
+{"senddata": "off", "port": "off", "formula": "off", "valuecnt": 1, "sync": "off", "pullup": "off", "name": "Switch", "stype": "SENSOR_TYPE_SWITCH", "pincnt": 1, "template": "switch.html", "timer": "off", "timestamp": "2018-04-02_19-45-371007451037", "inverse": "off", "id": 1, "dtype": "DEVICE_TYPE_SINGLE"}
