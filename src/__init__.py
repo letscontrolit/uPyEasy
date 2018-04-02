@@ -48,21 +48,27 @@ def main(**params):
         app._load_template('homepage.html')
         gc.collect()
 
-        #get ip address
-        ip_address = core._hal.get_ip_address()
-        config = db.configTable.getrow()
-
-        # Schedule plugin/protocol async coro's!
-        core._log.debug("Main: Schedule async loops")
-        # get loop
-        loop = asyncio.get_event_loop()
-        # Create async tasks
-        loop.create_task(core._plugins.asyncdevices())
-        loop.create_task(core._protocols.asynccontrollers())
-        loop.create_task(core._scripts.asyncscripts())
+        # Run only in STA mode!
+        if core.initial_upyeasywifi == "STA":
+            #get ip address
+            ip_address = core._hal.get_ip_address()
+            config = db.configTable.getrow()
+            port=config["port"]
+            # Schedule plugin/protocol async coro's!
+            core._log.debug("Main: Schedule async loops")
+            # get loop
+            loop = asyncio.get_event_loop()
+            # Create async tasks
+            loop.create_task(core._plugins.asyncdevices())
+            loop.create_task(core._protocols.asynccontrollers())
+            loop.create_task(core._scripts.asyncscripts())
+        else:
+            # WIFI AP mode
+            ip_address = "0.0.0.0"
+            port = 80
         
         core._log.debug("Main: uPyEasy Main Async Loop")
-        app.run(host=ip_address, port=config["port"],debug=False, log=core._log, **params)
+        app.run(host=ip_address, port=port, debug=False, log=core._log, **params)
         #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert, **params)   # SSL version
     else:
         #No network, exit!

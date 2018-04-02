@@ -71,6 +71,7 @@ class networkTable(uorm.Model):
         ("gateway", ""),
         ("subnet", ""),
         ("dns", ""),
+        ("mode", "STA"),
     ])
 
     @classmethod
