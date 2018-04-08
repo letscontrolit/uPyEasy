@@ -62,7 +62,8 @@ def main(**params):
         loop.create_task(core._scripts.asyncscripts())
         
         core._log.debug("Main: uPyEasy Main Async Loop")
-        app.run(host=ip_address, port=config["port"],debug=False, log=core._log, **params)
+        app.run(host=ip_address, port=config["port"],debug=False, **params) # AJ removed "log=core._log" 
+        #app.run(host=ip_address, port=config["port"],debug=False, log=core._log, **params) # previous version, caused error
         #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert, **params)   # SSL version
     else:
         #No network, exit!
