@@ -1,10 +1,3 @@
-# ohmqtt branch
-
-This branch provides the functionality of sending sensor data to a home controller using the OpenHab MQTT protocol.
-It contains additonal code and changes to existing modules. The existing code comes from the version of uPyEasy published on the Github repository 
-letscontrolit/uPyEasy in commit 4c649fa  on 26/03/2018.
-This is alpha firmware for testing. It currently allows publishing of data from uPyEasy, not yet subscribing.
-
 # uPyEasy
 
 uPyEasy allows you to turn an ESP or STM32 module into a multifunction sensor and switch device. Configuration of uPyEasy is web-based. This means that after you've got the firmware loaded, the set up of the device can be done with a web browser. New sensors can be added on-the-fly as well as the configuration for your home automation solution.
