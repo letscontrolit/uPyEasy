@@ -1,7 +1,7 @@
 #          
 # Filename: ds18.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.12
+# Author  : Lisa Esselink / Andrew Jackson changes for OHmqtt
 # Purpose : Plugin DS18B20
 # Usage   : Get DS18b20 sensor data
 #
@@ -76,6 +76,7 @@ class ds18_plugin:
         self.stype              = stype
         self.content            = plugin.get('content',content)
         self.dxpin              = device.get('dxpin',dxpin)
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
@@ -153,7 +154,7 @@ class ds18_plugin:
                 utime.sleep_ms(750)
                 # Read temp
                 values['valueN1'] = ''.join('{:02x}-'.format(x) for x in rom)[:-1]
-                values["valueV1"] = "{}c".format(self.ds18.read_temp(rom))
+                values["valueV1"] = round(self.ds18.read_temp(rom), int(self.valuenames['valueD1']) )
         else:
             self._log.debug("Plugin: ds18 read, empty values")
             # dummy values
@@ -177,7 +178,8 @@ class ds18_plugin:
                     ds18temp = self.ds18.read_temp(rom)
                     self._log.debug("Plugin: ds18 data read: "+str(ds18temp))
                     # send data to protocol and script/rule queues
-                    self.valuenames["valueV1"] = ds18temp        
+                    #self.valuenames["valueV1"] = ds18temp        
+                    self.valuenames['valueV1'] = round(ds18temp, int(self.valuenames['valueD1']) )
                     self._utils.plugin_senddata(self)
                 except Exception as e:
                     self._log.debug("Plugin: ds18 readtemp failed! Error: "+repr(e))

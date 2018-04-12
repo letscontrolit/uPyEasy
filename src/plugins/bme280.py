@@ -1,9 +1,9 @@
 #          
 # Filename: bme280.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.12
+# Author  : Lisa Esselink / Andrew Jackson changes for OHmqtt
 # Purpose : Plugin BME280
-# Usage   : Get BME280 sensor data
+# Usage   : Get BME280 sensor data, control decimals
 #
 # Copyright (c) 2018 - Lisa Esselink. All rights reserved.  
 # Licensend under the Creative Commons Attribution-NonCommercial 4.0 International License.
@@ -69,6 +69,9 @@ class bme280_plugin:
         self._plugins   = core._plugins
         self._lock      = Event()
         # plugin specific section
+        self.valuenames["valueV1"] = 0 # added by AJ
+        self.valuenames["valueV2"] = 0 # added by AJ
+        self.valuenames["valueV3"] = 0 # added by AJ
         self.valuenames["valueN1"]= "Temperature"
         self.valuenames["valueN2"]= "Humidity"
         self.valuenames["valueN3"]= "Pressure"
@@ -89,6 +92,7 @@ class bme280_plugin:
         self.pincnt             = pincnt
         self.valuecnt           = valuecnt
         self.stype              = stype
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
@@ -136,21 +140,28 @@ class bme280_plugin:
         values['valueN1'] = self.valuenames["valueN1"]
         values['valueN2'] = self.valuenames["valueN2"]
         values['valueN3'] = self.valuenames["valueN3"]
+        
+        #values['valueV1'] = round(self.valuenames["valueV1"], int(self.valuenames['valueD1']) ) # temp, specify decimal places
+        #values['valueV2'] = round(self.valuenames["valueV2"], int(self.valuenames['valueD2']) ) # hum, specify decimal places
+        #values['valueV3'] = round(self.valuenames["valueV3"], int(self.valuenames['valueD3']) ) # press, specify decimal places
+        
+        
         # plugin specific section
         if self.i2c != None: 
             try:
                 dvalues = self.bme280_values()
+                print("bme280.py l.153: dvalues =", dvalues)
             except Exception as e:
                 self._log.debug("Plugin: bme280 read exception: "+repr(e))
                 values['valueV1'] = ''
                 values['valueV2'] = ''
                 values['valueV3'] = ''
                 return values
-            values["valueV1"] = dvalues[0]
-            values["valueV2"] = dvalues[2]
-            values["valueV3"] = dvalues[1]
+            values["valueV1"] = round(float(dvalues[0]), int(self.valuenames['valueD1']) ) # temp, specify decimal places
+            values["valueV2"] = round(float(dvalues[2]), int(self.valuenames['valueD2']) ) # hum, specify decimal places
+            values["valueV3"] = round(float(dvalues[1]), int(self.valuenames['valueD3']) ) # press, specify decimal places
         else:
-            self._log.debug("Plugin: ds18 read, empty values")
+            self._log.debug("Plugin: BME280 read, empty values")
             # empty values
             values['valueV1'] = ''
             values['valueV2'] = ''
@@ -172,9 +183,9 @@ class bme280_plugin:
                 self._lock.clear()
                 return
             # send data to protocol and script/rule queues
-            self.valuenames["valueV1"] = t/100       
-            self.valuenames["valueV2"] = h/1024        
-            self.valuenames["valueV3"] = p/25600       
+            self.valuenames["valueV1"] = round(t/100, int(self.valuenames['valueD1']) ) # temp, specify decimal places
+            self.valuenames["valueV2"] = round(h/1024, int(self.valuenames['valueD2']) ) # hum, specify decimal places
+            self.valuenames["valueV3"] = round(p/25600, int(self.valuenames['valueD3']) ) # press, specify decimal places
             self._utils.plugin_senddata(self)
         # release lock, ready for next measurement
         self._lock.clear()
@@ -328,5 +339,7 @@ class bme280_plugin:
 
         hi = h // 1024
         hd = h * 100 // 1024 - hi * 100
-        return ("{}c".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
-                "{}.{:02d}%".format(hi, hd))
+        return ("{}".format(t / 100), "{}.{:02d}".format(pi, pd), # edited AJ, remove non-numerics
+                "{}.{:02d}".format(hi, hd))
+        #return ("{}c".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
+        #        "{}.{:02d}%".format(hi, hd))

@@ -13,3 +13,4 @@
 protocols = {}
 protocols['domoticz_http'] = 'protocol'
 protocols['domoticz_mqtt'] = 'protocol'
+protocols['openhab_mqtt']  = 'protocol'

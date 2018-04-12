@@ -1,7 +1,7 @@
 #          
 # Filename: test.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.12
+# Author  : Lisa Esselink/edited by AJ
 # Purpose : Plugin test
 # Usage   : Get fixed sensor data
 #
@@ -67,6 +67,7 @@ class test_plugin:
         self.valuecnt           = valuecnt
         self.stype              = stype
         self.dtype              = dtype
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
