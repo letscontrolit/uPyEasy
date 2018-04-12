@@ -10,7 +10,7 @@
 # See LICENSE file in the project root for full license information.  
 #
 
-import picoweb, gc, ustruct, ujson
+import picoweb, gc, ustruct, ujson, uasyncio as asyncio
 from . import core, db, utils
 from .app  import app
 from .hal import hal
@@ -123,33 +123,138 @@ def homepage(request, response):
     #Display home page
     _log.debug("Pages: Entering Home Page")
 
-    info={}
+    if request.method == 'GET':
+        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == None:
+            #Display home page in station mode
+            _log.debug("Pages: Home Page Station mode")
+            
+            # set info array
+            info={}
+            info['name'] = _utils.get_upyeasy_name()
+            info['copyright']=core.__copyright__
+            info['holder']= core.__author__
+            info['unit'] = _utils.get_unit_nr()
+            info['version'] = core.__version__
+            info['time'] = _hal.get_time()
+            info['platform'] = _utils.get_platform()
+            info['uptime'] = _utils.get_uptime()
+            info['heap'] = _utils.get_mem()
+            info['ip'] = _hal.get_ip_address()    
+            info['stack'] = _utils.get_stack_current()
+            _log.debug("Pages: Home Page Data collected")
+            
+            nodes = {}
+            
+            # menu settings
+            menu = 1
+            advanced = db.advancedTable.getrow()
+            gc.collect()
 
-    info['name'] = _utils.get_upyeasy_name()
-    info['copyright']=core.__copyright__
-    info['holder']= core.__author__
-    info['unit'] = _utils.get_unit_nr()
-    info['version'] = core.__version__
-    info['time'] = _hal.get_time()
-    info['platform'] = _utils.get_platform()
-    info['uptime'] = _utils.get_uptime()
-    info['heap'] = _utils.get_mem()
-    info['ip'] = _hal.get_ip_address()    
-    info['stack'] = _utils.get_stack_current()
-    _log.debug("Pages: Home Page Data collected")
-    
-    nodes = {}
-    
-    # menu settings
-    menu = 1
-    advanced = db.advancedTable.getrow()
-    gc.collect()
+            yield from picoweb.start_response(response)
+            yield from app.render_template(response, "header.html",(info, menu, advanced))
+            yield from app.render_template(response, "homepage.html",(info,nodes,))
+            yield from app.render_template(response, "footer.html",(info,))
+        else:
+            #Display home page in access point mode
+            _log.debug("Pages: Home Page AP mode")
+            
+            # set info array
+            info={}
+            info['name'] = "Set SSID!"
+            info['copyright']=core.__copyright__
+            info['holder']= core.__author__
+            
+            # setup wifi
+            import network as wifi
+            wnic = wifi.WLAN(wifi.STA_IF)
+            wnic.active(True)
+            
+            # Get list of ssid's
+            wifilist = wnic.scan()
+            
+            # close wifi station
+            wnic.active(False)
+            
+            # parse list, exchange encryption
+            wifiaplist = []
+            wifisec = ['Open','WEP','WPA-PSK','WPA2-PSK','WPA/WPA2-PSK']
+            wifihide = ['Visible','Hidden']
+            for wifi in wifilist:
+                _log.debug("Hal: esp32, Scan: Ssid found: "+str(wifi[0], 'utf8')+" Channel: "+str(wifi[2])+" Strength: "+str(wifi[3]) + ' dBm' + " Security: " + str(wifi[4])+ " Hidden: " + str(wifi[5]))
+                wifi_info = {
+                    "ssid":    str(wifi[0], 'utf8'),
+                    "channel":    str(wifi[2]),
+                    "strength":    str(wifi[3]),
+                    "security":    wifisec[wifi[4]],
+                    "hidden":    wifihide[wifi[5]],
+                }
+                wifiaplist.append(wifi_info)
+            wifi_ap = sorted(wifiaplist, key=lambda k: (k['ssid'],k['strength'])) 
+            
+            # Show wifi list page
+            yield from picoweb.start_response(response)
+            yield from app.render_template(response, "header_ap.html",(info,))
+            yield from app.render_template(response, "wifi_ap.html",(wifi_ap,))   
+            yield from app.render_template(response, "footer.html",(info,))
+    elif request.method == 'POST':
+         #Update config
+        _log.debug("Pages: Update SSID config")
 
-    yield from picoweb.start_response(response)
-    yield from app.render_template(response, "header.html",(info, menu, advanced))
-    yield from app.render_template(response, "homepage.html",(info,nodes,))
-    yield from app.render_template(response, "footer.html",(info,))
+        # set info array
+        info={}
+        info['name'] = "Set SSID!"
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
 
+        #Get network record key
+        dbnetwork = db.networkTable.getrow()
+
+        # Get all form values in a dict
+        yield from request.read_form_data()
+        uform = _utils.get_form_values(request.form)
+
+        # map form values to db records
+        network = _utils.map_form2db(dbnetwork, uform)
+
+        # connect to network to get ip-address
+        import network as wifi
+        wnic = wifi.WLAN(wifi.STA_IF)
+        wnic.active(True)
+        if not wnic.isconnected():
+            wnic.connect(network['ssid'], network['key'])
+            while not wnic.isconnected():
+                pass
+        info['ipaddress'] = wnic.ifconfig()[0]
+        info['ssid'] = network['ssid']
+
+        # if succesfull connect then reboot
+        if info['ipaddress'] != '0.0.0.0': 
+            _log.debug("Pages: SSID: "+info['ssid'])
+            _log.debug("Pages: SSID ip address: "+info['ipaddress'])
+
+            # update network
+            cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'])
+
+            # Show wifi reboot page
+            yield from picoweb.start_response(response)
+            yield from app.render_template(response, "header_ap.html",(info,))
+            yield from app.render_template(response, "wifi_reboot.html",(info,))   
+            yield from app.render_template(response, "footer.html",(info,))
+
+            # Reboot in 10 seconds!
+            loop = asyncio.get_event_loop()
+            loop.call_later(10,_hal.reboot_async())
+        else:
+            _log.debug("Pages: SSID failed: "+info['ssid'])
+            _log.debug("Pages: SSID failed password: "+network['key'])
+            _log.debug("Pages: SSID ip address failed: "+info['ipaddress'])
+
+            # could not connect, retry!
+            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+            yield from response.awrite("Location: /\r\n")
+            yield from response.awrite("Content-Type: text/html\r\n")
+            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            
 @app.route("/config", methods=['GET','POST'])
 def configpage(request, response):
     if not auth_page(request, response): 

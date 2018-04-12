@@ -18,14 +18,15 @@ __author__              = "Lisa Esselink"
 __copyright__           = "Copyright 2018"
 __credits__             = ["Lisa Esselink"]
 __license__             = "Creative Commons Attribution-NonCommercial 4.0 International License"
-__version__             = "0.2.2"
+__version__             = "0.2.3"
 __email__               = "info@upyeasy.com"
 __status__              = "Beta"
 __logname__             = "uPyEasy"
-__build__               = "61"
+__build__               = "62"
 
 upyeasy_starttime       = 0
 initial_upyeasyname     = "uPyEasy"
+initial_upyeasywifi     = "STA"
 
 import os
 working_dir = os.getcwd()

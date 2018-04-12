@@ -95,8 +95,8 @@ class hal(object):
                 else: 
                     try:
                         self._nic.ifconfig('dhcp')
-                    except OSError as e:
-                        self._log.debug("Hal: pyboard network init OSError: "+repr(e))
+                    except (OSError, TypeError) as e:
+                        self._log.debug("Hal: pyboard network init Error: "+repr(e))
                         return False
                 ip_address_v4 = self._nic.ifconfig()[0]
                 self._log.debug("Hal: pyboard, ip: "+ip_address_v4)
@@ -107,33 +107,20 @@ class hal(object):
             self._log.debug("Hal: esp32")
             if network:
                 import network as wifi
-                # AP mode
-                self._nic = wifi.WLAN(wifi.STA_IF)
-                core._nic = self._nic
-                self._nic.active(True)
                 # SSID already set?
                 if not network['ssid']:
                     self._log.debug("Hal: esp32, ssid empty")
-                    # No ssid set yet, let's connect to the strongest unencrypted wifi ap possible
-                    wlan_list = self._nic.scan()
-                    # parse list, find the strongest open network
-                    strength = -500
-                    wlan_ap = None
-                    for wlan in wlan_list:
-                        self._log.debug("Hal: esp32, Scan: Ssid found: "+str(wlan[0], 'utf8')+" Strength: "+str(wlan[3]) + ' dBm' + " Security: " + str(wlan[4]))
-                        if wlan[3] > strength and wlan[4] == 0:
-                            strength = wlan[3]
-                            wlan_ap = str(wlan[0], 'utf8')
-                            self._log.debug("Hal: esp32, Scan: Open ssid found: "+wlan_ap)
-                    if wlan_ap == None:
-                        return False
-                    else:
-                        #Activate station
-                        if not self._nic.isconnected():
-                            self._nic.connect(wlan_ap)
-                            while not self._nic.isconnected():
-                                pass
+                    # No ssid set yet, goto AP mode!
+                    self._nic = wifi.WLAN(wifi.AP_IF)
+                    core._nic = self._nic
+                    self._nic.active(True)
+                    self._nic.config(essid="uPyEasy")
+                    core.initial_upyeasywifi = "AP"
                 else:
+                    # STA mode
+                    self._nic = wifi.WLAN(wifi.STA_IF)
+                    core._nic = self._nic
+                    self._nic.active(True)
                     #Activate station
                     if not self._nic.isconnected():
                         self._nic.connect(network['ssid'], network['key'])
@@ -142,12 +129,9 @@ class hal(object):
                     # if ip address set: use it!
                     if network['ip']: 
                         self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))                    
+                    core.initial_upyeasywifi = "STA"
                 ip_address_v4 = self._nic.ifconfig()[0]
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
-                
-                #deactivate AP
-                ap_if = wifi.WLAN(wifi.AP_IF)
-                ap_if.active(False)
         elif self._utils.get_platform() == 'esp8266':
             if network:
                 if not network['ssid']:
@@ -613,6 +597,23 @@ class hal(object):
 
     def reboot(self):
         self._log.debug("Hal: reboot")
+        if self._utils.get_platform() == 'linux': 
+            import sys
+            #reboot!
+            sys.exit()
+        elif self._utils.get_platform() == 'pyboard':
+            pass
+        elif self._utils.get_platform() == 'esp32':
+            import machine
+            machine.reset()
+        elif self._utils.get_platform() == 'esp8266':
+            import machine
+            machine.reset()
+        else:
+            pass
+
+    async def reboot_async(self):
+        self._log.debug("Hal: Async reboot")
         if self._utils.get_platform() == 'linux': 
             import sys
             #reboot!

@@ -200,6 +200,9 @@ class init (object):
         # Init network!
         netconnected = self._hal.init_network()
             
+        # return in AP mode!
+        if core.initial_upyeasywifi == "AP" : return netconnected
+            
         # Init all protocols
         self._protocols = protocol()
         core._protocols = self._protocols

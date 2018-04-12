@@ -1,0 +1,32 @@
+{% args info %}
+   <B><U>Welcome to uPyEasy</U></B>
+   <BR><BR>
+   uPyEasy is connected to SSID: <B>{{info['ssid']}}</B><BR>
+   uPyEasy ip-address is: <B>{{info['ipaddress']}}</B>
+   <BR><BR>
+   Connect your laptop / tablet / phone back to your main Wifi network now!
+   <BR><BR>
+   This page will redirect you to your new ip-address in <B><span id="countdown">30</span></B> seconds...
+   <!-- JavaScript part -->
+    <script type="text/javascript">
+        
+        // Total seconds to wait
+        var seconds = 30;
+        
+        function countdown() {
+            seconds = seconds - 1;
+            if (seconds < 0) {
+                // Chnage your redirection link here
+                window.location = "http://{{info['ipaddress']}}";
+            } else {
+                // Update remaining seconds
+                document.getElementById("countdown").innerHTML = seconds;
+                // Count down using javascript
+                window.setTimeout("countdown()", 1000);
+            }
+        }
+        
+        // Run countdown function
+        countdown();
+        
+    </script>
