@@ -50,6 +50,7 @@ def main(**params):
 
         # Run only in STA mode!
         if core.initial_upyeasywifi == "STA":
+            core._log.debug("Main: uPyEasy running in Station mode")
             #get ip address
             ip_address = core._hal.get_ip_address()
             config = db.configTable.getrow()
@@ -64,16 +65,16 @@ def main(**params):
             loop.create_task(core._scripts.asyncscripts())
         else:
             # WIFI AP mode
+            core._log.debug("Main: uPyEasy running in AP mode")
             ip_address = "0.0.0.0"
             port = 80
         
-        core._log.debug("Main: uPyEasy Main Async Loop")
+        core._log.debug("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
         app.run(host=ip_address, port=port, debug=False, log=core._log, **params)
         #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert, **params)   # SSL version
     else:
         #No network, exit!
         print("Exiting: Network not available, set network values!")
-        return 
         
 if __name__ == '__main__':
    main()

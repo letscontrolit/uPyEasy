@@ -18,11 +18,11 @@ __author__              = "Lisa Esselink"
 __copyright__           = "Copyright 2018"
 __credits__             = ["Lisa Esselink"]
 __license__             = "Creative Commons Attribution-NonCommercial 4.0 International License"
-__version__             = "0.2.3"
+__version__             = "0.2.4"
 __email__               = "info@upyeasy.com"
 __status__              = "Beta"
 __logname__             = "uPyEasy"
-__build__               = "62"
+__build__               = "63"
 
 upyeasy_starttime       = 0
 initial_upyeasyname     = "uPyEasy"
@@ -57,7 +57,7 @@ SENSOR_TYPE_DIMMER          = "SENSOR_TYPE_DIMMER"          # Single value
 SENSOR_TYPE_LONG            = "SENSOR_TYPE_LONG"            # Single value
 SENSOR_TYPE_WIND            = "SENSOR_TYPE_WIND"            # Single value
 
-QUEUE_MESSAGE_START     = "UPYEASY_QMS"             # Start of every queue message
+QUEUE_MESSAGE_START         = "UPYEASY_QMS"             # Start of every queue message
 
 # Status types
 STATUS_INIT                 = "INIT"                # initialising

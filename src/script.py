@@ -9,7 +9,7 @@
 # Licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
 # See LICENSE file in the project root for full license information.  
 #
-import gc, re, sys, os, utime, ujson, uasyncio as asyncio
+import gc, ure as re, sys, os, utime, ujson, uasyncio as asyncio
 from . import core, db, utils
 from .app import app
 from .hal import hal
@@ -216,7 +216,7 @@ class scripts(object):
         rule_file = open("rules/{}".format(rule['filename']), 'r')
         content = rule_file.read()
         rule_file.close()
-        
+
         # setup rule environment
         event = {}
         event[devicedata['triggername']] = devicedata['value']
@@ -238,16 +238,18 @@ class scripts(object):
             devicedata = {}
             try:
                 while await(self._scriptqueue.get()) != core.QUEUE_MESSAGE_START:
-                    pass
+                    # Give async a change to schedule something else
+                    await asyncio.sleep_ms(100)
                 devicedata['name'] = self._scriptqueue.get_nowait()
                 devicedata['valuename'] = self._scriptqueue.get_nowait()
                 devicedata['value'] = self._scriptqueue.get_nowait()
             except Exception as e:
-                self._log.debug("Protocol "+name+" proces Exception: "+repr(e))
+                self._log.debug("Script: scriptqueue proces Exception: "+repr(e))
 
             # Assemble triggername
             devicedata['triggername'] = devicedata['name']+'#'+devicedata['valuename']
             
+            print(devicedata)
             ### SCRIPTS
         
             # process all scripts
@@ -282,6 +284,24 @@ class scripts(object):
                     self._log.debug("Rules: Scheduling Async processing rule: "+rule['name'])
                     # run rule
                     self.runrule(rule, devicedata)
+
+            # Give async a change to schedule something else
+            await asyncio.sleep_ms(100)
+
+            ### DEVICES
+
+            # process all devices
+            devices=db.deviceTable.public()
+                    
+            # Get all device values!
+            for device in devices:
+                # skip not enabled devices
+                if device['enable'] == 'on' and devicedata['triggername'] in device['valuesubscription']: 
+                    # Write data to plugin
+                    self._plugins.write(device, devicedata)
+                    
+            # Give async a change to schedule something else
+            await asyncio.sleep_ms(100)
 
     async def asynctimer(self, timer):
         # put timer1 message in queue!

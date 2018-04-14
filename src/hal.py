@@ -82,13 +82,14 @@ class hal(object):
                         return False
                 if not core._nic:
                     if board == "PYBv3 with STM32F405RG":
+                        self._log.debug("Hal: Board: "+ board)
                         core._nic = ethernet.WIZNET5K(pyb.SPI(network['spi']), network['cs'], network['rst'])
                     else: 
                         self._log.debug("Hal: pyboard, unknown board: "+ board)
                         return False
                     while not core._nic.isconnected():
                         pass
-                #core._nic.active(1)
+                core._nic.active(1)
                 self._nic = core._nic
                 if network['ip']: 
                     self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))

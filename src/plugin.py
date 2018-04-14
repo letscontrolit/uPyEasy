@@ -123,10 +123,50 @@ class plugins(object):
         self._log.debug("Plugins: Saveform plugin "+plugindata['name'])
         self._plugin[plugindata['name']].saveform(plugindata)
 
+    def loadvalues(self, device, valuenames): 
+        self._log.debug("Plugins: Loadvalues plugin")
+
+        # load values
+        devices=db.deviceTable.public()
+        # Get right device!
+        for devicedb in devices:
+            if devicedb['name'] == device['name']:
+                valuenames["valueN1"],valuenames["valueN2"],valuenames["valueN3"]=devicedb['valuename']
+                valuenames["valueF1"],valuenames["valueF2"],valuenames["valueF3"]=devicedb['valueformula']
+                valuenames["valueD1"],valuenames["valueD2"],valuenames["valueD3"]=devicedb['valuedecimal']
+
+    def savevalues(self, device, valuenames): 
+        self._log.debug("Plugins: Savevalues plugin")
+
+        # process values
+        devices=db.deviceTable.public()
+        # Get right device!
+        for devicedb in devices:
+            if devicedb['name'] == device['name']:
+                namelist = valuenames["valueN1"]+';'+valuenames["valueN2"]+';'+valuenames["valueN3"]
+                formulalist = valuenames["valueF1"]+';'+valuenames["valueF2"]+';'+valuenames["valueF3"]
+                decimallist = valuenames["valueD1"]+';'+valuenames["valueD2"]+';'+valuenames["valueD3"]
+                db.deviceTable.update({"timestamp":devicedb['timestamp']},valuename=namelist, valueformula=formulalist , valuedecimal=decimallist)
+                return
+
     def read(self, device, values): 
         self._log.debug("Plugins: Read device "+device['name'])
         self._plugin[device['name']].read(values)
 
+    def write(self, device, values): 
+        self._log.debug("Plugins: Write device "+device['name'])
+        self._plugin[device['name']].write(values)
+
+    def triggers(self, device, triggers):
+        self._log.debug("Plugins: Triggers device "+device['name'])
+        # process triggers
+        devices=db.deviceTable.public()
+        # Get right device!
+        for devicedb in devices:
+            if devicedb['name'] == device['name']:
+                db.deviceTable.update({"timestamp":devicedb['timestamp']},valuesubscription=triggers)
+                return
+        
     def readstore(self, pname):
         self._log.debug("Plugins: Read device store: "+pname)
         datastores = db.pluginstoreTable.public()

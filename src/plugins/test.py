@@ -71,6 +71,8 @@ class test_plugin:
         plugin['stype']         = stype
         plugin['template']      = template
         datastore               = self._plugins.readstore(name)
+        self.triggers           = name+"#"+self.valuenames["valueN1"]
+        self._plugins.triggers(device, self.triggers)
         return True
 
     def loadform(self,plugindata):
@@ -99,6 +101,7 @@ class test_plugin:
 
     def write(self, values):
         self._log.debug("Plugin: test write")
+        #print(values)
         
     async def asyncprocess(self):
         self._log.debug("Plugin: test process")

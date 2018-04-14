@@ -461,6 +461,10 @@ class deviceTable(uorm.Model):
         ("pullup", ""),
         ("inverse", ""),
         ("port", ""),
+        ("valuename", ""),
+        ("valueformula", ""),
+        ("valuedecimal", ""),
+        ("valuesubscription", ""),
     ])
 
     @classmethod
