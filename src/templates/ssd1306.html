@@ -1,0 +1,51 @@
+{% args info, plugindata %}
+<!- DO NOT CHANGE LINE ABOVE! -->
+<TR>
+   <TD>I2C Address:
+   <TD>
+      <select name='ssd_i2c'>
+         <option value=60 {% if plugindata['ssd_i2c'] == 60 %}selected{% endif %}>0x3C - (default)</option>
+         <option value=61 {% if plugindata['ssd_i2c'] == 61 %}selected{% endif %}>0x3D</option>
+      </select>
+<TR>
+   <TD>
+   <TD>
+      <div class='note'>Note: SDO Low=0x3C, High=0x3D</div>
+<TR>
+   <TD>Rotation:
+   <TD><input type='number' name='ssd_rotation' style='width:5em;' value={{plugindata['ssd_rotation']}}>
+<TR>
+ <TD>Display Size:
+ <TD>
+    <select name='ssd_size'>
+       <option value=128 {% if plugindata['ssd_size'] == 128 %}selected{% endif %}>128x64</option>
+       <option value=64 {% if plugindata['ssd_size'] == 64 %}selected{% endif %}>64x48</option>
+    </select>
+<TR>
+ <TD>Line 1:
+ <TD><input type='text' name='ssd_line1' maxlength='64' value='{{plugindata['ssd_line1']}}'>
+<TR>
+ <TD>Line 2:
+ <TD><input type='text' name='ssd_line2' maxlength='64' value='{{plugindata['ssd_line2']}}'>
+<TR>
+ <TD>Line 3:
+ <TD><input type='text' name='ssd_line3' maxlength='64' value='{{plugindata['ssd_line3']}}'>
+<TR>
+ <TD>Line 4:
+ <TD><input type='text' name='ssd_line4' maxlength='64' value='{{plugindata['ssd_line4']}}'>
+<TR>
+ <TD>Line 5:
+ <TD><input type='text' name='ssd_line5' maxlength='64' value='{{plugindata['ssd_line5']}}'>
+<TR>
+ <TD>Line 6:
+ <TD><input type='text' name='ssd_line6' maxlength='64' value='{{plugindata['ssd_line6']}}'>
+<TR>
+ <TD>Line 7:
+ <TD><input type='text' name='ssd_line7' maxlength='64' value='{{plugindata['ssd_line7']}}'>
+<TR>
+ <TD>Line 8:
+ <TD><input type='text' name='ssd_line8' maxlength='64' value='{{plugindata['ssd_line8']}}'>
+<TR>
+ <TD>Display Timeout:
+ <TD><input type='number' name='sss_timeout' style='width: 80px;' value='{{plugindata['ssd_timeout']}}'> (sec)
+{{plugindata['content']}}

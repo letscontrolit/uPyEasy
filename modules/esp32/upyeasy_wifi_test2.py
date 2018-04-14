@@ -1,0 +1,1 @@
+../../../../../upyeasy/modules/esp32/upyeasy_wifi_test.py
