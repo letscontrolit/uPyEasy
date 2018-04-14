@@ -13,6 +13,7 @@ Root directory (for micropython, upyeasy, etc):
 Temporary:
 - micropython-stm32
 
+
 Instructions for creating above directory structure:
 
 git clone https://github.com/micropython/micropython.git micropython
