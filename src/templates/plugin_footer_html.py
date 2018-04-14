@@ -29,7 +29,7 @@ def render(info, plugindata):
            <TD><input type='number' name='valueD"""
         yield str(cnt)
         yield """' min=0 max=6 style='width:5em;' value='"""
-        yield str(plugindata['valueN'+str(cnt)])
+        yield str(plugindata['valueD'+str(cnt)])
         yield """'>
     """
     yield """

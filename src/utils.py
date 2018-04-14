@@ -1,9 +1,9 @@
 #          
 # Filename: utils.py
-# Author  : Lisa Esselink
+# Author  : Lisa Esselink, with mods for Openhab MQTT by AJ
 # Purpose : uPyEasy util functions
 # Usage   : Provide functions for the app
-#
+# Version : 0.13 (send unitname direct from utils)
 # Copyright (c) Lisa Esselink. All rights reserved.  
 # Licensend under the Creative Commons Attribution-NonCommercial 4.0 International License.
 # See LICENSE file in the project root for full license information.  
@@ -267,36 +267,45 @@ class utils(object):
 
     def plugin_senddata(self, queuedata):
         # no queue, no deal
-        if not queuedata.scriptqueue: 
+        if not queuedata.scriptqueue:  # Script/rule queue
             self._log.debug("Utils: Senddata script queue empty!")
             return
 
-        if queuedata.queue:
+        # General section for all sensor types..
+        # Read unitname and put into queuedata
+        queuedata.valuenames['unitname'] = self.get_upyeasy_name() # AJ added for OHmqtt
+
+        # Protocol queue...
+        if queuedata.queue: # Protocol queue for Domoticz, Openhab etc
             # Put start message in protocol queue
             queuedata.queue.put_nowait(core.QUEUE_MESSAGE_START)
-            # put sensor type in queue
+            # put sensor type in protocol queue
             queuedata.queue.put_nowait(queuedata.stype)
-            # put HA server id in queue
+            # put HA server id in protocol queue
             queuedata.queue.put_nowait(queuedata.queue_sid)
+            
+            # Addiional parameters for use by Openhab MQTT protocol (for all sensor types) (AJ)
+            queuedata.queue.put_nowait(queuedata.valuenames['unitname']) # aka upyeasyname
+            queuedata.queue.put_nowait(queuedata.valuenames['devicename']) # given name of device/plugin
 
-        # Put start message in script/rule/plugin queue
+        # Script/rule queue...
+        # Put start message in script/rule queue
         queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
-        # Put device name in script/rule/plugin queue
+        # Put device/plugin name in script/rule queue
         queuedata.scriptqueue.put_nowait(queuedata.devicename)
-        # put valuename in script/rule/plugin queue
-        queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN1"])
-
+        # put  first valuename datavalue into script/rule queue
+        queuedata.scriptqueue.put_nowait(queuedata.valuenames['valueN1'])
+        
+        # Start of code for specific sensor types...
         while True:
-
             # case SENSOR_TYPE_SINGLE
             if queuedata.stype == core.SENSOR_TYPE_SINGLE:
                 if queuedata.queue:
-                    # put valuedata in protocol queue
-                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
-
-                # put valuedata in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
-
+                    # put valuedata and name in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames['valueV1'])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
+                # put first data value in script/rule queue (order to match script.py)
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
                 break
 
             # case SENSOR_TYPE_LONG
@@ -310,83 +319,73 @@ class utils(object):
             # case SENSOR_TYPE_TEMP_HUM
             if queuedata.stype == core.SENSOR_TYPE_TEMP_HUM:
                 if queuedata.queue:
-                    # put valuedata in protocol queue
+                    # put valuedata and names in protocol queue
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
-
-                # put valuedata in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
-                # Put start message in script/rule queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN2"])
+                
+                # put valuenames and valuees in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
+                # start second block of data
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
-                # Put device name in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
-                # Put device name in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.devicename)
-                # put valuename in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuedata in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
-
                 break
 
             # case SENSOR_TYPE_TEMP_BARO
             if queuedata.stype == core.SENSOR_TYPE_TEMP_BARO:
                 if queuedata.queue:
-                    # put valuedata in protocol queue
+                    # put valuedata and names in protocol queue
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
-
-                # put valuedata in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
-                # Put start message in script/rule queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN2"])
+               
+                # put first value in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
+                # second block of data for script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
-                # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
-                # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuedata in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
-
                 break
 
             # case SENSOR_TYPE_TEMP_HUM_BARO
             if queuedata.stype == core.SENSOR_TYPE_TEMP_HUM_BARO:
                 if queuedata.queue:
-                    # put valuedata in protocol queue
+                    # put valuedata and names in protocol queue
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN2"])
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV3"])
-
-                # put valuedata in script/rule queue
-                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
-                # Put start message in script/rule queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN3"])
+                    
+                # put first value in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
+                # second block of data for script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
-                # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
-                # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
-                # put valuedata in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
-                # Put start message in script/rule queue
+                # third block of data for script/rule queue
                 queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
-                # Put device name in queue
                 queuedata.scriptqueue.put_nowait(queuedata.devicename)
-                # put valuename in queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN3"])
-                # put valuedata in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV3"])
-
+                
                 break
 
             # case SENSOR_TYPE_SWITCH
             if queuedata.stype == core.SENSOR_TYPE_SWITCH:
                 if queuedata.queue:
-                    # put valuedata in protocol queue
+                    # put valuedata and name in protocol queue
                     queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
-
-                # put valuedata in script/rule queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
+                # put valuename and value in script/rule queue
                 queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"])
-
                 break
 
             # case SENSOR_TYPE_DIMMER
@@ -413,43 +412,50 @@ class utils(object):
         data.queue              = queue
         data.scriptqueue        = scriptqueue
         data.queue_sid          = device["controllerid"]
-        data.devicename         = device["name"]
+        data.devicename         = device["name"] # added AJ for Openhab mqtt
+        data.unitname           = utils.get_upyeasy_name(self) # added AJ for Openhab mqtt
 
     def plugin_loadform(self, data, plugindata):
         # generic
         plugindata['pincnt']    = data.pincnt
         plugindata['valuecnt']  = data.valuecnt
         plugindata['content']   = data.content
+        
         # at least one value
         plugindata['valueN1']   = data.valuenames["valueN1"]
         plugindata['valueF1']   = data.valuenames["valueF1"]
         plugindata['valueD1']   = data.valuenames["valueD1"]
-        # two values
+        
+        # two values or more
         if data.valuecnt > 1:
             plugindata['valueN2']   = data.valuenames["valueN2"]
             plugindata['valueF2']   = data.valuenames["valueF2"]
             plugindata['valueD2']   = data.valuenames["valueD2"]
-        # three values
+        # three values or more
         if data.valuecnt > 2:
             plugindata['valueN3']   = data.valuenames["valueN3"]
             plugindata['valueF3']   = data.valuenames["valueF3"]
             plugindata['valueD3']   = data.valuenames["valueD3"]
+            
+        # we'll need to add more values to cover valuecnt = 4 (for Dummy plugin)
+        
         
     def plugin_saveform(self, data, plugindata):
         # at least one value
         data.valuenames["valueN1"]  = plugindata['valueN1']
         data.valuenames["valueF1"]  = plugindata['valueF1']
         data.valuenames["valueD1"]  = plugindata['valueD1']
-        # two values
+        
+        # two values or more
         if data.valuecnt > 1:
             data.valuenames["valueN2"]  = plugindata['valueN2']
             data.valuenames["valueF2"]  = plugindata['valueF2']
             data.valuenames["valueD2"]  = plugindata['valueD2']
+            
         # three values
         if data.valuecnt > 2:
             data.valuenames["valueN3"]  = plugindata['valueN3']
             data.valuenames["valueF3"]  = plugindata['valueF3']
             data.valuenames["valueD3"]  = plugindata['valueD3']
-    
-    
-    
+            
+        # we'll need to add more values to cover valuecnt = 4 (for Dummy plugin)

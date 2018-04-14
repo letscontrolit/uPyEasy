@@ -1,7 +1,7 @@
 #          
 # Filename: test.py
-# Version : 0.1
-# Author  : Lisa Esselink
+# Version : 0.12
+# Author  : Lisa Esselink/edited by AJ
 # Purpose : Plugin test
 # Usage   : Get fixed sensor data
 #
@@ -67,12 +67,11 @@ class test_plugin:
         self.valuecnt           = valuecnt
         self.stype              = stype
         self.dtype              = dtype
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
         plugin['template']      = template
         datastore               = self._plugins.readstore(name)
-        self.triggers           = name+"#"+self.valuenames["valueN1"]
-        self._plugins.triggers(device, self.triggers)
         return True
 
     def loadform(self,plugindata):
@@ -101,7 +100,6 @@ class test_plugin:
 
     def write(self, values):
         self._log.debug("Plugin: test write")
-        #print(values)
         
     async def asyncprocess(self):
         self._log.debug("Plugin: test process")

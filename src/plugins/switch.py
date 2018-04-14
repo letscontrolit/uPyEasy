@@ -1,9 +1,9 @@
 #          
-# Filename: dht.py
-# Version : 0.1
-# Author  : Lisa Esselink
-# Purpose : Plugin DHT 11/12/22
-# Usage   : Get DHT sensor data
+# Filename: switch.py # AJ changed from dht.py
+# Version : 0.11
+# Author  : Lisa Esselink / AJ additions for openhab_mqtt protocol
+# Purpose : Plugin Switch ### AJ changed from "DHT 11/12/22"
+# Usage   : Get Switch sensor data
 #
 # Copyright (c) 2018 - Lisa Esselink. All rights reserved.  
 # Licensend under the Creative Commons Attribution-NonCommercial 4.0 International License.
@@ -75,6 +75,7 @@ class switch_plugin:
         plugin['stype']         = stype
         plugin['template']      = template
         datastore               = self._plugins.readstore(self.devicename)
+        self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         # plugin specific section
         self.switch_status      = bootstate
         if self.inputtype == 'normal':
