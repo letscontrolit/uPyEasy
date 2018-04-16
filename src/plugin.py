@@ -10,12 +10,12 @@
 # See LICENSE file in the project root for full license information.  
 #
 import gc, sys, os, utime, ujson, uasyncio as asyncio, uasyncio.queues as queues
+from asyn import Event
 from . import core, db, utils
 from .app import app
 from .hal import hal
 from .plugins import *
 from .db import _dbc
-from asyn import Event
 
 class plugins(object):
 
