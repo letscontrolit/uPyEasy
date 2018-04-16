@@ -103,6 +103,7 @@ class bme280_plugin:
         self.i2c                = core._hal.get_i2c(i2c)
         if self.i2c != None: 
             try:
+                self._log.debug("Plugin: bme280 init i2c")
                 self.bme280_init(address=self.bme_i2c)
             except OSError as e:
                 self._log.debug("Plugin: bme280 init OSError exception: "+repr(e))
@@ -128,7 +129,7 @@ class bme280_plugin:
         if sf_bme_elev: self.bme_elev = int(sf_bme_elev)
         else: self.bme_elev = None
         self.i2c                    = core._hal.get_i2c(i2c)
-        if self.bme_i2c:
+        if self.i2c:
             try:
                 if self.i2c != None: self.bme280_init(address=self.bme_i2c)
             except OSError as e:

@@ -1,1 +1,1 @@
-../../../micropython/micropython/tools/upip.py
+../unix/upip.py

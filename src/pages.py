@@ -649,7 +649,7 @@ def controllersettingpage(request, response):
             _log.debug("Pages: Create Controller")
 
             controllerhostname = uform['hostname']
-            _log.debug("Pages: Controller hostname: %s",controllerhostname)
+            _log.debug("Pages: Controller hostname: "+controllerhostname)
             
             #Controller creation/protocol change
             if not controllerhostname and not protocolchange:
@@ -986,7 +986,7 @@ def devicesettingpage(request, response):
             for cnt in range(0,plugindata["pincnt"]):
                 device['dxpin'+str(cnt)] = dxpins[cnt]
 
-            _log.debug("Pages: Loading plugin page: "+plugin['template'])
+            _log.debug("Pages: Loading plugin page edit: "+plugin['template'])
 
             # menu settings
             menu = 5
@@ -999,6 +999,7 @@ def devicesettingpage(request, response):
             yield from app.render_template(response, plugin['template'],(info, plugindata,))
             yield from app.render_template(response, "plugin_footer.html",(info, plugindata,))
             yield from app.render_template(response, "footer.html",(info,))
+
         elif id > 0 and oper == 'del':
             # delete device
             import os
@@ -1223,7 +1224,7 @@ def devicesettingpage(request, response):
                 for cnt in range(0,plugindata["pincnt"]):
                     device['dxpin'+str(cnt)] = 0
 
-                _log.debug("Pages: Loading plugin page: "+plugin['template'])
+                _log.debug("Pages: Loading plugin page update: "+plugin['template'])
 
                 # menu settings
                 menu = 5
@@ -1299,7 +1300,7 @@ def devicesettingpage(request, response):
                 for cnt in range(0,plugindata["pincnt"]):
                     device['dxpin'+str(cnt)] = 0
 
-                _log.debug("Pages: Loading plugin page: "+plugin['template'])
+                _log.debug("Pages: Loading plugin page new plugin: "+plugin['template'])
 
                 # menu settings
                 menu = 5
@@ -1369,7 +1370,7 @@ def devicesettingpage(request, response):
                 for cnt in range(0,plugindata["pincnt"]):
                     device['dxpin'+str(cnt)] = "d0"
                 
-                _log.debug("Pages: Loading plugin page: "+plugin['template'])
+                _log.debug("Pages: Loading plugin page new plugin: "+plugin['template'])
 
                 # menu settings
                 menu = 5

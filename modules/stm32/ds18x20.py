@@ -1,1 +1,1 @@
-../../../micropython/micropython/drivers/onewire/ds18x20.py
+../unix/ds18x20.py

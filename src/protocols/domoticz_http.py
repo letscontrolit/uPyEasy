@@ -73,13 +73,14 @@ class domoticz_http_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_SINGLE")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
                 except Exception:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_TEMP_HUM exception: Queue Emtpy!")
                     break
                 
                 # Assemble http message
-                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["value1"])+";0"
+                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+";0"
                 break
 
             # case SENSOR_TYPE_LONG
@@ -97,13 +98,15 @@ class domoticz_http_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_TEMP_HUM")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
-                    devicedata['value2'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
+                    devicedata['valueV2'] = self._queue.get_nowait()
+                    devicedata['valueN2'] = self._queue.get_nowait()
                 except Exception:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_TEMP_HUM exception: Queue Emtpy!")
                     break
                 # Assemble http message
-                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["value1"])+str(devicedata["value2"])+";0"
+                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+str(devicedata["valueV2"])+";0"
                 break
 
             # case SENSOR_TYPE_TEMP_BARO
@@ -116,14 +119,17 @@ class domoticz_http_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_TEMP_HUM_BARO")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
-                    devicedata['value2'] = self._queue.get_nowait()
-                    devicedata['value3'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
+                    devicedata['valueV2'] = self._queue.get_nowait()
+                    devicedata['valueN2'] = self._queue.get_nowait()
+                    devicedata['valueV3'] = self._queue.get_nowait()
+                    devicedata['valueN3'] = self._queue.get_nowait()
                 except Exception:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_TEMP_HUM_BARO exception: Queue Emtpy!")
                     break
                 # Assemble http message
-                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["value1"])+str(devicedata["value2"])+";0;"+str(devicedata["value3"])+";0"
+                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+str(devicedata["valueV2"])+";0;"+str(devicedata["valueV3"])+";0"
                 break
 
             # case SENSOR_TYPE_SWITCH
@@ -131,7 +137,8 @@ class domoticz_http_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_SWITCH")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
                 except Exception:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_SWITCH exception: Queue Emtpy!")
                     break
@@ -140,17 +147,17 @@ class domoticz_http_protocol:
                 switch_on  = ['closed','press','double','long', 'on']
                 switch_off = ['open','release', 'off']    
                 
-                if devicedata["value1"].lower() in switch_on: 
-                    devicedata["value1"] = 'On'
-                elif devicedata["value1"].lower() in switch_off: 
-                    devicedata["value1"] = 'Off'
+                if devicedata["valueV1"].lower() in switch_on: 
+                    devicedata["valueV1"] = 'On'
+                elif devicedata["valueV1"].lower() in switch_off: 
+                    devicedata["valueV1"] = 'Off'
                 else: 
-                    self._log.debug("Protocol "+name+" SENSOR_TYPE_SWITCH error: Value1 break!")
-                    print(devicedata["value1"])
+                    self._log.debug("Protocol "+name+" SENSOR_TYPE_SWITCH error: valueV1 break!")
+                    print(devicedata["valueV1"])
                     break
 
                 # Assemble http message
-                message = "/json.htm?type=command&param=switchlight&idx="+str(devicedata["serverid"])+"&switchcmd="+devicedata["value1"]
+                message = "/json.htm?type=command&param=switchlight&idx="+str(devicedata["serverid"])+"&switchcmd="+devicedata["valueV1"]
                 break
 
             # case SENSOR_TYPE_DIMMER
@@ -187,6 +194,8 @@ class domoticz_http_protocol:
                 pass
             devicedata['stype'] = self._queue.get_nowait()
             devicedata['serverid'] = self._queue.get_nowait()
+            devicedata['unitname'] = self._queue.get_nowait()
+            devicedata['devicename'] = self._queue.get_nowait()
         except Exception as e:
             self._log.debug("Protocol "+name+" proces Exception: "+repr(e))
         self.send(devicedata)

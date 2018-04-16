@@ -284,7 +284,7 @@ class utils(object):
             # put HA server id in protocol queue
             queuedata.queue.put_nowait(queuedata.queue_sid)
             
-            # Addiional parameters for use by Openhab MQTT protocol (for all sensor types) (AJ)
+            # Additional parameters for use by Openhab MQTT protocol (for all sensor types) (AJ)
             queuedata.queue.put_nowait(queuedata.valuenames['unitname']) # aka upyeasyname
             queuedata.queue.put_nowait(queuedata.valuenames['devicename']) # given name of device/plugin
 

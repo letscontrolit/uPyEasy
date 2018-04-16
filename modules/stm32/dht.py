@@ -1,1 +1,1 @@
-../../../micropython/micropython/drivers/dht/dht.py
+../unix/dht.py

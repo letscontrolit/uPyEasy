@@ -1,1 +1,0 @@
-{"senddata": "off", "port": "off", "formula": "off", "valuecnt": 3, "sync": "off", "pullup": "off", "name": "SSD1306", "stype": "SENSOR_TYPE_SINGLE", "pincnt": 0, "template": "ssd1306.html", "timer": "off", "timestamp": "2018-04-12_23-14-261007451037", "inverse": "off", "id": 1, "dtype": "DEVICE_TYPE_SINGLE"}

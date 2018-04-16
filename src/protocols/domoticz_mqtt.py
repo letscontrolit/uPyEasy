@@ -86,7 +86,8 @@ class domoticz_mqtt_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_SINGLE")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
                 except Exception as e:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_SINGLE exception: "+repr(e))
                     break
@@ -95,7 +96,7 @@ class domoticz_mqtt_protocol:
                 mqttdata = {}
                 mqttdata["idx"] = devicedata["serverid"]
                 mqttdata["nvalue"] = 0
-                mqttdata["svalue"] = str(devicedata["value1"])
+                mqttdata["svalue"] = str(devicedata["valueV1"])
                 message = ujson.dumps(mqttdata)
                 break
 
@@ -115,8 +116,10 @@ class domoticz_mqtt_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_TEMP_HUM")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
-                    devicedata['value2'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
+                    devicedata['valueV2'] = self._queue.get_nowait()
+                    devicedata['valueN2'] = self._queue.get_nowait()
                 except Exception as e:
                     self._log.debug("Protocol "+self._name+" SENSOR_TYPE_TEMP_HUM Exception: "+repr(e))
                     break
@@ -124,7 +127,7 @@ class domoticz_mqtt_protocol:
                 mqttdata = {}
                 mqttdata["idx"] = devicedata["serverid"]
                 mqttdata["nvalue"] = 0
-                mqttdata["svalue"] = str(devicedata["value1"])+";"+str(devicedata["value2"])+";0"
+                mqttdata["svalue"] = str(devicedata["valueV1"])+";"+str(devicedata["valueV2"])+";0"
                 message = ujson.dumps(mqttdata)
                 break
 
@@ -138,9 +141,12 @@ class domoticz_mqtt_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_TEMP_HUM_BARO")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
-                    devicedata['value2'] = self._queue.get_nowait()
-                    devicedata['value3'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
+                    devicedata['valueV2'] = self._queue.get_nowait()
+                    devicedata['valueN2'] = self._queue.get_nowait()
+                    devicedata['valueV3'] = self._queue.get_nowait()
+                    devicedata['valueN3'] = self._queue.get_nowait()
                 except Exception as e:
                     self._log.debug("Protocol "+self._name+" SENSOR_TYPE_TEMP_HUM_BARO Exception: "+repr(e))
                     break
@@ -148,7 +154,7 @@ class domoticz_mqtt_protocol:
                 mqttdata = {}
                 mqttdata["idx"] = devicedata["serverid"]
                 mqttdata["nvalue"] = 0
-                mqttdata["svalue"] = str(devicedata["value1"])+";"+str(devicedata["value2"])+";0;"+str(devicedata["value3"])+";0"
+                mqttdata["svalue"] = str(devicedata["valueV1"])+";"+str(devicedata["valueV2"])+";0;"+str(devicedata["valueV3"])+";0"
                 message = ujson.dumps(mqttdata)
                 break
 
@@ -157,7 +163,8 @@ class domoticz_mqtt_protocol:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_SWITCH")
                 # Get plugin values
                 try:
-                    devicedata['value1'] = self._queue.get_nowait()
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
                 except Exception as e:
                     self._log.debug("Protocol "+self._name+" SENSOR_TYPE_SWITCH Exception: "+repr(e))
                     break
@@ -166,15 +173,15 @@ class domoticz_mqtt_protocol:
                 switch_on  = ['closed','press','double','long']
                 switch_off = ['open','release']    
                 
-                if devicedata["value1"] in switch_on: devicedata["value1"] = 'On'
-                elif devicedata["value1"] in switch_off: devicedata["value1"] = 'Off'
+                if devicedata["valueV1"] in switch_on: devicedata["valueV1"] = 'On'
+                elif devicedata["valueV1"] in switch_off: devicedata["valueV1"] = 'Off'
                 else: break
                 
                 # Assemble mqtt message
                 mqttdata = {}
                 mqttdata["command"] = "switchlight"
                 mqttdata["idx"] = devicedata["serverid"]
-                mqttdata["switchcmd"] = devicedata["value1"]
+                mqttdata["switchcmd"] = devicedata["valueV1"]
                 message = ujson.dumps(mqttdata)
                 break
 
@@ -207,6 +214,8 @@ class domoticz_mqtt_protocol:
                     break
             devicedata['stype'] = self._queue.get_nowait()
             devicedata['serverid'] = self._queue.get_nowait()
+            devicedata['unitname'] = self._queue.get_nowait()
+            devicedata['devicename'] = self._queue.get_nowait()
             self.send(devicedata)
         except Exception as e:
             self._log.debug("Protocol "+name+" process Exception: "+repr(e))

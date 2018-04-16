@@ -722,7 +722,9 @@ class hal(object):
         pin = None
 
         # check if id is present
-        if not vpin: return pin
+        if not vpin: 
+            self._log.debug("Hal: vpin = None!")
+            return pin
         
         # get dx map
         dxmap = db.dxmapTable.getrow()
@@ -881,9 +883,10 @@ class hal(object):
         
     def get_i2c(self, id=1):
         self._log.debug("Hal: get i2c")
-                
+
         # first time: create i2c storage
-        if 'self._i2c' not in locals():
+        if not hasattr(self,'_i2c'):
+            self._log.debug("Hal: get i2c esp32, create i2c local storage")
             self._i2c = {}
         
         if self._utils.get_platform() == 'linux':
@@ -915,16 +918,16 @@ class hal(object):
 
             # Get SW I2C pins
             hardware = db.hardwareTable.getrow()
-                
+
             # Create new or reuse existing
-            if id not in self._i2c:
+            if id not in self._i2c.keys():
                 self._log.debug("Hal: get i2c esp32, create i2c object with id: "+str(id))
                 try:
                     self._i2c[id] = I2C(sda=self.pin(hardware["sda"]), scl=self.pin(hardware["scl"]))
                 except ValueError:
                     self._log.debug("Hal: get i2c esp32, exception valueerror")
                     return None
-                   
+
             return self._i2c[id] 
         elif self._utils.get_platform() == 'esp8266':
             self._log.debug("Hal: get i2c esp8266")

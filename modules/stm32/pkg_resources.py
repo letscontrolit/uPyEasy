@@ -1,1 +1,1 @@
-../../../micropython/micropython-lib/pkg_resources/pkg_resources.py
+../unix/pkg_resources.py

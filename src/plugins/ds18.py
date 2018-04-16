@@ -76,6 +76,7 @@ class ds18_plugin:
         self.stype              = stype
         self.content            = plugin.get('content',content)
         self.dxpin              = device.get('dxpin',dxpin)
+        self._log.debug("Plugin: ds18 init dxpin"+self.dxpin)
         self.valuenames['devicename'] = device['name'] # gets device/plugin name, added AJ
         plugin['dtype']         = dtype
         plugin['stype']         = stype
@@ -85,12 +86,13 @@ class ds18_plugin:
         self._log.debug("Plugin: ds18 init, pin used: "+str(self.dxpin))
         # the device is on Dx
         self.mPin                   = self._hal.pin(self.dxpin)
-        # create the onewire object
-        self.ds18                   = ds18x20.DS18X20(onewire.OneWire(self.mPin))
-        # scan for devices on the bus
-        roms                        = self.ds18.scan()
-        # scan for devices on the bus
-        self.roms                   = self.ds18.scan()
+        if self.mPin:
+            # create the onewire object
+            self.ds18                   = ds18x20.DS18X20(onewire.OneWire(self.mPin))
+            # scan for devices on the bus
+            roms                        = self.ds18.scan()
+            # scan for devices on the bus
+            self.roms                   = self.ds18.scan()
 
         return True
 
