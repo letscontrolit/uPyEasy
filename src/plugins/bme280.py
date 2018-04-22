@@ -107,6 +107,7 @@ class bme280_plugin:
                 self.bme280_init(address=self.bme_i2c)
             except OSError as e:
                 self._log.debug("Plugin: bme280 init OSError exception: "+repr(e))
+                return False
         return True
 
     def loadform(self,plugindata):
@@ -151,7 +152,7 @@ class bme280_plugin:
         if self.i2c != None: 
             try:
                 dvalues = self.bme280_values()
-                print("bme280.py l.153: dvalues =", dvalues)
+                #print("bme280.py l.153: dvalues =", dvalues)
             except Exception as e:
                 self._log.debug("Plugin: bme280 read exception: "+repr(e))
                 values['valueV1'] = ''

@@ -40,21 +40,21 @@
          <TD colspan='2'>
             <h3>SPI Interface</h3>
       <TR>
-         <TD>MOSI:
-         <TD>
-            <select name='mosi'>
-               <option value=''{% if hardware['mosi'] == "" %} selected{% endif %}> </option>
-               {% for cnt in range(0,dx_label["count"]) %}
-                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['mosi'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
-               {% endfor %}
-            </select>
-      <TR>
          <TD>MISO:
          <TD>
             <select name='miso'>
                <option value=''{% if hardware['miso'] == "" %} selected{% endif %}> </option>
                {% for cnt in range(0,dx_label["count"]) %}
                     <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['miso'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
+               {% endfor %}
+            </select>
+      <TR>
+         <TD>MOSI:
+         <TD>
+            <select name='mosi'>
+               <option value=''{% if hardware['mosi'] == "" %} selected{% endif %}> </option>
+               {% for cnt in range(0,dx_label["count"]) %}
+                    <option value='d{{cnt}}' {% if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '' %}disabled{% endif %}{% if hardware['mosi'] == 'd'+str(cnt) %} selected{% endif %}>{{dx_label['d'+str(cnt)]}}</option>
                {% endfor %}
             </select>
       <TR>

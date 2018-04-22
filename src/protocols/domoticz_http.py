@@ -76,7 +76,7 @@ class domoticz_http_protocol:
                     devicedata['valueV1'] = self._queue.get_nowait()
                     devicedata['valueN1'] = self._queue.get_nowait()
                 except Exception:
-                    self._log.debug("Protocol "+name+" SENSOR_TYPE_TEMP_HUM exception: Queue Emtpy!")
+                    self._log.debug("Protocol "+name+" SENSOR_TYPE_SINGLE exception: Queue Emtpy!")
                     break
                 
                 # Assemble http message
@@ -91,6 +91,24 @@ class domoticz_http_protocol:
             # case SENSOR_TYPE_DUAL
             if devicedata["stype"] == core.SENSOR_TYPE_DUAL:
                 self._log.debug("Protocol "+name+": SENSOR_TYPE_DUAL")
+                break
+
+            # case SENSOR_TYPE_TRIPLE
+            if devicedata["stype"] == core.SENSOR_TYPE_TRIPLE:
+                self._log.debug("Protocol "+name+": SENSOR_TYPE_TRIPLE")
+                # Get plugin values
+                try:
+                    devicedata['valueV1'] = self._queue.get_nowait()
+                    devicedata['valueN1'] = self._queue.get_nowait()
+                    devicedata['valueV2'] = self._queue.get_nowait()
+                    devicedata['valueN2'] = self._queue.get_nowait()
+                    devicedata['valueV3'] = self._queue.get_nowait()
+                    devicedata['valueN3'] = self._queue.get_nowait()
+                except Exception:
+                    self._log.debug("Protocol "+name+" SENSOR_TYPE_TRIPLE exception: Queue Emtpy!")
+                    break
+                # Assemble http message
+                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+";0;"+str(devicedata["valueV2"])+";0;"+str(devicedata["valueV3"])+";0"
                 break
 
             # case SENSOR_TYPE_TEMP_HUM
@@ -129,7 +147,7 @@ class domoticz_http_protocol:
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_TEMP_HUM_BARO exception: Queue Emtpy!")
                     break
                 # Assemble http message
-                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+str(devicedata["valueV2"])+";0;"+str(devicedata["valueV3"])+";0"
+                message = "/json.htm?type=command&param=udevice&idx="+str(devicedata["serverid"])+"&nvalue=0&svalue="+str(devicedata["valueV1"])+";0;"+str(devicedata["valueV2"])+";0;"+str(devicedata["valueV3"])+";0"
                 break
 
             # case SENSOR_TYPE_SWITCH
@@ -153,7 +171,7 @@ class domoticz_http_protocol:
                     devicedata["valueV1"] = 'Off'
                 else: 
                     self._log.debug("Protocol "+name+" SENSOR_TYPE_SWITCH error: valueV1 break!")
-                    print(devicedata["valueV1"])
+                    #print(devicedata["valueV1"])
                     break
 
                 # Assemble http message

@@ -249,7 +249,7 @@ class scripts(object):
             # Assemble triggername
             devicedata['triggername'] = devicedata['name']+'#'+devicedata['valuename']
             
-            print(devicedata)
+            #print(devicedata)
             ### SCRIPTS
         
             # process all scripts

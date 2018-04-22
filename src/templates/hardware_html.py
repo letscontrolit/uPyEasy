@@ -90,30 +90,6 @@ def render(info, hardware, dx_label, dxpin):
          <TD colspan='2'>
             <h3>SPI Interface</h3>
       <TR>
-         <TD>MOSI:
-         <TD>
-            <select name='mosi'>
-               <option value=''"""
-    if hardware['mosi'] == "":
-        yield """ selected"""
-    yield """> </option>
-               """
-    for cnt in range(0,dx_label["count"]):
-        yield """
-                    <option value='d"""
-        yield str(cnt)
-        yield """' """
-        if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '':
-            yield """disabled"""
-        if hardware['mosi'] == 'd'+str(cnt):
-            yield """ selected"""
-        yield """>"""
-        yield str(dx_label['d'+str(cnt)])
-        yield """</option>
-               """
-    yield """
-            </select>
-      <TR>
          <TD>MISO:
          <TD>
             <select name='miso'>
@@ -130,6 +106,30 @@ def render(info, hardware, dx_label, dxpin):
         if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '':
             yield """disabled"""
         if hardware['miso'] == 'd'+str(cnt):
+            yield """ selected"""
+        yield """>"""
+        yield str(dx_label['d'+str(cnt)])
+        yield """</option>
+               """
+    yield """
+            </select>
+      <TR>
+         <TD>MOSI:
+         <TD>
+            <select name='mosi'>
+               <option value=''"""
+    if hardware['mosi'] == "":
+        yield """ selected"""
+    yield """> </option>
+               """
+    for cnt in range(0,dx_label["count"]):
+        yield """
+                    <option value='d"""
+        yield str(cnt)
+        yield """' """
+        if hardware['d'+str(cnt)] == 8  or dxpin['d'+str(cnt)] != '':
+            yield """disabled"""
+        if hardware['mosi'] == 'd'+str(cnt):
             yield """ selected"""
         yield """>"""
         yield str(dx_label['d'+str(cnt)])

@@ -109,8 +109,15 @@ class plugins(object):
 
                 # init plugin
                 plugin['client_id'] = core.__logname__+self._utils.get_upyeasy_name()
-                if devicename: self._plugin[devicename].init(plugin, device, queue, self._scriptqueue)
-
+                if devicename: 
+                    try:
+                        if not self._plugin[devicename].init(plugin, device, queue, self._scriptqueue):
+                            self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, disabling!")
+                            # device init failed, disable!
+                            db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
+                    except Exception as e:
+                        self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, exception: "+repr(e))
+                            
     def loadform(self, plugindata): 
         self._log.debug("Plugins: Loadform plugin "+plugindata['name'])
 

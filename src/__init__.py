@@ -49,10 +49,12 @@ def main(**params):
         gc.collect()
 
         # Run only in STA mode!
-        if core.initial_upyeasywifi == "STA":
+        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == "STA+AP":
             core._log.debug("Main: uPyEasy running in Station mode")
             #get ip address
-            ip_address = core._hal.get_ip_address()
+            if core.initial_upyeasywifi == "STA":
+                ip_address = core._hal.get_ip_address()
+            else: ip_address = "0.0.0.0"
             config = db.configTable.getrow()
             port=config["port"]
             # Schedule plugin/protocol async coro's!

@@ -104,8 +104,8 @@ class protocol(object):
                             if protocol_function: protocol_function()
                     except KeyError:
                         self._log.debug("Protocols: Async processing protocols KeyError exception, controller: "+controllername)
-                        print(self._queue)
-                        print(self._protocol)
+                        #print(self._queue)
+                        #print(self._protocol)
                 await asyncio.sleep(0)
             #self._hal.idle()  # Yield to underlying RTOS
             await asyncio.sleep(1)

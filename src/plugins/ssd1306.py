@@ -34,7 +34,8 @@ valuecnt            = 3
 i2c                 = 1
 ssd_i2c             = 60
 ssd_rotation        = 'normal'
-ssd_size            = 128
+ssd_width           = 128
+ssd_height          = 64
 ssd_timeout         = 300
 ssd_line1           = ''
 ssd_line2           = ''
@@ -77,8 +78,10 @@ class ssd1306_plugin:
         self.valuecnt           = valuecnt
         self.stype              = stype
         self.dtype              = dtype
+        self.ssd_i2c            = ssd_i2c
         self.ssd_rotation       = ssd_rotation
-        self.ssd_size           = ssd_size
+        self.ssd_width          = ssd_width
+        self.ssd_height         = ssd_height
         self.ssd_timeout        = ssd_timeout
         self.ssd_line1          = ssd_line1
         self.ssd_line2          = ssd_line2
@@ -106,6 +109,11 @@ class ssd1306_plugin:
         # generic section
         self._utils.plugin_loadform(self, plugindata)
         # plugin specific section
+        plugindata["ssd_i2c"]      = self.ssd_i2c
+        plugindata["ssd_rotation"] = self.ssd_rotation
+        plugindata["ssd_height"]   = self.ssd_height
+        plugindata["ssd_width"]    = self.ssd_width 
+        plugindata["ssd_timeout"]  = self.ssd_timeout
         
     def saveform(self,plugindata):
         self._log.debug("Plugin: ssd1306 saveform")

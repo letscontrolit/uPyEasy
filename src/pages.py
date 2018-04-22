@@ -79,15 +79,15 @@ def authenticate_page(request, response):
         uform = _utils.get_form_values(request.form)
         # same password = ok, no password -> password page redirect
         if uform["password"]:
-            print (uform["password"])
+            #print (uform["password"])
             # Get admin password if any
             config = db.configTable.getrow()
-            print(config["password"])
+            #print(config["password"])
             if config["password"] == uform["password"]:
                 import uhashlib
                 configpw = config["password"]
                 hash = str(uhashlib.sha256(configpw).digest())
-                print(hash)
+                #print(hash)
                 # same password, send the cookie and redirect to homepage
                 yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
                 yield from response.awrite("Set-Cookie: upyeasy="+hash+"\r\n")
@@ -124,7 +124,7 @@ def homepage(request, response):
     _log.debug("Pages: Entering Home Page")
 
     if request.method == 'GET':
-        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == None:
+        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == "STA+AP" or core.initial_upyeasywifi == None:
             #Display home page in station mode
             _log.debug("Pages: Home Page Station mode")
             

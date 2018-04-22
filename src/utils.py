@@ -255,8 +255,8 @@ class utils(object):
         # erase old assignment
         for cnt in range(0,count):
             if dxpin['d'+str(cnt)] == name:
-                print(cnt)
-                print (name)
+                #print(cnt)
+                #print (name)
                 dxpin['d'+str(cnt)] = ''
                 break
  
@@ -314,6 +314,45 @@ class utils(object):
 
             # case SENSOR_TYPE_DUAL
             if queuedata.stype == core.SENSOR_TYPE_DUAL:
+                if queuedata.queue:
+                    # put valuedata and names in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN2"])
+                
+                # put valuenames and valuees in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
+                # start second block of data
+                queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
+                queuedata.scriptqueue.put_nowait(queuedata.devicename)
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
+                break
+
+            # case SENSOR_TYPE_TRIPLE
+            if queuedata.stype == core.SENSOR_TYPE_TRIPLE:
+                if queuedata.queue:
+                    # put valuedata and names in protocol queue
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN1"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV2"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN2"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueV3"])
+                    queuedata.queue.put_nowait(queuedata.valuenames["valueN3"])
+                    
+                # put first value in script/rule queue
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV1"]) # (name done in general section)
+                # second block of data for script/rule queue
+                queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
+                queuedata.scriptqueue.put_nowait(queuedata.devicename)
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN2"])
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV2"])
+                # third block of data for script/rule queue
+                queuedata.scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
+                queuedata.scriptqueue.put_nowait(queuedata.devicename)
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueN3"])
+                queuedata.scriptqueue.put_nowait(queuedata.valuenames["valueV3"])
                 break
 
             # case SENSOR_TYPE_TEMP_HUM
