@@ -23,6 +23,15 @@ def render(wifilist):
           <TD><a class=\"button link\" href=\"/\">Close</a> 
           <input class=\"button link\" type='submit' value='Submit'>
    </table>
+</form>
+<form name = 'frmselect' method=\"post\">
+    <table cellpadding='4' border='1' frame='box' rules='all'>
+       <TR>
+            <input type='hidden' name='ssid' maxlength='6' value='APMODE'>
+            <input type='hidden' name='key' maxlength='1' value='.'>
+            <TD>Click this button to use AP mode: <input class=\"button link\" type='submit' value='AP mode'>
+   </table>
+</form>
    <BR>
    <B><U>Available SSID's:</U></B>
    <BR>
@@ -55,4 +64,4 @@ def render(wifilist):
        """
     yield """
    </table>
-</form>"""
+"""

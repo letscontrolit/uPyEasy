@@ -124,7 +124,12 @@ def homepage(request, response):
     _log.debug("Pages: Entering Home Page")
 
     if request.method == 'GET':
-        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == "STA+AP" or core.initial_upyeasywifi == None:
+        # opstartmode == config mode?
+        
+        #Get network record key
+        network = db.networkTable.getrow()
+
+        if core.initial_upyeasywifi == network['mode']:
             #Display home page in station mode
             _log.debug("Pages: Home Page Station mode")
             
@@ -155,8 +160,8 @@ def homepage(request, response):
             yield from app.render_template(response, "homepage.html",(info,nodes,))
             yield from app.render_template(response, "footer.html",(info,))
         else:
-            #Display home page in access point mode
-            _log.debug("Pages: Home Page AP mode")
+            #Display home page in config access point mode
+            _log.debug("Pages: Home Page Config STA/AP mode")
             
             # set info array
             info={}
@@ -216,44 +221,55 @@ def homepage(request, response):
         # map form values to db records
         network = _utils.map_form2db(dbnetwork, uform)
 
-        # connect to network to get ip-address
-        import network as wifi
-        wnic = wifi.WLAN(wifi.STA_IF)
-        wnic.active(True)
-        if not wnic.isconnected():
-            wnic.connect(network['ssid'], network['key'])
-            while not wnic.isconnected():
-                pass
-        info['ipaddress'] = wnic.ifconfig()[0]
-        info['ssid'] = network['ssid']
-
-        # if succesfull connect then reboot
-        if info['ipaddress'] != '0.0.0.0': 
-            _log.debug("Pages: SSID: "+info['ssid'])
-            _log.debug("Pages: SSID ip address: "+info['ipaddress'])
-
+        # STA mode or AP mode?
+        if network['ssid'] == 'APMODE':
+            _log.debug("Pages: Update SSID config, AP mode")
             # update network
-            cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'])
-
-            # Show wifi reboot page
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header_ap.html",(info,))
-            yield from app.render_template(response, "wifi_reboot.html",(info,))   
-            yield from app.render_template(response, "footer.html",(info,))
-
-            # Reboot in 10 seconds!
-            loop = asyncio.get_event_loop()
-            loop.call_later(10,_hal.reboot_async())
-        else:
-            _log.debug("Pages: SSID failed: "+info['ssid'])
-            _log.debug("Pages: SSID failed password: "+network['key'])
-            _log.debug("Pages: SSID ip address failed: "+info['ipaddress'])
-
-            # could not connect, retry!
+            db.networkTable.update({"timestamp":dbnetwork['timestamp']},mode='AP')
+            print('test')
+            # redirect to homepage!
             yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
             yield from response.awrite("Location: /\r\n")
             yield from response.awrite("Content-Type: text/html\r\n")
             yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+
+            # Reboot in 1 seconds!
+            loop = asyncio.get_event_loop()
+            loop.call_later(3,_hal.reboot_async())
+        else:
+            _log.debug("Pages: Update SSID config, STA mode")
+            ipaddress = ''
+            # connect to network to get ip-address
+            if _hal.init_wifi(network['ssid'], network['key'], ipaddress):
+            
+                _log.debug("Pages: Update SSID config, wifi connect succesfull")
+                info['ipaddress'] = ipaddress
+                info['ssid'] = network['ssid']
+
+                _log.debug("Pages: SSID: "+info['ssid'])
+                _log.debug("Pages: SSID ip address: "+info['ipaddress'])
+
+                # update network
+                cid = db.networkTable.update({"timestamp":dbnetwork['timestamp']},ssid=network['ssid'],key=network['key'])
+
+                # Show wifi reboot page
+                yield from picoweb.start_response(response)
+                yield from app.render_template(response, "header_ap.html",(info,))
+                yield from app.render_template(response, "wifi_reboot.html",(info,))   
+                yield from app.render_template(response, "footer.html",(info,))
+
+                # Reboot in 10 seconds!
+                loop = asyncio.get_event_loop()
+                loop.call_later(10,_hal.reboot_async())
+            else:
+                _log.debug("Pages: SSID failed: "+network['ssid'])
+                _log.debug("Pages: SSID failed password: "+network['key'])
+
+                # could not connect, retry!
+                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+                yield from response.awrite("Location: /\r\n")
+                yield from response.awrite("Content-Type: text/html\r\n")
+                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
             
 @app.route("/config", methods=['GET','POST'])
 def configpage(request, response):
@@ -303,6 +319,8 @@ def configpage(request, response):
         else: info['subnet'] = ''
         if network['dns']: info['dns'] = network['dns']
         else: info['dns'] = ''
+        if network['mode']: info['mode'] = network['mode']
+        else: info['mode'] = 'STA'
         info['sleepenable'] = config['sleepenable']
         info['sleeptime'] = config['sleeptime']
         info['sleepfailure'] = config['sleepfailure']
@@ -365,7 +383,7 @@ def configpage(request, response):
         cid = db.configTable.update({"timestamp":config['timestamp']},name=config['name'],unit=config['unit'],password=config['password'],sleepenable=config['sleepenable'],sleeptime=config['sleeptime'],sleepfailure=config['sleepfailure'],port=config['port'])
 
         # update network
-        cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'],fbssid=network['fbssid'],fbkey=network['fbkey'],ip=network['ip'],gateway=network['gateway'],subnet=network['subnet'],dns=network['dns'])
+        cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'],fbssid=network['fbssid'],fbkey=network['fbkey'],ip=network['ip'],gateway=network['gateway'],subnet=network['subnet'],dns=network['dns'],mode=network['mode'])
 
         #return to controllers page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")

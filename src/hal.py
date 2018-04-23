@@ -43,12 +43,14 @@ class hal(object):
         except (OSError, StopIteration):
             network = None
             self._log.debug("Hal: Network Table StopIteration")
+            return False
  
         # check for network record
         if network:
             self._log.debug("Hal: init, network record present")
         else:
             self._log.debug("Hal: init, network record missing")
+            return False
  
         _dbc.close()
 
@@ -109,7 +111,7 @@ class hal(object):
             if network:
                 import network as wifi
                 # SSID already set?
-                if not network['ssid']:
+                if network['mode'] == "AP" or (network['mode'] == "STA" and not network['ssid']):
                     self._log.debug("Hal: esp32, ssid empty")
                     # No ssid set yet, goto AP mode!
                     self._log.debug("Hal: init esp32 network: AP mode")
@@ -157,17 +159,21 @@ class hal(object):
                         else:
                             core.initial_upyeasywifi = "STA"
                     else: 
-                        self._log.debug("Hal: esp32, wifi not connected, going to STA+AP mode")
-                        # goto STA+AP mode!
+                        self._log.debug("Hal: esp32, wifi connect attempts unsuccesfull, going to AP mode")
+                        # disconnect nic to prevent endless wifi  connect trials
+                        self._nic.disconnect()
+                        # goto AP mode!
                         self._log.debug("Hal: init esp32 network: AP mode")
                         self._nic = wifi.WLAN(wifi.AP_IF)
                         core._nic = self._nic
                         self._nic.active(True)
                         self._nic.config(essid="uPyEasy")
                         ip_address_v4 = self._nic.ifconfig()[0]
-                        core.initial_upyeasywifi = "STA+AP"
+                        core.initial_upyeasywifi = "AP"
                 
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
+            else:
+                self._log.debug("Hal: esp32 network db record not available")
         elif self._utils.get_platform() == 'esp8266':
             if network:
                 if not network['ssid']:
@@ -199,6 +205,55 @@ class hal(object):
             return True
         else: 
             self._log.debug("Hal: nic not present")
+            return False
+
+    def init_wifi(self, ssid, key, ip):
+        self._log.debug("Hal: Init wifi")
+        
+        if self._utils.get_platform() == 'linux':
+            self._log.debug("Hal: init wifi linux")
+            return False
+        elif self._utils.get_platform() == 'pyboard': 
+            self._log.debug("Hal: init wifi pyboard")
+            return False
+        elif self._utils.get_platform() == 'esp32':
+            self._log.debug("Hal: esp32")
+
+            import network as wifi
+            self._log.debug("Hal: init wifi esp32")
+            self._log.debug("Hal: init wifi esp32, ssid: "+ssid)
+            self._log.debug("Hal: init wifi esp32, key: "+key)
+            self._nic = wifi.WLAN(wifi.STA_IF)
+            self._nic.active(True)
+
+            #Activate station
+            self._nic.connect(ssid, key)
+            # get start time
+            nicstart = self.get_time_sec()
+            import utime
+            # wait until connected or 30s timeout
+            while not self._nic.isconnected():
+                # wait 1sec
+                utime.sleep(1)
+                # get current sec time
+                nicnow = self.get_time_sec()
+                # timeout reached?
+                if nicnow > nicstart+30:
+                    break
+            
+            if self._nic.isconnected():
+                # get ip address
+                ip = self._nic.ifconfig()[0]
+                self._log.debug("Hal: esp32, init wifi connect succesfull, ip: "+ip)
+                return True
+            else: 
+                self._log.debug("Hal: esp32, init wifi connect attempts unsuccesfull")
+                # disconnect nic to prevent endless wifi  connect trials
+                self._nic.disconnect()
+                return False
+
+        elif self._utils.get_platform() == 'esp8266':
+            self._log.debug("Hal: init wifi esp8266")
             return False
 
     def getntptime(self):

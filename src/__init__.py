@@ -50,11 +50,13 @@ def main(**params):
 
         # Run only in STA mode!
         if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == "STA+AP":
-            core._log.debug("Main: uPyEasy running in Station mode")
             #get ip address
             if core.initial_upyeasywifi == "STA":
-                ip_address = core._hal.get_ip_address()
-            else: ip_address = "0.0.0.0"
+               core._log.debug("Main: uPyEasy running in Station mode")
+               ip_address = core._hal.get_ip_address()
+            else: 
+               core._log.debug("Main: uPyEasy running in Station+Access Point mode")
+               ip_address = "0.0.0.0"
             config = db.configTable.getrow()
             port=config["port"]
             # Schedule plugin/protocol async coro's!
@@ -67,7 +69,7 @@ def main(**params):
             loop.create_task(core._scripts.asyncscripts())
         else:
             # WIFI AP mode
-            core._log.debug("Main: uPyEasy running in AP mode")
+            core._log.debug("Main: uPyEasy running in Access Point mode")
             ip_address = "0.0.0.0"
             port = 80
         

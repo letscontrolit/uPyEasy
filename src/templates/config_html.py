@@ -30,6 +30,22 @@ def render(info):
                <TD colspan='2'>
                   <h3>Wifi Settings</h3>
             <TR>
+               <TD>Select wifi mode: 
+               <TD><select name='mode'>
+                  <option value=\"STA\" """
+    if info["mode"] == "STA":
+        yield """selected"""
+    yield """>Station</option>
+                  <option value=\"STA+AP\" """
+    if info["mode"] == "STA+AP":
+        yield """selected"""
+    yield """>Station and Access Point</option>
+                  <option value=\"AP\" """
+    if info["mode"] == "AP":
+        yield """selected"""
+    yield """>Access Point</option>
+               </select>
+            <TR>
                <TD>SSID:
                <TD><input type='text' name='ssid' maxlength=31 value='"""
     yield str(info['ssid'])
