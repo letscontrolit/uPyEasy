@@ -117,6 +117,7 @@ class hal(object):
                     core._nic = self._nic
                     self._nic.active(True)
                     self._nic.config(essid="uPyEasy")
+                    ip_address_v4 = self._nic.ifconfig()[0]
                     core.initial_upyeasywifi = "AP"
                 else:
                     # STA mode
@@ -127,22 +128,45 @@ class hal(object):
                     #Activate station
                     if not self._nic.isconnected():
                         self._nic.connect(network['ssid'], network['key'])
+                        # get start time
+                        nicstart = self.get_time_sec()
+                        import utime
+                        # wait until connected or 30s timeout
                         while not self._nic.isconnected():
-                            pass
-                    # if ip address set: use it!
-                    if network['ip']: 
-                        self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))                    
-                    # network mode
-                    if network['mode']=='STA+AP':
-                        self._log.debug("Hal: init esp32 network: STA+AP mode")
-                        self._apnic = wifi.WLAN(wifi.AP_IF)
-                        self._apnic.active(True)
-                        self._apnic.config(essid="uPyEasy")                    
-                        core.initial_upyeasywifi = "STA+AP"
-                    else:
-                        core.initial_upyeasywifi = "STA"
+                            # wait 1sec
+                            utime.sleep(1)
+                            # get current sec time
+                            nicnow = self.get_time_sec()
+                            # timeout reached?
+                            if nicnow > nicstart+30:
+                                break
                     
-                ip_address_v4 = self._nic.ifconfig()[0]
+                    if self._nic.isconnected():
+                        # if ip address set: use it!
+                        if network['ip']: 
+                            self._nic.ifconfig((network['ip'], network['subnet'], network['gateway'], network['dns']))                    
+                        # get ip address
+                        ip_address_v4 = self._nic.ifconfig()[0]
+                        # network mode STA+AP
+                        if network['mode']=='STA+AP':
+                            self._log.debug("Hal: init esp32 network: STA+AP mode")
+                            self._apnic = wifi.WLAN(wifi.AP_IF)
+                            self._apnic.active(True)
+                            self._apnic.config(essid="uPyEasy")                    
+                            core.initial_upyeasywifi = "STA+AP"
+                        else:
+                            core.initial_upyeasywifi = "STA"
+                    else: 
+                        self._log.debug("Hal: esp32, wifi not connected, going to STA+AP mode")
+                        # goto STA+AP mode!
+                        self._log.debug("Hal: init esp32 network: AP mode")
+                        self._nic = wifi.WLAN(wifi.AP_IF)
+                        core._nic = self._nic
+                        self._nic.active(True)
+                        self._nic.config(essid="uPyEasy")
+                        ip_address_v4 = self._nic.ifconfig()[0]
+                        core.initial_upyeasywifi = "STA+AP"
+                
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
         elif self._utils.get_platform() == 'esp8266':
             if network:

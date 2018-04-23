@@ -13,10 +13,13 @@ import gc, ure as re, sys, os, utime, ujson, uasyncio as asyncio
 from . import core, db, utils
 from .app import app
 from .hal import hal
-from .scripts import *
 from .db import _dbc
 from asyn import Event
-
+try:
+    from .scripts import *
+except ImportError:
+    pass
+    
 class scripts(object):
 
     def __init__(self) :
