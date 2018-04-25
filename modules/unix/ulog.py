@@ -24,8 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import sys
-import utime
+import sys, utime, gc
 
 class Log :
     '''
@@ -100,7 +99,11 @@ class Log :
                     sink_configs = self._config['sinks']
                     for logname, config in sink_configs.items() :
                         if name == logname and config['level'] >= loglevel:
-                             self.do_log(sink, message)
+                            self.do_log(sink, message)
+                            if config['meminfo']:
+                                #self.do_log(sink, self.create(level, 'MEM Free: {:.}'.format(gc.mem_free()), args))
+                                gc.collect()
+                                self.do_log(sink, self.create(level, 'GC MEM Free: {:,}'.format(gc.mem_free()), args))
     
     def do_log(self, sink, message) :
         try :
@@ -151,12 +154,13 @@ class Log :
                 else: ret[name] = self._mod[name].Sink(config)
             self._sinks = ret
 
-    def changelevel(self, logname, level):
+    def changelevel(self, logname, level, meminfo = False):
         if 'sinks' in self._config :
             sink_configs = self._config['sinks']
             for name, config in sink_configs.items() :
                 if name == logname :
                     config['level'] = level
+                    config['meminfo'] = meminfo
 
     def readlog (self):
         for name, sink in self._sinks.items() :
@@ -169,6 +173,9 @@ class Log :
 
     def changehal(self, hal):
         self._hal = hal
+        
+    def exc(self, excep, message):
+        self.debug("Critical exception: "+repr(excep)+" - message: "+message)
                     
 def module_to_dict(mod) :
     ret = {}

@@ -38,10 +38,10 @@ class protocol(object):
         self._log.debug("Protocols: Init protocol records")
         tprotocols = db.protocolTable.public()
         for tprotocol in tprotocols:
-            try:
-                os.remove(db.protocolTable.fname(tprotocol['timestamp']))
-            except KeyError:
-                self._log.debug("Protocols: Record delete failed!")
+            if db.protocolTable.delete(tprotocol['timestamp']):
+                self._log.debug("Protocols: Record delete succeeded: "+db.protocolTable.fname(tprotocol['timestamp']))
+            else:
+                self._log.debug("Protocols: Record delete failed: "+db.protocolTable.fname(tprotocol['timestamp']))
 
         cnt=1
 

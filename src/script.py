@@ -65,10 +65,10 @@ class scripts(object):
         self._log.debug("Scripts: init scripts records")
         scripts = db.scriptTable.public()
         for script in scripts:
-            try:
-                os.remove(db.scriptTable.fname(script['timestamp']))
-            except KeyError:
-                self._log.debug("Scripts: Script record delete failed!")
+            if db.scriptTable.delete(script['timestamp']):
+                self._log.debug("Scripts: Script record delete succeeded: "+db.scriptTable.fname(script['timestamp']))
+            else:
+                self._log.debug("Scripts: Script record delete failed: "+db.scriptTable.fname(script['timestamp']))
 
         cnt = 1
         advanced = db.advancedTable.getrow()
@@ -121,10 +121,10 @@ class scripts(object):
         self._log.debug("Scripts: init rules records")
         rules = db.ruleTable.public()
         for rule in rules:
-            try:
-                os.remove(db.ruleTable.fname(rule['timestamp']))
-            except KeyError:
-                self._log.debug("Scripts: Rule record delete failed!")
+            if db.ruleTable.delete(rule['timestamp']):
+                self._log.debug("Scripts: Rule record delete succeeded: "+db.ruleTable.fname(rule['timestamp']))
+            else:
+                self._log.debug("Scripts: Rule record delete failed: "+db.ruleTable.fname(rule['timestamp']))
 
         cnt = 1
         advanced = db.advancedTable.getrow()

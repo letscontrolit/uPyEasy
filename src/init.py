@@ -10,7 +10,7 @@
 # See LICENSE file in the project root for full license information.  
 #
 
-import uos, gc, time, sys, ulog, uasyncio as asyncio
+import uos, gc, ulog
 from . import core
 from . import db
 from .utils import utils
@@ -27,6 +27,12 @@ class init (object):
         logger['name']      = core.initial_upyeasyname
         self._log           = ulog.Log(logger)
         core._log           = self._log
+
+        #Set log levels
+        self._log.changelevel('syslog',0)
+        self._log.changelevel('console',1, True)
+        self._log.changelevel('log',0)
+        
         core._log.debug("Init: Init constructor")
         
     def init(self):
@@ -201,7 +207,7 @@ class init (object):
         netconnected = self._hal.init_network()
             
         # return in AP mode!
-        if core.initial_upyeasywifi == "AP" : return netconnected
+        #if core.initial_upyeasywifi == "AP" : return netconnected
             
         # Init all protocols
         self._protocols = protocol()
@@ -235,13 +241,6 @@ class init (object):
         #Get advanced record key
         advanced = db.advancedTable.getrow()
        
-        _dbc.close()
-
-        #Set log levels
-        self._log.changelevel('syslog',advanced['sysloglevel'])
-        self._log.changelevel('console',advanced['serialloglevel'])
-        self._log.changelevel('log',advanced['webloglevel'])
-        
         #Set right syslog hostname
         if core._utils.get_syslog_hostname():
             self._log.changehost(core.__logname__+"-"+core._utils.get_upyeasy_name(),core._utils.get_syslog_hostname())

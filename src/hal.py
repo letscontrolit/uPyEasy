@@ -30,7 +30,7 @@ class hal(object):
         self._hal       = core._hal
         self._utils     = core._utils
 
-    def init_network(self, mode = "STA"):
+    def init_network(self, mode = core.NET_STA):
         self._log.debug("Hal: Init")
         ip_address_v4 = None
         
@@ -63,6 +63,9 @@ class hal(object):
             import pyb, network as ethernet
             
             if network:
+                # run in ethernet mode
+                core.initial_upyeasywifi = core.NET_ETH
+                # get board type
                 board = self.board()
                 if network['spi'] == 0:
                     self._log.debug("Hal: pyboard, spi is empty: trying default!")
@@ -111,7 +114,7 @@ class hal(object):
             if network:
                 import network as wifi
                 # SSID already set?
-                if network['mode'] == "AP" or (network['mode'] == "STA" and not network['ssid']):
+                if network['mode'] == core.NET_AP or (network['mode'] == core.NET_STA and not network['ssid']):
                     self._log.debug("Hal: esp32, ssid empty")
                     # No ssid set yet, goto AP mode!
                     self._log.debug("Hal: init esp32 network: AP mode")
@@ -120,7 +123,7 @@ class hal(object):
                     self._nic.active(True)
                     self._nic.config(essid="uPyEasy")
                     ip_address_v4 = self._nic.ifconfig()[0]
-                    core.initial_upyeasywifi = "AP"
+                    core.initial_upyeasywifi = core.NET_STA_AP
                 else:
                     # STA mode
                     self._log.debug("Hal: init esp32 network: STA mode")
@@ -155,9 +158,9 @@ class hal(object):
                             self._apnic = wifi.WLAN(wifi.AP_IF)
                             self._apnic.active(True)
                             self._apnic.config(essid="uPyEasy")                    
-                            core.initial_upyeasywifi = "STA+AP"
+                            core.initial_upyeasywifi = core.NET_STA_AP
                         else:
-                            core.initial_upyeasywifi = "STA"
+                            core.initial_upyeasywifi = core.NET_STA
                     else: 
                         self._log.debug("Hal: esp32, wifi connect attempts unsuccesfull, going to AP mode")
                         # disconnect nic to prevent endless wifi  connect trials
@@ -169,7 +172,7 @@ class hal(object):
                         self._nic.active(True)
                         self._nic.config(essid="uPyEasy")
                         ip_address_v4 = self._nic.ifconfig()[0]
-                        core.initial_upyeasywifi = "AP"
+                        core.initial_upyeasywifi = core.NET_AP
                 
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
             else:

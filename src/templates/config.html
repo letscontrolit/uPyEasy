@@ -21,7 +21,7 @@
                   <h3>Wifi Settings</h3>
             <TR>
                <TD>Select wifi mode: 
-               <TD><select name='mode'>
+               <TD><select name='mode' {{info['wifi']}}>
                   <option value="STA" {% if info["mode"] == "STA" %}selected{% endif %}>Station</option>
                   <option value="STA+AP" {% if info["mode"] == "STA+AP" %}selected{% endif %}>Station and Access Point</option>
                   <option value="AP" {% if info["mode"] == "AP" %}selected{% endif %}>Access Point</option>

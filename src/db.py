@@ -53,6 +53,15 @@ class configTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class networkTable(uorm.Model):
 
     # Create network table
@@ -93,6 +102,15 @@ class networkTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class controllerTable(uorm.Model):
 
     # Create controller table
@@ -131,6 +149,15 @@ class controllerTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class protocolTable(uorm.Model):
 
     # Create protocol table
@@ -162,6 +189,15 @@ class protocolTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class hardwareTable(uorm.Model):
 
@@ -259,6 +295,15 @@ class hardwareTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class dxpinTable(uorm.Model):
 
     # Create dxpin table
@@ -327,6 +372,15 @@ class dxpinTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class dxmapTable(uorm.Model):
 
@@ -397,6 +451,15 @@ class dxmapTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
         
 class pluginTable(uorm.Model):
 
@@ -439,6 +502,15 @@ class pluginTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class deviceTable(uorm.Model):
 
@@ -486,6 +558,15 @@ class deviceTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class notificationTable(uorm.Model):
 
     # Create notification table
@@ -516,6 +597,15 @@ class notificationTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class serviceTable(uorm.Model):
 
@@ -549,6 +639,15 @@ class serviceTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class advancedTable(uorm.Model):
 
@@ -602,6 +701,15 @@ class advancedTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class pluginstoreTable(uorm.Model):
 
     # Create plugin table
@@ -631,6 +739,15 @@ class pluginstoreTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
 
 class scriptTable(uorm.Model):
 
@@ -666,6 +783,15 @@ class scriptTable(uorm.Model):
         res = [x for x in cls.scan()]
         return res.values
 
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
+
 class ruleTable(uorm.Model):
 
     # Create script table
@@ -698,4 +824,13 @@ class ruleTable(uorm.Model):
     def list(cls):
         res = [x for x in cls.scan()]
         return res.values
+
+    @classmethod
+    def delete(cls, timestamp):
+        # delete the table record
+        try:
+            os.remove(cls.fname(timestamp))
+        except KeyError:
+            return False
+        return True
                 

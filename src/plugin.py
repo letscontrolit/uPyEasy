@@ -43,10 +43,10 @@ class plugins(object):
         self._log.debug("Plugins: init plugin records")
         tplugins = db.pluginTable.public()
         for tplugin in tplugins:
-            try:
-                os.remove(db.pluginTable.fname(tplugin['timestamp']))
-            except KeyError:
-                self._log.debug("Plugins: Record delete failed!")
+            if db.pluginTable.delete(tplugin['timestamp']):
+                self._log.debug("DB: Plugin record delete succeeded: "+db.pluginTable.fname(tplugin['timestamp']))
+            else:
+                self._log.debug("DB: Plugin record delete failed: "+db.pluginTable.fname(tplugin['timestamp']))
 
         cnt=1
         

@@ -10,7 +10,7 @@
 # See LICENSE file in the project root for full license information.  
 #
 
-import picoweb, gc, ustruct, ujson, uasyncio as asyncio
+import picoweb, gc, ujson, uasyncio as asyncio
 from . import core, db, utils
 from .app  import app
 from .hal import hal
@@ -129,7 +129,7 @@ def homepage(request, response):
         #Get network record key
         network = db.networkTable.getrow()
 
-        if core.initial_upyeasywifi == network['mode']:
+        if core.initial_upyeasywifi == network['mode'] or core.initial_upyeasywifi == core.NET_ETH:
             #Display home page in station mode
             _log.debug("Pages: Home Page Station mode")
             
@@ -226,7 +226,7 @@ def homepage(request, response):
             _log.debug("Pages: Update SSID config, AP mode")
             # update network
             db.networkTable.update({"timestamp":dbnetwork['timestamp']},mode='AP')
-            print('test')
+
             # redirect to homepage!
             yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
             yield from response.awrite("Location: /\r\n")
@@ -447,9 +447,6 @@ def controllersettingpage(request, response):
             #Edit controller
             _log.debug("Pages: Edit Controller: "+str(id))
             
-            #connect to database
-            _dbc.connect()
-            
             #init ONLY!
             try:
                 db.protocolTable.create_table()
@@ -478,8 +475,6 @@ def controllersettingpage(request, response):
                    break
             info['id'] = protocol['id']
             info['protocolname']=protocol['name']
-            
-            _dbc.close()
            
             # menu settings
             menu = 3
@@ -496,9 +491,6 @@ def controllersettingpage(request, response):
 
             _log.debug("Pages: Delete Controller: "+str(id))
             
-            #connect to database
-            _dbc.connect()
-            
             try:
                 db.controllerTable.create_table()  
             except OSError:
@@ -509,10 +501,10 @@ def controllersettingpage(request, response):
             for controller in controllers:
                 if controller['id'] == id:
                    break
-            _log.debug("Pages: remove record file: "+db.controllerTable.fname(controller['timestamp']))
-            os.remove(db.controllerTable.fname(controller['timestamp']))
-            
-            _dbc.close()
+            if db.controllerTable.delete(controller['timestamp']):
+                _log.debug("Pages: remove record file succeeded: "+db.controllerTable.fname(controller['timestamp']))
+            else:
+                _log.debug("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
             
             #gc.collect()
             #deleted, return to controllers page
@@ -525,9 +517,6 @@ def controllersettingpage(request, response):
             #New controller
             _log.debug("Pages: New Controller: "+str(id))
             
-            #connect to database
-            _dbc.connect()
-            
             #init ONLY!
             try:
                 db.protocolTable.create_table()
@@ -537,8 +526,6 @@ def controllersettingpage(request, response):
             # Get list of protocols
             protocols = db.protocolTable.public()
             protocol = db.protocolTable.getrow()
-
-            _dbc.close()
 
             info={}
             info['name']=_utils.get_upyeasy_name()
@@ -588,8 +575,6 @@ def controllersettingpage(request, response):
             if not protocolchange:
                 # Same  protocol, update controller!
                 _log.debug("Pages: Update controller: Same  protocol")
-                #connect to database
-                _dbc.connect()
 
                 #init ONLY!
                 try:
@@ -606,7 +591,7 @@ def controllersettingpage(request, response):
                 for protocol in protocols:
                     if protocol['name'] == uform['protocol']:
                        break
-                _log.debug('Protocol: %s', protocol['name'])
+                _log.debug('Protocol: {}'.format(protocol['name']))
 
                 # Get correct controller
                 controllers = db.controllerTable.public()
@@ -622,8 +607,6 @@ def controllersettingpage(request, response):
                 else:
                     _log.debug("Failed to update controller entry: not all fields are filled")
 
-                _dbc.close()
-
                 #return to controllers page
                 yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
                 yield from response.awrite("Location: /controllers\r\n")
@@ -638,9 +621,7 @@ def controllersettingpage(request, response):
                 for protocol in protocols:
                     if protocol['name'] == uform['protocol']:
                        break
-                _log.debug('Protocol: %s', protocol['name'])
-                
-                _dbc.close()
+                _log.debug('Protocol: {}'.format(protocol['name']))
 
                 info={}
                 info['name'] = _utils.get_upyeasy_name()
@@ -680,8 +661,6 @@ def controllersettingpage(request, response):
             elif not controllerhostname and protocolchange:
                 #Protocol change
                 _log.debug("Pages: Empty controller protocol change, new protocol: "+uform['protocol'])
-                #connect to database
-                _dbc.connect()
                 
                 #init ONLY!
                 try:
@@ -694,9 +673,7 @@ def controllersettingpage(request, response):
                 for protocol in protocols:
                     if protocol['name'] == uform['protocol']:
                        break
-                _log.debug('Protocol: %s', protocol['name'])
-                
-                _dbc.close()
+                _log.debug('Protocol: {}'.format( protocol['name']))
 
                 info={}
                 info['name'] = _utils.get_upyeasy_name()
@@ -720,8 +697,6 @@ def controllersettingpage(request, response):
             else:
                 #Controller creation
                 _log.debug("Pages: Create new Controller")
-                #connect to database
-                _dbc.connect()
                 
                 try:
                     db.controllerTable.create_table()  
@@ -752,8 +727,6 @@ def controllersettingpage(request, response):
                     cid = db.controllerTable.create(id=cnt+1,usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
                 else:
                     _log.debug("Failed to create controller entry: not all fields are filled")
-                       
-                _dbc.close()
 
                 #init controller!
                 _protocols.initcontroller(controller)
@@ -863,9 +836,6 @@ def devicespage(request, response):
     #Display devices overview page
     _log.debug("Pages: Entering Devices Page")
 
-    #connect to database
-    _dbc.connect()
-    
     info={}
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
@@ -901,8 +871,6 @@ def devicespage(request, response):
         
     # Get all controllers
     controllers = db.controllerTable.public()
-
-    _dbc.close()
     
     # menu settings
     menu = 5
@@ -926,23 +894,20 @@ def devicesettingpage(request, response):
     if request.method == 'GET' and request.qs != "":
         _log.debug("Pages: GET")
         parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug('Parsed qs: '.join(list(parsed_qs)))
+        _log.debug('Parsed qs: {}'.format(list(parsed_qs)))
         qs_id = parsed_qs.get("id")
-        _log.debug('Parsed id: '.join(qs_id))
+        _log.debug('Parsed id: {}'.format(qs_id))
         id = int(qs_id[0])
-        _log.debug("Pages: id: %i",id)
+        _log.debug("Pages: id: {}".format(id))
         qs_oper = parsed_qs.get("oper")
         if qs_oper: 
             oper = qs_oper[0] 
             _log.debug("Pages: Oper: "+oper)
         else: oper = None
-        
+
         if id > 0 and not oper:
             #Edit controller
             _log.debug("Pages: Edit Device: "+str(id))
-            
-            #connect to database
-            _dbc.connect()
             
             #init ONLY!
             try:
@@ -972,8 +937,6 @@ def devicesettingpage(request, response):
             for plugin in plugins:
                 if plugin['id'] == device['pluginid']:
                    break
-            
-            _dbc.close()
            
             info={}
             info['name'] = _utils.get_upyeasy_name()
@@ -1024,9 +987,6 @@ def devicesettingpage(request, response):
 
             _log.debug("Pages: Delete Device: "+str(id))
             
-            #connect to database
-            _dbc.connect()
-            
             try:
                 db.deviceTable.create_table()  
             except OSError:
@@ -1044,10 +1004,10 @@ def devicesettingpage(request, response):
                 if plugin['id'] == device['pluginid']:
                    break
 
-            _log.debug("Pages: remove record file: "+db.deviceTable.fname(device['timestamp']))
-            os.remove(db.deviceTable.fname(device['timestamp']))
-            
-            _dbc.close()
+            if db.deviceTable.delete(device['timestamp']):
+                _log.debug("Pages: remove record file succeeded: "+db.deviceTable.fname(device['timestamp']))
+            else:
+                _log.debug("Pages: remove record file failed: "+db.deviceTable.fname(device['timestamp']))
             
             # Get dxpin config
             dxpin = db.dxpinTable.getrow()
@@ -1074,14 +1034,10 @@ def devicesettingpage(request, response):
             #New device
             _log.debug("Pages: New Device, choose plugin")
             
-            #connect to database
-            _dbc.connect()
-            
             # Get list of plugins
             plugins = db.pluginTable.public()
-            plugins = sorted(plugins, key=lambda k: k['name'])
 
-            _dbc.close()
+            plugins = sorted(plugins, key=lambda k: k['name'])
 
             info={}
             info['name'] = _utils.get_upyeasy_name()
@@ -1100,9 +1056,11 @@ def devicesettingpage(request, response):
     elif request.method == 'POST' and request.qs != "":
         _log.debug("Pages: POST")
         parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug(''.join(list(parsed_qs)))
-        id = int(''.join(parsed_qs.get("id")))
-        _log.debug(str(id))
+        _log.debug('Parsed QS:{}'.format(list(parsed_qs)))
+        qs_id = parsed_qs.get("id")
+        _log.debug('Parsed id: {}'.format(qs_id))
+        id = int(qs_id[0])
+        _log.debug("Pages: id: {}".format(id))
         qs_oper = parsed_qs.get("oper")
         if qs_oper: 
             oper = qs_oper[0] 
@@ -1114,7 +1072,7 @@ def devicesettingpage(request, response):
         uform = _utils.get_form_values(request.form)
  
         if 'currentpluginid' in uform: 
-            _log.debug('Current Plugin: %s', uform['currentpluginid'])
+            _log.debug('Current Plugin: {}'.format(uform['currentpluginid']))
             if uform['currentpluginid'] != uform['pluginid']:
                 pluginchange = True
             else: pluginchange = False
@@ -1123,19 +1081,17 @@ def devicesettingpage(request, response):
         if 'pluginid' in uform: 
             #get new plugin id
             pluginid = int(uform['pluginid'])
-            _log.debug('New Plugin: %s', uform['pluginid'])
+            _log.debug('New Plugin: {}'.format(uform['pluginid']))
         else: 
             pluginid = None
             
         if id > 0:
             #Update Device
-            _log.debug("Pages: Update Device: "+str(id))
+            _log.debug("Pages: Update Device: {}".format(id))
             
             if not pluginchange:
                 # Same  plugin, update Device!
                 _log.debug("Pages: Update Device: Same  plugin")
-                #connect to database
-                _dbc.connect()
 
                 #init ONLY!
                 try:
@@ -1174,8 +1130,6 @@ def devicesettingpage(request, response):
                 else:
                     _log.debug("Pages: Failed to update device entry: not all fields are filled")
 
-                _dbc.close()
-
                 # init device!
                 _plugins.initdevice(device)
                 
@@ -1192,9 +1146,6 @@ def devicesettingpage(request, response):
                 # Different  plugin, empty device!
                 _log.debug("Pages: Update device: different plugin")
                 
-                #connect to database
-                _dbc.connect()
-                
                 # Get correct device
                 devices = db.deviceTable.public()
                 for device in devices:
@@ -1209,8 +1160,6 @@ def devicesettingpage(request, response):
                 
                 # Get correct controller
                 controllers=db.controllerTable.public()
-
-                _dbc.close()
 
                 info={}
                 info['name'] = _utils.get_upyeasy_name()
@@ -1261,7 +1210,7 @@ def devicesettingpage(request, response):
 
             if 'name' in uform: 
                 devicename = uform['name']
-                _log.debug("Pages: Device name: %s",devicename)
+                _log.debug("Pages: Device name: {}".format(devicename))
             else: devicename = None
             
             #Device creation/plugin change
@@ -1275,16 +1224,12 @@ def devicesettingpage(request, response):
             elif pluginchange:
                 #Plugin change
                 _log.debug("Pages: Empty device plugin change, new plugin")
-                #connect to database
-                _dbc.connect()
                 
                 # Get list of plugins
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
                     if plugin['id'] == pluginid:
                        break
-                        
-                _dbc.close()
 
                 info={}
                 info['name'] = _utils.get_upyeasy_name()
@@ -1335,9 +1280,6 @@ def devicesettingpage(request, response):
                 #New device
                 _log.debug("Pages: New Device and plugin choosen: "+str(pluginid))
                 
-                #connect to database
-                _dbc.connect()
-                
                 # Get correct controller
                 controllers=db.controllerTable.public()
                 
@@ -1346,8 +1288,6 @@ def devicesettingpage(request, response):
                 for plugin in plugins:
                     if plugin['id'] == pluginid:
                         break
-
-                _dbc.close()
 
                 info={}
                 info['name'] = _utils.get_upyeasy_name()
@@ -1365,7 +1305,6 @@ def devicesettingpage(request, response):
 
                 # Empty device, dict converted to list
                 device = db.deviceTable.__schema__
-
 
                 # init temp device!
                 device['name'] = 'dummy'
@@ -1405,8 +1344,6 @@ def devicesettingpage(request, response):
             else:
                 # Same  plugin, new Device!
                 _log.debug("Pages: New Device: Same  plugin")
-                #connect to database
-                _dbc.connect()
 
                 #init ONLY!
                 try:
@@ -1420,7 +1357,7 @@ def devicesettingpage(request, response):
                 for device in devices:
                     if device['id'] > cnt:
                        cnt = device['id']
-                _log.debug("Pages: Device max Count: %i",cnt)
+                _log.debug("Pages: Device max Count: {}".format(cnt))
                     
                 # set form values
                 # Empty device, dict converted to list
@@ -1451,8 +1388,6 @@ def devicesettingpage(request, response):
                     cid = db.deviceTable.create(id=cnt+1,enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
                 else:
                     _log.debug("Pages: Failed to create device entry: not all fields are filled")
-
-                _dbc.close()
                 
                 # init device!
                 _plugins.initdevice(device)
@@ -1937,7 +1872,7 @@ def notificationsettingpage(request, response):
         qs_id = parsed_qs.get("id")
         _log.debug('Parsed id: '.join(qs_id))
         id = int(qs_id[0])
-        _log.debug("Pages: id: %i",id)
+        _log.debug("Pages: id: {}".format(id))
         qs_oper = parsed_qs.get("oper")
         if qs_oper: 
             oper = qs_oper[0] 
@@ -1996,8 +1931,11 @@ def notificationsettingpage(request, response):
             for notification in notifications:
                 if notification['id'] == id:
                    break
-            _log.debug("Pages: remove record file: "+db.notificationTable.fname(notification['timestamp']))
-            os.remove(db.notificationTable.fname(notification['timestamp']))
+
+            if db.notificationTable.delete(notification['timestamp']):
+                _log.debug("Pages: remove record file succeeded: "+db.notificationTable.fname(notification['timestamp']))
+            else:
+                _log.debug("Pages: remove record file failed: "+db.notificationTable.fname(notification['timestamp']))
             
             _dbc.close()
             
@@ -2067,8 +2005,8 @@ def notificationsettingpage(request, response):
         if uform['currentserviceid'] != uform['serviceid']:
             notificationchange = True
         else: notificationchange = False
-        _log.debug('Current service id: %s', uform['currentserviceid'])
-        _log.debug('New service id: %s', uform['serviceid'])
+        _log.debug('Current service id: {}'.format(uform['currentserviceid']))
+        _log.debug('New service id: {}s'.format(uform['serviceid']))
 
         if id > 0:
             #Update notification
@@ -2161,7 +2099,7 @@ def notificationsettingpage(request, response):
             _log.debug("Pages: Create notification")
 
             serviceid = uform['serviceid']
-            _log.debug("Pages: service id: %s",serviceid)
+            _log.debug("Pages: service id: {}".format(serviceid))
             
             #serviceid creation/serviceid change
             if serviceid == 0 and not notificationchange:
@@ -2173,7 +2111,7 @@ def notificationsettingpage(request, response):
                 yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
             elif serviceid != 0 and notificationchange:
                 #Plugin change
-                _log.debug("Pages: Empty notification service change, new service id: %i",serviceid)
+                _log.debug("Pages: Empty notification service change, new service id: {}".format(serviceid))
                 
                 #connect to database
                 _dbc.connect()
@@ -2214,7 +2152,7 @@ def notificationsettingpage(request, response):
                 for dbnotification in notifications:
                     if notification['id'] > cnt:
                        cnt = notification_org['id']
-                _log.debug("Pages: notification max Count: %i",cnt)
+                _log.debug("Pages: notification max Count: {}".format(cnt))
                     
                 # set form values
                 notification = _utils.map_form2db(dbnotification, uform)
@@ -2352,7 +2290,7 @@ def toolpage(request, response):
             os.chdir(core.working_dir)
             
             # start html transfer
-            yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename=%s\r\n"%backupfilename)
+            yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename={}\r\n".format(backupfilename))
             
             # get all config file names
             import uos 
@@ -2573,7 +2511,7 @@ def filesettingpage(request, response):
             content = file_desc.read()
             file_desc.close() 
 
-            yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename=%s\r\n"% qs_name)
+            yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename={}\r\n".format(qs_name))
             yield from response.awrite(content)
 
         elif qs_name and oper == 'del':
@@ -2635,7 +2573,7 @@ def filesettingpage(request, response):
             qs_name = uform["filename"]
         except TypeError:
             qs_name = ""
-        _log.debug('Parsed name: %s',qs_name)
+        _log.debug('Parsed name: {}'.format(qs_name))
 
         if qs_name:
             #Create Script

@@ -57,7 +57,8 @@ SENSOR_TYPE_DIMMER          = "SENSOR_TYPE_DIMMER"          # Single value
 SENSOR_TYPE_LONG            = "SENSOR_TYPE_LONG"            # Single value
 SENSOR_TYPE_WIND            = "SENSOR_TYPE_WIND"            # Single value
 
-QUEUE_MESSAGE_START         = "UPYEASY_QMS"             # Start of every queue message
+# Queueu types
+QUEUE_MESSAGE_START         = "UPYEASY_QMS"         # Start of every queue message
 
 # Status types
 STATUS_INIT                 = "INIT"                # initialising
@@ -68,6 +69,12 @@ STATUS_IDLE                 = "IDLE"                # running idle, no plugin de
 STATUS_WEB_REQUEST          = "WEBREQUEST"          # web requested received
 STATUS_PLUGIN_PROCESS       = "PLUGIN_PROCESS"      # processing plugin 
 STATUS_CONTROLLER_PROCESS   = "CONTROLLER_PROCESS"  # processing controller
+
+# Network types
+NET_STA                 = "STA"
+NET_STA_AP              = "STA+AP"
+NET_AP                  = "AP"
+NET_ETH                 = "ETH"
 
 # Pin Options
 PIN_PULL_UP         = 0

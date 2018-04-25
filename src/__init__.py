@@ -48,15 +48,11 @@ def main(**params):
         app._load_template('homepage.html')
         gc.collect()
 
-        # Run only in STA mode!
-        if core.initial_upyeasywifi == "STA" or core.initial_upyeasywifi == "STA+AP":
+        # Run only in STA, STA+AP or ETH mode!
+        if core.initial_upyeasywifi == core.NET_STA or core.initial_upyeasywifi == core.NET_STA_AP or core.initial_upyeasywifi == core.NET_ETH:
             #get ip address
-            if core.initial_upyeasywifi == "STA":
-               core._log.debug("Main: uPyEasy running in Station mode")
-               ip_address = core._hal.get_ip_address()
-            else: 
-               core._log.debug("Main: uPyEasy running in Station+Access Point mode")
-               ip_address = "0.0.0.0"
+            core._log.debug("Main: uPyEasy running in Station/Ethernet mode")
+            ip_address = core._hal.get_ip_address()
             config = db.configTable.getrow()
             port=config["port"]
             # Schedule plugin/protocol async coro's!

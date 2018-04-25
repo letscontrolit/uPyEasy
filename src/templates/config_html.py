@@ -31,7 +31,9 @@ def render(info):
                   <h3>Wifi Settings</h3>
             <TR>
                <TD>Select wifi mode: 
-               <TD><select name='mode'>
+               <TD><select name='mode' """
+    yield str(info['wifi'])
+    yield """>
                   <option value=\"STA\" """
     if info["mode"] == "STA":
         yield """selected"""

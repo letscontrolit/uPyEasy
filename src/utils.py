@@ -20,21 +20,14 @@ class utils(object):
     def setnet(self, spi_nr, cs, rst, ip, gtw, mask, dns):
         #self._log.debug("setnet: "+ip+"/"+gtw+"/"+mask+"/"+dns)
 
-        #connect to database
-        _dbc.connect()
-
         #Get network record key
         network = db.networkTable.getrow()
 
         # update network
         cid = db.networkTable.update({"timestamp":network['timestamp']},spi=spi_nr,cs=cs, rst=rst,ip=ip,gateway=gtw,subnet=mask,dns=dns)
 
-        _dbc.close()
-
     def setwifi(self,ssid, key, ssid2, key2, wport):
         #self._log.debug("setwifi: "+ssid+"/"+key+"/"+ssid2+"/"+key2)
-        #connect to database
-        _dbc.connect()
 
         network = db.networkTable.getrow()
 
@@ -45,26 +38,18 @@ class utils(object):
         config = db.configTable.getrow()
         db.configTable.update({"timestamp":config['timestamp']},port = wport)
         
-        _dbc.close()
-        
     def get_unit_nr(self):
         self._log.debug("Utils: Unit Number")
-        #connect to database
-        _dbc.connect()
         
         try:
             config = db.configTable.getrow()
         except OSError:
             pass
         
-        _dbc.close()
-        
         return config['unit']
 
     def get_upyeasy_name(self):
         self._log.debug("Utils: uPyEasy Name")
-        #connect to database
-        _dbc.connect()
         
         #init ONLY!
         try:
@@ -75,14 +60,10 @@ class utils(object):
 
         config = db.configTable.getrow()
 
-        _dbc.close()
-
         return config['name']
         
     def get_syslog_hostname(self):
         self._log.debug("Utils: Sys hostname")
-        #connect to database
-        _dbc.connect()
         
         #init ONLY!
         try:
@@ -92,8 +73,6 @@ class utils(object):
             pass
 
         advanced = db.advancedTable.getrow()
-
-        _dbc.close()
 
         return advanced['sysloghostname']
         
@@ -223,18 +202,10 @@ class utils(object):
         return dbtable
 
     def get_dbversion(self):
-        #connect to database
-        _dbc.connect()
-        
         config = db.configTable.getrow()
-
-        _dbc.close()
         return config["version"]
  
     def get_dxlabels(self):
-        #connect to database
-        _dbc.connect()
-        
         # get dx map
         dxmap = db.dxmapTable.getrow()
         
@@ -244,13 +215,9 @@ class utils(object):
             dx_label['d'+str(cnt)] = dxmap['d'+str(cnt)].split(';')[1]
         # add count!
         dx_label["count"] = dxmap["count"]
-        
-        _dbc.close()
         return dx_label
 
     def pin_assignment(self, name, pin, count, dxpin):
-        #connect to database
-        _dbc.connect()
 
         # erase old assignment
         for cnt in range(0,count):
@@ -262,8 +229,6 @@ class utils(object):
  
         # set new assignment
         dxpin[pin]=name
-
-        _dbc.close()
 
     def plugin_senddata(self, queuedata):
         # no queue, no deal
