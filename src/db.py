@@ -168,6 +168,7 @@ class protocolTable(uorm.Model):
         ("id",  1),
         ("name", ""),
         ("protocol", ""),
+        ("module", ""),
         ("template", ""),        
     ])
 
@@ -481,6 +482,7 @@ class pluginTable(uorm.Model):
         ("pullup",  ""),
         ("inverse",  ""),
         ("port",  ""),
+        ("module",  ""),
         ("template", ""),        
     ])
 

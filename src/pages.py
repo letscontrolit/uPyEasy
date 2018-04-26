@@ -715,7 +715,7 @@ def controllersettingpage(request, response):
                 for controller in controllers:
                     if controller['id'] > cnt:
                        cnt = controller['id']
-                _log.debug("Pages: Controller Count: %i",cnt)
+                _log.debug("Pages: Controller Count: {}".format(cnt))
                  
                 # Empty controller
                 _dbcontroller = db.controllerTable.__schema__
@@ -1364,24 +1364,32 @@ def devicesettingpage(request, response):
                 db_device = db.deviceTable.__schema__
                 device = _utils.map_form2db(db_device, uform)
                 
-                # Get list of plugins
+                # Get correct plugin
+                plugfound = False
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
                     if plugin['id'] == device['pluginid']:
-                       break
-
-                # Get dxpin config
-                dxpin = db.dxpinTable.getrow()
-
-                #contract dxpin fields
-                device['dxpin'] = ""
-                for dxcnt in range(0,plugin['pincnt']):
-                    dxpin["d"+str(device['dxpin'+str(dxcnt)])] = device['name']
-                    device['dxpin'] += str(device['dxpin'+str(dxcnt)])
-                    if dxcnt < plugin['pincnt']-1: device['dxpin'] += ";"
+                        break
+                        plugfound = True
+                        
+                # no plugin? Exit!
+                if not plugfound: return False
                 
-                # Update pins
-                cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+                
+                # dxpins needed?
+                if plugin['pincnt'] > 0:
+                    # Get dxpin config
+                    dxpin = db.dxpinTable.getrow()
+
+                    #contract dxpin fields
+                    device['dxpin'] = ""
+                    for dxcnt in range(0,plugin['pincnt']):
+                        dxpin["d"+str(device['dxpin'+str(dxcnt)])] = device['name']
+                        device['dxpin'] += str(device['dxpin'+str(dxcnt)])
+                        if dxcnt < plugin['pincnt']-1: device['dxpin'] += ";"
+                    
+                    # Update pins
+                    cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
 
                 # Verify mandatory fields!
                 if device['name']:

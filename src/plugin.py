@@ -33,51 +33,51 @@ class plugins(object):
         
     def init(self): 
         # Load all plugins
-        import sys
         from . import plugins 
 
+        self._log.debug("Plugins: Init plugin records")
         # script queue
         self._scriptqueue = queues.Queue(maxsize=100)
        
-        # delete plugins records
-        self._log.debug("Plugins: init plugin records")
+        # delete plugin record if plugin NOT present in frozen firmware!
         tplugins = db.pluginTable.public()
-        for tplugin in tplugins:
-            if db.pluginTable.delete(tplugin['timestamp']):
-                self._log.debug("DB: Plugin record delete succeeded: "+db.pluginTable.fname(tplugin['timestamp']))
-            else:
-                self._log.debug("DB: Plugin record delete failed: "+db.pluginTable.fname(tplugin['timestamp']))
-
-        cnt=1
+        cnt = 0
+        for plugin in tplugins:
+            # check if present in table
+            if (not [modplugin for modplugin in plugins.plugins if plugin['name'] in plugins.plugins.values()]) and tplugins:
+                if db.pluginTable.delete(plugin['timestamp']):
+                    self._log.debug("Plugins: Record delete succeeded: "+db.pluginTable.fname(plugin['timestamp']))
+                else:
+                    self._log.debug("Plugins: Record delete failed: "+db.pluginTable.fname(plugin['timestamp']))
+            elif not tplugins: 
+                self._log.debug("Plugins: No plugin records found!")
+                cnt = 0
+            else: 
+                self._log.debug("Plugins: Plugin record found: {}".format(plugin['name']))
+            if plugin['id'] > cnt: cnt = plugin['id']
+        cnt+=1
         
-        # get all frozen plugins
-        for k, v in plugins.plugins.items():
-            # load plugin module
-            #print(k)
-            #print(v)
-            modname = k
-            self._log.debug("Plugins: Register frozen plugin "+modname)
-            self._mod[modname] = __import__("upyeasy.plugins."+modname,globals(), locals(), v)
-            plugin = self._mod[modname]
-            
-            self._log.debug("Plugins: Create frozen plugin Record: "+modname)
-            #create table record
-            try:
-                cid = db.pluginTable.create(id=cnt,name=plugin.name,dtype=plugin.dtype,stype=plugin.stype,valuecnt=plugin.valuecnt,senddata=plugin.senddata,formula=plugin.formula,sync=plugin.sync,timer=plugin.timer,pullup=plugin.pullup,inverse=plugin.inverse,port=plugin.port,template=plugin.template, pincnt=plugin.pincnt)
-            except OSError:
-                self._log.debug("Plugins: Exception creating frozen plugin record:"+modname)
-            cnt += 1
-
-            # unload plugin to save memory
-            self._mod[plugin.name] = modname
-            del plugin
-            del self._mod[modname]
-            del sys.modules["upyeasy.plugins."+modname]
-                    
+        # get all frozen Plugins from __init__.py
+        for modname, combi in plugins.plugins.items():
+            # split name, pincnt
+            name, pincnt = combi.split(';')
+            template = modname+".html"
+                
+            # check if not present in table
+            if not tplugins or (not [plugin for plugin in tplugins if name in plugin['name']]):
+                #new Plugins found: create new plugin table record
+                self._log.debug("Plugins: Create missing plugin record: "+modname)
+                try:
+                    cid = db.pluginTable.create(id=cnt,name=name,template=template, module=modname, pincnt=pincnt)
+                except OSError:
+                    self._log.debug("Plugins: Exception creating plugin record:"+modname)
+                cnt += 1
+                                
     def initdevice(self, device): 
         self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid']))
         from . import plugins 
 
+        _initcomplete = False
         # find plugin
         tplugins = db.pluginTable.public()
         pluginname = None
@@ -95,13 +95,9 @@ class plugins(object):
                        break
 
                 # load plugin  
-                #print(self._mod)
-                #print(pluginname)
-                modname = self._mod[pluginname]
-                #print(modname)
-                mod = __import__("upyeasy.plugins."+modname,globals(), locals(), 'plugin')
-                #self._mod[pluginname] = self._mod[modname]
-                self._plugin_class[pluginname] = getattr(mod, modname+'_plugin')
+                modname = plugin['module']
+                self._mod[pluginname] = __import__("upyeasy.plugins."+modname,globals(), locals(), 'plugin')
+                self._plugin_class[pluginname] = getattr(self._mod[pluginname], modname+'_plugin')
                        
                 # instantiate plugin
                 self._plugin[devicename] = self._plugin_class[pluginname]()
@@ -117,7 +113,12 @@ class plugins(object):
                             db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
                     except Exception as e:
                         self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, exception: "+repr(e))
-                            
+                
+                _initcomplete = True
+                
+        if not _initcomplete: 
+            self._log.debug("Plugins: Init device {} failed!".format(device['name']))
+                                     
     def loadform(self, plugindata): 
         self._log.debug("Plugins: Loadform plugin "+plugindata['name'])
 
@@ -227,6 +228,11 @@ class plugins(object):
                     for plugin in plugins:
                         # get devices
                         if plugin['id'] == device['pluginid']:
+                            # init plugin?
+                            try:
+                               _mod = self._mod[plugin['name']]
+                            except KeyError:
+                                self.initdevice(device)
                             # process plugin
                             #self._plugin[plugin['name']].process()
                             if not self._plugin[device['name']]._lock.is_set():
@@ -237,5 +243,4 @@ class plugins(object):
                                     else: loop.call_soon(plugin_function())
                                 self._plugin[device['name']]._lock.set()
                         await asyncio.sleep(0)
-            #self._hal.idle()  # Yield to underlying RTOS
             await asyncio.sleep_ms(10)

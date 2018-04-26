@@ -1,1 +1,0 @@
-{"valuesubscription": "Test#GPIO", "dxpin": "d0", "enable": "on", "port": "", "controllerid": 0, "timestamp": "2018-04-10_18-04-371669677", "name": "Test", "pluginid": 3, "delay": 10, "i2c": "", "valueformula": "", "controller": 0, "valuedecimal": "", "bootstate": "off", "inverse": "off", "id": 1, "pullup": "off", "dxpin0": "d0", "sync": "off", "valuename": ""}

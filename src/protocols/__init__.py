@@ -11,6 +11,6 @@
 #
 
 protocols = {}
-protocols['domoticz_http'] = 'protocol'
-protocols['domoticz_mqtt'] = 'protocol'
-protocols['openhab_mqtt']  = 'protocol'
+protocols['domoticz_http'] = 'Domoticz HTTP;HTTP'
+protocols['domoticz_mqtt'] = 'Domoticz MQTT;MQTT'
+protocols['openhab_mqtt']  = 'OpenHab MQTT;MQTT'

@@ -214,24 +214,10 @@ class init (object):
         core._protocols = self._protocols
         self._protocols.init()
            
-        # Init all controllers
-        controllers = db.controllerTable.public()
-        for controller in controllers:
-            self._protocols.initcontroller(controller)
-        
         # Init all plugins
         self._plugins = plugins()
         core._plugins = self._plugins
         self._plugins.init()
-        
-        # Init all devices
-        try:
-            self._log.debug("Init: Init devices")
-            devices = db.deviceTable.public()
-            for device in devices:
-                self._plugins.initdevice(device)
-        except OSError as e:
-            self._log.debug("Init: Init devices exception: "+repr(e))
         
         # Init all scripts
         self._scripts = scripts()

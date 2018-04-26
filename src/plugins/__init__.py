@@ -11,7 +11,7 @@
 #
 
 plugins             = {}
-plugins["bme280"]   = "plugin"
-plugins["ds18"]     = "plugin"
-plugins["switch"]   = "plugin"
-plugins["test"]     = "plugin"
+plugins["bme280"]   = "BME280;0"
+plugins["ds18"]     = "DS18B20;1"
+plugins["switch"]   = "SSD1306;0"
+plugins["test"]     = "Test;1"
