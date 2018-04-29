@@ -44,7 +44,7 @@ class plugins(object):
         cnt = 0
         for plugin in tplugins:
             # check if present in table
-            if (not [modplugin for modplugin in plugins.plugins if plugin['name'] in plugins.plugins.values()]) and tplugins:
+            if (not [modplugin for modplugin in plugins.plugins if plugin['name']+";{}".format(plugin['pincnt']) in plugins.plugins.values()]) and tplugins:
                 if db.pluginTable.delete(plugin['timestamp']):
                     self._log.debug("Plugins: Record delete succeeded: "+db.pluginTable.fname(plugin['timestamp']))
                 else:
@@ -68,7 +68,7 @@ class plugins(object):
                 #new Plugins found: create new plugin table record
                 self._log.debug("Plugins: Create missing plugin record: "+modname)
                 try:
-                    cid = db.pluginTable.create(id=cnt,name=name,template=template, module=modname, pincnt=pincnt)
+                    cid = db.pluginTable.create(id=cnt,name=name,template=template, module=modname, pincnt=int(pincnt))
                 except OSError:
                     self._log.debug("Plugins: Exception creating plugin record:"+modname)
                 cnt += 1
@@ -98,7 +98,17 @@ class plugins(object):
                 modname = plugin['module']
                 self._mod[pluginname] = __import__("upyeasy.plugins."+modname,globals(), locals(), 'plugin')
                 self._plugin_class[pluginname] = getattr(self._mod[pluginname], modname+'_plugin')
-                       
+
+                # update plugin?
+                print(plugin["dtype"])
+                if plugin["dtype"] == "":
+                    modplugin = self._mod[pluginname]
+                    try:
+                       self._log.debug("Plugins: Updating frozen plugin db record:"+pluginname)
+                       db.pluginTable.update({"timestamp":plugin['timestamp']},dtype=modplugin.dtype,stype=modplugin.stype,valuecnt=modplugin.valuecnt,senddata=modplugin.senddata,formula=modplugin.formula,sync=modplugin.sync,timer=modplugin.timer,pullup=modplugin.pullup,inverse=modplugin.inverse,port=modplugin.port)
+                    except OSError:
+                        self._log.debug("Plugins: Exception creating frozen plugin db record:"+pluginname)
+                
                 # instantiate plugin
                 self._plugin[devicename] = self._plugin_class[pluginname]()
                 self._log.debug("Plugins: Init device: "+devicename+" ,instantiate plugin: "+pluginname)
@@ -126,11 +136,18 @@ class plugins(object):
             self._plugin[plugindata['name']].loadform(plugindata)
         except KeyError:
             self._log.debug("Plugins: Loadform plugin KeyError Exception: "+plugindata['name'])
+        else: 
+            self._log.debug("Plugins: Loadform plugin Exception: ")
         
     def saveform(self, plugindata): 
         self._log.debug("Plugins: Saveform plugin "+plugindata['name'])
-        self._plugin[plugindata['name']].saveform(plugindata)
-
+        try:
+            self._plugin[plugindata['name']].saveform(plugindata)
+        except KeyError:
+            self._log.debug("Plugins: Saveform plugin KeyError Exception: "+plugindata['name'])
+        else: 
+            self._log.debug("Plugins: Saveform plugin Exception: ")
+        
     def loadvalues(self, device, valuenames): 
         self._log.debug("Plugins: Loadvalues plugin")
 
@@ -159,10 +176,22 @@ class plugins(object):
 
     def read(self, device, values): 
         self._log.debug("Plugins: Read device "+device['name'])
+        # init done?
+        plugins = db.pluginTable.public()
+        for plugin in plugins:
+            if plugin['id'] == device['pluginid'] and plugin["dtype"] == "":
+                self.initdevice(device)
+        # read plugin values  
         self._plugin[device['name']].read(values)
 
     def write(self, device, values): 
         self._log.debug("Plugins: Write device "+device['name'])
+        # init done?
+        plugins = db.pluginTable.public()
+        for plugin in plugins:
+            if plugin['id'] == device['pluginid'] and plugin["dtype"] == "":
+                self.initdevice(device)
+        # write plugin values  
         self._plugin[device['name']].write(values)
 
     def triggers(self, device, triggers):

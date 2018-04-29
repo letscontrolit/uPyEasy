@@ -41,13 +41,6 @@ def main(**params):
         # load pages
         from . import pages
         
-        #We have a network!
-        core._log.debug("Main: Pre-loading home page")
-        # Preload templates to avoid memory fragmentation issues
-        gc.collect()
-        app._load_template('homepage.html')
-        gc.collect()
-
         # Run only in STA, STA+AP or ETH mode!
         if core.initial_upyeasywifi == core.NET_STA or core.initial_upyeasywifi == core.NET_STA_AP or core.initial_upyeasywifi == core.NET_ETH:
             #get ip address

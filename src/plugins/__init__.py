@@ -13,5 +13,6 @@
 plugins             = {}
 plugins["bme280"]   = "BME280;0"
 plugins["ds18"]     = "DS18B20;1"
-plugins["switch"]   = "SSD1306;0"
+plugins["switch"]   = "Switch;1"
+plugins["ssd1306"]  = "SSD1306;0"
 plugins["test"]     = "Test;1"

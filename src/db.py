@@ -15,6 +15,7 @@ from ucollections import OrderedDict
 from . import core
 
 _dbc = uorm.DB(core.working_dir+"config")
+_config = {}
 
 class configTable(uorm.Model):
 
@@ -35,32 +36,11 @@ class configTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-
-    @classmethod
     def getrow(cls):
-        res = next(cls.get())
-        return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
+        _config = next(cls.get())
+        print(_config)
+        print('_config id: {}'.format(id(_config)))
+        return _config
 
 class networkTable(uorm.Model):
 
@@ -84,32 +64,9 @@ class networkTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-
-    @classmethod
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
 
 class controllerTable(uorm.Model):
 
@@ -131,10 +88,6 @@ class controllerTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -143,11 +96,6 @@ class controllerTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -173,10 +121,6 @@ class protocolTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -185,11 +129,6 @@ class protocolTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -278,32 +217,9 @@ class hardwareTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-
-    @classmethod
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
 
 class dxpinTable(uorm.Model):
 
@@ -356,32 +272,9 @@ class dxpinTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-
-    @classmethod
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
 
 class dxmapTable(uorm.Model):
 
@@ -435,33 +328,10 @@ class dxmapTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-
-    @classmethod
     def getrow(cls):
         res = next(cls.get())
         return res
 
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
-        
 class pluginTable(uorm.Model):
 
     # Create plugin table
@@ -487,10 +357,6 @@ class pluginTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -499,11 +365,6 @@ class pluginTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -542,10 +403,6 @@ class deviceTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -554,11 +411,6 @@ class deviceTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -582,10 +434,6 @@ class notificationTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -593,11 +441,6 @@ class notificationTable(uorm.Model):
     @classmethod
     def getrow(cls):
         res = next(cls.get())
-        return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
         return res
 
     @classmethod
@@ -624,10 +467,6 @@ class serviceTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -635,11 +474,6 @@ class serviceTable(uorm.Model):
     @classmethod
     def getrow(cls):
         res = next(cls.get())
-        return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
         return res
 
     @classmethod
@@ -685,32 +519,9 @@ class advancedTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
-    def public(cls):
-        res = [x for x in cls.get()]
-        return res
-        
-    @classmethod
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res
-
-    @classmethod
-    def delete(cls, timestamp):
-        # delete the table record
-        try:
-            os.remove(cls.fname(timestamp))
-        except KeyError:
-            return False
-        return True
 
 class pluginstoreTable(uorm.Model):
 
@@ -724,10 +535,6 @@ class pluginstoreTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -736,11 +543,6 @@ class pluginstoreTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -767,10 +569,6 @@ class scriptTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -779,11 +577,6 @@ class scriptTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):
@@ -809,10 +602,6 @@ class ruleTable(uorm.Model):
     ])
 
     @classmethod
-    def mapkeys(cls, obj):
-        return [obj.get(k) for k in cls.__schema__.keys()]
-
-    @classmethod
     def public(cls):
         res = [x for x in cls.get()]
         return res
@@ -821,11 +610,6 @@ class ruleTable(uorm.Model):
     def getrow(cls):
         res = next(cls.get())
         return res
-
-    @classmethod
-    def list(cls):
-        res = [x for x in cls.scan()]
-        return res.values
 
     @classmethod
     def delete(cls, timestamp):

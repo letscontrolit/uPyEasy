@@ -30,6 +30,7 @@ def auth_page(request, response):
 
     # Get admin password if any
     config = db.configTable.getrow()
+    print('config address id: {}'.format(id(config)))
     if config["password"]:
         _log.debug("Pages: Authorize User is set, verifying password")
 
@@ -1363,18 +1364,23 @@ def devicesettingpage(request, response):
                 # Empty device, dict converted to list
                 db_device = db.deviceTable.__schema__
                 device = _utils.map_form2db(db_device, uform)
-                
+
                 # Get correct plugin
                 plugfound = False
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
                     if plugin['id'] == device['pluginid']:
-                        break
-                        plugfound = True
-                        
+                       plugfound = True
+                       break
+
                 # no plugin? Exit!
-                if not plugfound: return False
-                
+                if not plugfound: 
+                    #return to devices page
+                    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+                    yield from response.awrite("Location: /devices\r\n")
+                    yield from response.awrite("Content-Type: text/html\r\n")
+                    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+                    return False
                 
                 # dxpins needed?
                 if plugin['pincnt'] > 0:
@@ -1396,7 +1402,7 @@ def devicesettingpage(request, response):
                     cid = db.deviceTable.create(id=cnt+1,enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
                 else:
                     _log.debug("Pages: Failed to create device entry: not all fields are filled")
-                
+
                 # init device!
                 _plugins.initdevice(device)
 

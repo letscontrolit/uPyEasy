@@ -161,7 +161,7 @@ class init (object):
         gc.collect()
 
         #Config table init
-        config = db.configTable.public()
+        config = db.configTable.getrow()
         
         #Test is config table = empty, if so create initial record
         if not config:
@@ -170,7 +170,7 @@ class init (object):
             cid = db.configTable.create(name=core.initial_upyeasyname)
 
         #Network table init
-        network = db.networkTable.public()
+        network = db.networkTable.getrow()
         #Test is network table = empty, if so create initial record
         if not network:
             self._log.debug("Init: Create Network Record")
@@ -178,7 +178,7 @@ class init (object):
             cid = db.networkTable.create(ssid="")
 
         #Hardware table init
-        hardware = db.hardwareTable.public()
+        hardware = db.hardwareTable.getrow()
         #Test is hardware table = empty, if so create initial record
         if not hardware:
             self._log.debug("Init: Create Hardware Record")
@@ -186,7 +186,7 @@ class init (object):
             self._hal.hardwaredb_init()
             
         #dxpin table init
-        dxpin = db.dxpinTable.public()
+        dxpin = db.dxpinTable.getrow()
         #Test is dxpin table = empty, if so create initial record
         if not dxpin:
             self._log.debug("Init: Create dxpin Record")
@@ -196,7 +196,7 @@ class init (object):
             self._hal.dxpins_init()
             
         #advanced table init
-        advanced = db.advancedTable.public()
+        advanced = db.advancedTable.getrow()
         #Test is advanced table = empty, if so create initial record
         if not advanced:
             self._log.debug("Init: Create advanced Record")
@@ -205,9 +205,6 @@ class init (object):
 
         # Init network!
         netconnected = self._hal.init_network()
-            
-        # return in AP mode!
-        #if core.initial_upyeasywifi == "AP" : return netconnected
             
         # Init all protocols
         self._protocols = protocol()
