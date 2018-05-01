@@ -98,10 +98,9 @@ class Log :
                 if 'sinks' in self._config :
                     sink_configs = self._config['sinks']
                     for logname, config in sink_configs.items() :
-                        if name == logname and config['level'] >= loglevel:
+                        if name == logname and (config['level'] <= loglevel or config['level'] == 0):
                             self.do_log(sink, message)
-                            if config['meminfo']:
-                                #self.do_log(sink, self.create(level, 'MEM Free: {:.}'.format(gc.mem_free()), args))
+                            if config['level']==0:
                                 gc.collect()
                                 self.do_log(sink, self.create(level, 'GC MEM Free: {:,}'.format(gc.mem_free()), args))
     
@@ -154,13 +153,12 @@ class Log :
                 else: ret[name] = self._mod[name].Sink(config)
             self._sinks = ret
 
-    def changelevel(self, logname, level, meminfo = False):
+    def changelevel(self, logname, level):
         if 'sinks' in self._config :
             sink_configs = self._config['sinks']
             for name, config in sink_configs.items() :
                 if name == logname :
                     config['level'] = level
-                    config['meminfo'] = meminfo
 
     def readlog (self):
         for name, sink in self._sinks.items() :

@@ -68,7 +68,7 @@ class hal(object):
                 # get board type
                 board = self.board()
                 if network['spi'] == 0:
-                    self._log.debug("Hal: pyboard, spi is empty: trying default!")
+                    self._log.warning("Hal: pyboard, spi is empty: trying default!")
                     if board == "PYBv3 with STM32F405RG":
                         # connect to default setup
                         core._nic = ethernet.WIZNET5K(pyb.SPI(1), pyb.Pin.board.A3, pyb.Pin.board.A4)
@@ -80,17 +80,17 @@ class hal(object):
                             cnt += 1
                             utime.sleep(1)
                         if not core._nic.isconnected():
-                            self._log.debug("Hal: pyboard, spi is empty: no default setup!")
+                            self._log.error("Hal: pyboard, spi is empty: no default setup!")
                             return False
                     else: 
-                        self._log.debug("Hal: pyboard, spi is empty: unknown board: "+ board)
+                        self._log.error("Hal: pyboard, spi is empty: unknown board: "+ board)
                         return False
                 if not core._nic:
                     if board == "PYBv3 with STM32F405RG":
                         self._log.debug("Hal: Board: "+ board)
                         core._nic = ethernet.WIZNET5K(pyb.SPI(network['spi']), network['cs'], network['rst'])
                     else: 
-                        self._log.debug("Hal: pyboard, unknown board: "+ board)
+                        self._log.error("Hal: pyboard, unknown board: "+ board)
                         return False
                     while not core._nic.isconnected():
                         pass
@@ -102,12 +102,12 @@ class hal(object):
                     try:
                         self._nic.ifconfig('dhcp')
                     except (OSError, TypeError) as e:
-                        self._log.debug("Hal: pyboard network init Error: "+repr(e))
+                        self._log.error("Hal: pyboard network init Error: "+repr(e))
                         return False
                 ip_address_v4 = self._nic.ifconfig()[0]
                 self._log.debug("Hal: pyboard, ip: "+ip_address_v4)
             else:
-                self._log.debug("Hal: pyboard, network record empty")
+                self._log.error("Hal: pyboard, network record empty")
                 return False
         elif self._utils.get_platform() == 'esp32':
             self._log.debug("Hal: esp32")
@@ -115,15 +115,15 @@ class hal(object):
                 import network as wifi
                 # SSID already set?
                 if network['mode'] == core.NET_AP or (network['mode'] == core.NET_STA and not network['ssid']):
-                    self._log.debug("Hal: esp32, ssid empty")
+                    self._log.error("Hal: esp32, ssid empty")
                     # No ssid set yet, goto AP mode!
-                    self._log.debug("Hal: init esp32 network: AP mode")
+                    self._log.warning("Hal: init esp32 network: AP mode")
                     self._nic = wifi.WLAN(wifi.AP_IF)
                     core._nic = self._nic
                     self._nic.active(True)
                     self._nic.config(essid="uPyEasy")
                     ip_address_v4 = self._nic.ifconfig()[0]
-                    core.initial_upyeasywifi = core.NET_STA_AP
+                    core.initial_upyeasywifi = core.NET_AP
                 else:
                     # STA mode
                     self._log.debug("Hal: init esp32 network: STA mode")
@@ -162,7 +162,7 @@ class hal(object):
                         else:
                             core.initial_upyeasywifi = core.NET_STA
                     else: 
-                        self._log.debug("Hal: esp32, wifi connect attempts unsuccesfull, going to AP mode")
+                        self._log.warning("Hal: esp32, wifi connect attempts unsuccesfull, going to AP mode")
                         # disconnect nic to prevent endless wifi  connect trials
                         self._nic.disconnect()
                         # goto AP mode!
@@ -176,7 +176,7 @@ class hal(object):
                 
                 self._log.debug("Hal: esp32, ip: "+ip_address_v4)
             else:
-                self._log.debug("Hal: esp32 network db record not available")
+                self._log.error("Hal: esp32 network db record not available")
         elif self._utils.get_platform() == 'esp8266':
             if network:
                 if not network['ssid']:
@@ -199,7 +199,7 @@ class hal(object):
             ap_if = wifi.WLAN(wifi.AP_IF)
             ap_if.active(False)
         else:
-            self._log.debug("Hal: failure")
+            self._log.error("Hal: failure")
             self._nic = None
             return False
             
@@ -207,7 +207,7 @@ class hal(object):
             self._log.debug("Hal: nic present")
             return True
         else: 
-            self._log.debug("Hal: nic not present")
+            self._log.error("Hal: nic not present")
             return False
 
     def init_wifi(self, ssid, key, ip):
@@ -250,7 +250,7 @@ class hal(object):
                 self._log.debug("Hal: esp32, init wifi connect succesfull, ip: "+ip)
                 return True
             else: 
-                self._log.debug("Hal: esp32, init wifi connect attempts unsuccesfull")
+                self._log.error("Hal: esp32, init wifi connect attempts unsuccesfull")
                 # disconnect nic to prevent endless wifi  connect trials
                 self._nic.disconnect()
                 return False
@@ -313,7 +313,7 @@ class hal(object):
                 msg = s.recv(48)
                 s.close()
             except OSError as e:
-                self._log.debug("Hal: NTP Time OSError exception: "+repr(e))
+                self._log.error("Hal: NTP Time OSError exception: "+repr(e))
                 return rtctime
                 
             # collect socket
@@ -349,7 +349,7 @@ class hal(object):
                 msg = s.recv(48)
                 s.close()
             except (OSError,IndexError) as e:
-                self._log.debug("Hal: NTP Time Error exception: "+repr(e))
+                self._log.error("Hal: NTP Time Error exception: "+repr(e))
                 return rtctime
             
             # collect socket
@@ -386,7 +386,7 @@ class hal(object):
                 msg = s.recv(48)
                 s.close()
             except OSError as e:
-                self._log.debug("Hal: NTP Time OSError exception: "+repr(e))
+                self._log.error("Hal: NTP Time OSError exception: "+repr(e))
                 return rtctime
             
             # collect socket
@@ -422,7 +422,7 @@ class hal(object):
         if rtctime:
             self._log.debug("Hal: Received NTP Time: %d" % rtctime)
         else: 
-            self._log.debug("Hal: Received NTP Time: n.a.")
+            self._log.error("Hal: Received NTP Time: n.a.")
             return rtctime
 
         #store starttime
@@ -445,7 +445,7 @@ class hal(object):
             if hasattr(machine,'RTC'):
                 if hasattr(machine.RTC,'datetime'): machine.RTC().datetime(tm)
             else:
-                self._log.debug("Hal: SetTime: NO RTC!")
+                self._log.error("Hal: SetTime: NO RTC!")
                 
             self._log.debug("Set time: "+"%04u-%02u-%02uT%02u:%02u:%02u" % utime.localtime()[0:6])
         elif self._utils.get_platform() == 'esp8266':
@@ -520,7 +520,7 @@ class hal(object):
             try:
                 ip_address_v4 = self._nic.ifconfig()[0]
             except AttributeError:
-                self._log.debug("Hal: get_ip_address AttributeError")
+                self._log.error("Hal: get_ip_address AttributeError")
                 #print(self._nic.ifconfig())
                 ip_address_v4 = "0.0.0.0"
             self._log.debug("Hal: get_ip_address pyboard, ip: "+ip_address_v4)
@@ -529,7 +529,7 @@ class hal(object):
             try:
                 ip_address_v4 = self._nic.ifconfig()[0]
             except AttributeError:
-                self._log.debug("Hal: get_ip_address AttributeError")
+                self._log.error("Hal: get_ip_address AttributeError")
                 #print(self._nic.ifconfig())
                 ip_address_v4 = "0.0.0.0"
             self._log.debug("Hal: get_ip_address esp32, ip: "+ip_address_v4)
@@ -538,12 +538,12 @@ class hal(object):
             try:
                 ip_address_v4 = self._nic.ifconfig()[0]
             except AttributeError:
-                self._log.debug("Hal: get_ip_address AttributeError")
+                self._log.error("Hal: get_ip_address AttributeError")
                 #print(self._nic.ifconfig())
                 ip_address_v4 = "0.0.0.0"
             self._log.debug("Hal: get_ip_address esp8266, ip: "+ip_address_v4)
         else:
-            self._log.debug("Hal: get_ip_address failure")
+            self._log.error("Hal: get_ip_address failure")
             ip_address_v4 = ""
             
         return ip_address_v4
@@ -563,7 +563,7 @@ class hal(object):
             try:
                 ip_gw = self._nic.ifconfig()[2]
             except AttributeError:
-                self._log.debug("Hal: get_ip_gw AttributeError")
+                self._log.error("Hal: get_ip_gw AttributeError")
                 ip_gw = "0.0.0.0"
             self._log.debug("Hal: get_ip_gw pyboard, ip: "+ip_gw)
         elif self._utils.get_platform() == 'esp32':
@@ -571,7 +571,7 @@ class hal(object):
             try:
                 ip_gw = self._nic.ifconfig()[2]
             except AttributeError:
-                self._log.debug("Hal: get_ip_gw AttributeError")
+                self._log.error("Hal: get_ip_gw AttributeError")
                 ip_gw = "0.0.0.0"
             self._log.debug("Hal: get_ip_gw pyboard, ip: "+ip_gw)
         elif self._utils.get_platform() == 'esp8266':
@@ -579,11 +579,11 @@ class hal(object):
             try:
                 ip_gw = self._nic.ifconfig()[2]
             except AttributeError:
-                self._log.debug("Hal: get_ip_gw AttributeError")
+                self._log.error("Hal: get_ip_gw AttributeError")
                 ip_gw = "0.0.0.0"
             self._log.debug("Hal: get_ip_gw pyboard, ip: "+ip_gw)
         else:
-            self._log.debug("Hal: get_ip_gw failure")
+            self._log.error("Hal: get_ip_gw failure")
             ip_gw = "invalid"
 
         return ip_gw
@@ -603,7 +603,7 @@ class hal(object):
             try:
                 ip_netmask = self._nic.ifconfig()[1]
             except AttributeError:
-                self._log.debug("Hal: get_ip_netmask AttributeError")
+                self._log.error("Hal: get_ip_netmask AttributeError")
                 #print(self._nic.ifconfig())
                 ip_netmask = "0.0.0.0"
             self._log.debug("Hal: get_ip_netmask pyboard, ip: "+ip_netmask)
@@ -612,7 +612,7 @@ class hal(object):
             try:
                 ip_netmask = self._nic.ifconfig()[1]
             except AttributeError:
-                self._log.debug("Hal: get_ip_netmask AttributeError")
+                self._log.error("Hal: get_ip_netmask AttributeError")
                 #print(self._nic.ifconfig())
                 ip_netmask = "0.0.0.0"
             self._log.debug("Hal: get_ip_netmask pyboard, ip: "+ip_netmask)
@@ -621,12 +621,12 @@ class hal(object):
             try:
                 ip_netmask = self._nic.ifconfig()[1]
             except AttributeError:
-                self._log.debug("Hal: get_ip_netmask AttributeError")
+                self._log.error("Hal: get_ip_netmask AttributeError")
                 #print(self._nic.ifconfig())
                 ip_netmask = "0.0.0.0"
             self._log.debug("Hal: get_ip_netmask pyboard, ip: "+ip_netmask)
         else:
-            self._log.debug("Hal: get_ip_netmask failure")
+            self._log.error("Hal: get_ip_netmask failure")
             ip_netmask = "invalid"
 
         return ip_netmask
@@ -646,7 +646,7 @@ class hal(object):
             try:
                 ip_dns = self._nic.ifconfig()[3]
             except AttributeError:
-                self._log.debug("Hal: get_ip_dns AttributeError")
+                self._log.error("Hal: get_ip_dns AttributeError")
                 #print(self._nic.ifconfig())
                 ip_dns = "0.0.0.0"
             self._log.debug("Hal: get_ip_dns pyboard, ip: "+ip_dns)
@@ -655,7 +655,7 @@ class hal(object):
             try:
                 ip_dns = self._nic.ifconfig()[3]
             except AttributeError:
-                self._log.debug("Hal: get_ip_dns AttributeError")
+                self._log.error("Hal: get_ip_dns AttributeError")
                 #print(self._nic.ifconfig())
                 ip_dns = "0.0.0.0"
             self._log.debug("Hal: get_ip_dns pyboard, ip: "+ip_dns)
@@ -664,12 +664,12 @@ class hal(object):
             try:
                 ip_dns = self._nic.ifconfig()[3]
             except AttributeError:
-                self._log.debug("Hal: get_ip_dns AttributeError")
+                self._log.error("Hal: get_ip_dns AttributeError")
                 #print(self._nic.ifconfig())
                 ip_dns = "0.0.0.0"
             self._log.debug("Hal: get_ip_dns pyboard, ip: "+ip_dns)
         else:
-            self._log.debug("Hal: get_ip_dns failure")
+            self._log.error("Hal: get_ip_dns failure")
             ip_dns = "invalid"
 
         return ip_dns
@@ -771,7 +771,7 @@ class hal(object):
                 wifiaplist.append(info)
             wifi_ap = sorted(wifiaplist, key=lambda k: k['ssid']) 
         else:
-            self._log.debug("Hal: wifiscan failure")
+            self._log.error("Hal: wifiscan failure")
         
         return wifi_ap
  
@@ -792,7 +792,7 @@ class hal(object):
             if board == "PYBv3 with STM32F405RG":
                 db.hardwareTable.create(boardled1="LED_G1",boardled2="LED_G2",boardled3="LED_R1",boardled4="LED_R2",switch1="SW")     
             else:
-                self._log.debug("Hal: hardwaredb pyboard failure")
+                self._log.error("Hal: hardwaredb pyboard failure")
         elif self._utils.get_platform() == 'esp32':
             self._log.debug("Hal: hardwaredb esp32")
             # create hardwareTable
@@ -802,7 +802,7 @@ class hal(object):
             # create hardwareTable
             db.hardwareTable.create(boardled1="")
         else:
-            self._log.debug("Hal: hardwaredb failure")
+            self._log.error("Hal: hardwaredb failure")
         
         _dbc.close()
         
@@ -816,7 +816,7 @@ class hal(object):
 
         # check if id is present
         if not vpin: 
-            self._log.debug("Hal: vpin = None!")
+            self._log.error("Hal: vpin = None!")
             return pin
         
         # get dx map
@@ -878,7 +878,7 @@ class hal(object):
             elif platform_mode: pin = Pin(int(id), platform_mode)
             else: pin = Pin(int(id))
         else:
-            self._log.debug("Hal: pin failure")
+            self._log.error("Hal: pin failure")
 
         return pin
         
@@ -902,13 +902,13 @@ class hal(object):
         elif self._utils.get_platform() == 'esp32':
             self._log.debug("Hal: dxpins_init esp32")
             # create platform disabled pins
-            db.dxmapTable.create(count=34,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d6="6;GPIO6",d7="7;GPIO7",d8="8;GPIO8",d9="9;GPIO9",d10="10;GPIO10",d11="11;GPIO11",d12="12;GPIO12",d13="13;GPIO13",d14="14;GPIO14",d15="15;GPIO15",d16="16;GPIO16",d17="17;GPIO17",d18="18;GPIO18",d19="19;GPIO19",d20="21;GPIO21",d21="22;GPIO22",d22="23;GPIO23",d23="25;GPIO25",d24="26;GPIO26",d25="27;GPIO27",d26="32;GPIO32",d27="33;GPIO33",d28="34;GPIO34",d29="35;GPIO35",d30="36;GPIO35",d31="37;GPIO37",d32="38;GPIO38",d33="39;GPIO39")        
+            db.dxmapTable.create(count=34,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d12="12;GPIO12",d13="13;GPIO13",d14="14;GPIO14",d15="15;GPIO15",d16="16;GPIO16",d17="17;GPIO17",d18="18;GPIO18",d19="19;GPIO19",d20="21;GPIO21",d21="22;GPIO22",d22="23;GPIO23",d23="25;GPIO25",d24="26;GPIO26",d25="27;GPIO27",d26="32;GPIO32",d27="33;GPIO33",d28="34;GPIO34",d29="35;GPIO35",d30="36;GPIO35",d31="37;GPIO37",d32="38;GPIO38",d33="39;GPIO39")        
         elif self._utils.get_platform() == 'esp8266':
             self._log.debug("Hal: dxpins_init esp82662")
             # create platform disabled pins
             db.dxmapTable.create(count=12,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d6="9;GPIO9",d7="10;GPIO10",d8="12;GPIO12",d9="13;GPIO13",d10="14;GPIO14",d11="15;GPIO15")        
         else:
-            self._log.debug("Hal: dxpins_init failure")
+            self._log.error("Hal: dxpins_init failure")
         
         _dbc.close()
 
@@ -938,7 +938,7 @@ class hal(object):
             uname = os.uname()
             board = uname.machine
         else:
-            self._log.debug("Hal: board failure")
+            self._log.error("Hal: board failure")
 
         return board
         
@@ -970,7 +970,7 @@ class hal(object):
             uname = os.uname()
             python = uname.version
         else:
-            self._log.debug("Hal: python failure")
+            self._log.error("Hal: python failure")
 
         return python
         
@@ -1018,7 +1018,7 @@ class hal(object):
                 try:
                     self._i2c[id] = I2C(sda=self.pin(hardware["sda"]), scl=self.pin(hardware["scl"]))
                 except ValueError:
-                    self._log.debug("Hal: get i2c esp32, exception valueerror")
+                    self._log.error("Hal: get i2c esp32, exception valueerror")
                     return None
 
             return self._i2c[id] 
@@ -1028,7 +1028,7 @@ class hal(object):
             from machine import I2C
             # check boundaries
             if id > 1:
-                self._log.debug("Hal: get i2c esp8266, id bigger then 1")
+                self._log.error("Hal: get i2c esp8266, id bigger then 1")
                 return None
 
             # Get SW I2C pins
@@ -1041,7 +1041,7 @@ class hal(object):
                 
             return self._i2c[id] 
         else:
-            self._log.debug("Hal: get i2c failure")
+            self._log.error("Hal: get i2c failure")
             return None
 
     def get_spi(self, id=1):
@@ -1076,7 +1076,7 @@ class hal(object):
             from machine import SPI
             # check boundaries
             if id > 1:
-                self._log.debug("Hal: get spi esp32, id bigger then 1")
+                self._log.error("Hal: get spi esp32, id bigger then 1")
                 return None
 
             # Get SW spi pins
@@ -1088,7 +1088,7 @@ class hal(object):
                 try:
                     self._spi[id] = SPI(miso=self.pin(hardware["miso"]), mosi=self.pin(hardware["mosi"]), sck=self.pin(hardware["sck"]), nss=self.pin(hardware["nss"]))
                 except ValueError:
-                    self._log.debug("Hal: get spi esp32, exception valueerror")
+                    self._log.error("Hal: get spi esp32, exception valueerror")
                     return None
 
             return self._spi[id] 
@@ -1111,7 +1111,7 @@ class hal(object):
                 
             return self._spi[id] 
         else:
-            self._log.debug("Hal: get spi failure")
+            self._log.error("Hal: get spi failure")
             return None
 
     def get_uart(self, id=1):
@@ -1131,7 +1131,7 @@ class hal(object):
             from machine import UART
             # check boundaries
             if id > 2:
-                self._log.debug("Hal: get uart pyboard, id bigger then 2")
+                self._log.error("Hal: get uart pyboard, id bigger then 2")
                 return None
 
             # Create new or reuse existing
@@ -1146,7 +1146,7 @@ class hal(object):
             from machine import UART
             # check boundaries
             if id > 2:
-                self._log.debug("Hal: get uart esp32, id bigger then 2")
+                self._log.error("Hal: get uart esp32, id bigger then 2")
                 return None
 
             # Get SW uart pins
@@ -1158,7 +1158,7 @@ class hal(object):
                 try:
                     self._uart[id] = UART(id, tx=int(hardware["tx"][1:]), rx=int(hardware["rx"][1:]))
                 except ValueError:
-                    self._log.debug("Hal: get uart esp32, exception valueerror")
+                    self._log.error("Hal: get uart esp32, exception valueerror")
                     return None
 
             return self._uart[id] 
@@ -1168,7 +1168,7 @@ class hal(object):
             from machine import UART
             # check boundaries
             if id > 2:
-                self._log.debug("Hal: get uart esp8266, id bigger then 2")
+                self._log.error("Hal: get uart esp8266, id bigger then 2")
                 return None
 
             # Get SW uart pins
@@ -1181,6 +1181,6 @@ class hal(object):
                 
             return self._uart[id] 
         else:
-            self._log.debug("Hal: get uart failure")
+            self._log.error("Hal: get uart failure")
             return None
                     

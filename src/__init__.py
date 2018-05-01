@@ -29,13 +29,19 @@ def setwifi(ssid,key,ssid2='',key2='', port=80):
     wifi.setwifi(ssid, key, ssid2, key2, port)
 	
 def main(**params):
+    # set debug value
+    _debug=4
+    for param, value in params.items():
+        if param == "loglevel":
+            _debug=value
+        
     # auto collect garbage
     gc.enable()
     # Max 1/4 heap used: start auto collect
     gc.threshold((gc.mem_free() + gc.mem_alloc()) // 4)
     
     #Start init
-    init_ok = init()
+    init_ok = init(_debug)
     
     if init_ok.init():
         # load pages
@@ -43,8 +49,14 @@ def main(**params):
         
         # Run only in STA, STA+AP or ETH mode!
         if core.initial_upyeasywifi == core.NET_STA or core.initial_upyeasywifi == core.NET_STA_AP or core.initial_upyeasywifi == core.NET_ETH:
+            if core.initial_upyeasywifi == core.NET_STA:
+                core._log.info("Main: uPyEasy running in Station mode")
+            elif core.initial_upyeasywifi == core.NET_STA_AP:
+                core._log.info("Main: uPyEasy running in Station_Access Point mode")
+            elif core.initial_upyeasywifi == core.NET_ETH:
+                core._log.info("Main: uPyEasy running in Ethernet mode")
+           
             #get ip address
-            core._log.debug("Main: uPyEasy running in Station/Ethernet mode")
             ip_address = core._hal.get_ip_address()
             config = db.configTable.getrow()
             port=config["port"]
@@ -58,13 +70,13 @@ def main(**params):
             loop.create_task(core._scripts.asyncscripts())
         else:
             # WIFI AP mode
-            core._log.debug("Main: uPyEasy running in Access Point mode")
+            core._log.info("Main: uPyEasy running in Access Point mode")
             ip_address = "0.0.0.0"
             port = 80
         
-        core._log.debug("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
-        app.run(host=ip_address, port=port, debug=False, log=core._log, **params)
-        #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert, **params)   # SSL version
+        core._log.info("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
+        app.run(host=ip_address, port=port, debug=False, log=core._log)
+        #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert)   # SSL version
     else:
         #No network, exit!
         print("Exiting: Network not available, set network values!")

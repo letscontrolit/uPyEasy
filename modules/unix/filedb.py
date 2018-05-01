@@ -57,7 +57,6 @@ class Model:
         pkey = fields[pkey_field]
         with open(cls.fname(pkey), "w") as f:
             f.write(ujson.dumps(fields))
-        #print("create: pkey:", pkey)
         return pkey
 
     @classmethod
@@ -69,12 +68,18 @@ class Model:
     def update(cls, where, **fields):
         pkey_field = cls.__fields__[0]
         assert len(where) == 1 and pkey_field in where
-        #print("update:", where)
         with open(cls.fname(where[pkey_field])) as f:
             data = ujson.loads(f.read())
         data.update(fields)
         with open(cls.fname(where[pkey_field]), "w") as f:
             f.write(ujson.dumps(data))
+        # if cached: delete cached record
+        if hasattr(cls,'_{}'.format(cls.__table__)): 
+            name = '_{}'.format(cls.__table__)
+            delattr(cls,name)
+            # clean up var
+            import gc
+            gc.collect()
 
     @classmethod
     def scan(cls):
@@ -87,6 +92,7 @@ class Model:
 
     @classmethod
     def get(cls):
+        #print(cls.__table__)
         # Return dict!
         for dirent in uos.ilistdir("%s/%s" % (cls.__db__.name, cls.__table__)):
             fname = dirent[0]

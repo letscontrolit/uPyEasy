@@ -48,9 +48,9 @@ class plugins(object):
                 if db.pluginTable.delete(plugin['timestamp']):
                     self._log.debug("Plugins: Record delete succeeded: "+db.pluginTable.fname(plugin['timestamp']))
                 else:
-                    self._log.debug("Plugins: Record delete failed: "+db.pluginTable.fname(plugin['timestamp']))
+                    self._log.error("Plugins: Record delete failed: "+db.pluginTable.fname(plugin['timestamp']))
             elif not tplugins: 
-                self._log.debug("Plugins: No plugin records found!")
+                self._log.warning("Plugins: No plugin records found!")
                 cnt = 0
             else: 
                 self._log.debug("Plugins: Plugin record found: {}".format(plugin['name']))
@@ -70,7 +70,7 @@ class plugins(object):
                 try:
                     cid = db.pluginTable.create(id=cnt,name=name,template=template, module=modname, pincnt=int(pincnt))
                 except OSError:
-                    self._log.debug("Plugins: Exception creating plugin record:"+modname)
+                    self._log.error("Plugins: Exception creating plugin record:"+modname)
                 cnt += 1
                                 
     def initdevice(self, device): 
@@ -87,12 +87,14 @@ class plugins(object):
                 devicename = device['name']
                 queue      = None
                 
-                # Get correct controller
-                controllers = db.controllerTable.public()
-                for controller in controllers:
-                    if controller['id'] == device['controller']:
-                       queue = self._protocols.getqueue(controller)
-                       break
+                # only get controller in non-AP mode!
+                if core.initial_upyeasywifi != core.NET_STA_AP:
+                    # Get correct controller
+                    controllers = db.controllerTable.public()
+                    for controller in controllers:
+                        if controller['id'] == device['controller']:
+                           queue = self._protocols.getqueue(controller)
+                           break
 
                 # load plugin  
                 modname = plugin['module']
@@ -100,14 +102,13 @@ class plugins(object):
                 self._plugin_class[pluginname] = getattr(self._mod[pluginname], modname+'_plugin')
 
                 # update plugin?
-                print(plugin["dtype"])
                 if plugin["dtype"] == "":
                     modplugin = self._mod[pluginname]
                     try:
                        self._log.debug("Plugins: Updating frozen plugin db record:"+pluginname)
                        db.pluginTable.update({"timestamp":plugin['timestamp']},dtype=modplugin.dtype,stype=modplugin.stype,valuecnt=modplugin.valuecnt,senddata=modplugin.senddata,formula=modplugin.formula,sync=modplugin.sync,timer=modplugin.timer,pullup=modplugin.pullup,inverse=modplugin.inverse,port=modplugin.port)
                     except OSError:
-                        self._log.debug("Plugins: Exception creating frozen plugin db record:"+pluginname)
+                        self._log.error("Plugins: Exception creating frozen plugin db record:"+pluginname)
                 
                 # instantiate plugin
                 self._plugin[devicename] = self._plugin_class[pluginname]()
@@ -122,7 +123,7 @@ class plugins(object):
                             # device init failed, disable!
                             db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
                     except Exception as e:
-                        self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, exception: "+repr(e))
+                        self._log.error("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, exception: "+repr(e))
                 
                 _initcomplete = True
                 
@@ -135,18 +136,18 @@ class plugins(object):
         try:
             self._plugin[plugindata['name']].loadform(plugindata)
         except KeyError:
-            self._log.debug("Plugins: Loadform plugin KeyError Exception: "+plugindata['name'])
+            self._log.error("Plugins: Loadform plugin KeyError Exception: "+plugindata['name'])
         else: 
-            self._log.debug("Plugins: Loadform plugin Exception: ")
+            self._log.error("Plugins: Loadform plugin Exception: ")
         
     def saveform(self, plugindata): 
         self._log.debug("Plugins: Saveform plugin "+plugindata['name'])
         try:
             self._plugin[plugindata['name']].saveform(plugindata)
         except KeyError:
-            self._log.debug("Plugins: Saveform plugin KeyError Exception: "+plugindata['name'])
+            self._log.error("Plugins: Saveform plugin KeyError Exception: "+plugindata['name'])
         else: 
-            self._log.debug("Plugins: Saveform plugin Exception: ")
+            self._log.error("Plugins: Saveform plugin Exception: ")
         
     def loadvalues(self, device, valuenames): 
         self._log.debug("Plugins: Loadvalues plugin")

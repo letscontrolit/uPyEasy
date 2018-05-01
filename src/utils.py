@@ -162,7 +162,7 @@ class utils(object):
             form_values = [(v[0]) for k,v in form.items()]
             uform = dict(zip(form.keys(), form_values))
         else: 
-            self._log.debug("Utils: No webform");
+            self._log.warning("Utils: No webform");
             uform = None
             
         return uform
@@ -174,7 +174,7 @@ class utils(object):
         #print(dbtable)
 
         if not dbtable or not uform:
-           self._log.debug("Utils: map_form2db not all input available");
+           self._log.warning("Utils: map_form2db not all input available");
            return None
         
         # compare keys and if they match: copy value over
@@ -233,7 +233,7 @@ class utils(object):
     def plugin_senddata(self, queuedata):
         # no queue, no deal
         if not queuedata.scriptqueue:  # Script/rule queue
-            self._log.debug("Utils: Senddata script queue empty!")
+            self._log.warning("Utils: Senddata script queue empty!")
             return
 
         # General section for all sensor types..
@@ -401,7 +401,7 @@ class utils(object):
                 break
 
             # else UNKNOWN
-            self._log.debug("Utils: Senddata unknown sensor type!")
+            self._log.error("Utils: Senddata unknown sensor type!")
             break
 
     def plugin_initdata(self, data, plugin, device, queue, scriptqueue):

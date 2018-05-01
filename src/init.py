@@ -22,16 +22,16 @@ from .script import scripts
 
 class init (object):
     
-    def __init__(self):
+    def __init__(self, debug=4):
         logger              = ulog.get_config()
         logger['name']      = core.initial_upyeasyname
         self._log           = ulog.Log(logger)
         core._log           = self._log
 
         #Set log levels
-        self._log.changelevel('syslog',0)
-        self._log.changelevel('console',1, True)
-        self._log.changelevel('log',0)
+        self._log.changelevel('syslog',4)
+        self._log.changelevel('console',debug)
+        self._log.changelevel('log',4)
         
         core._log.debug("Init: Init constructor")
         
@@ -86,47 +86,47 @@ class init (object):
             self._log.debug("Init: config Table")
             db.configTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: config Table exception: "+repr(e))
+            self._log.error("Init: config Table exception: "+repr(e))
         try:
             self._log.debug("Init: network Table")
             db.networkTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: network Table exception: "+repr(e))
+            self._log.error("Init: network Table exception: "+repr(e))
         try:
             self._log.debug("Init: protocol Table")
             db.protocolTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: protocol Table exception: "+repr(e))
+            self._log.error("Init: protocol Table exception: "+repr(e))
         try:
             self._log.debug("Init: controller Table")
             db.controllerTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: controller Table exception: "+repr(e))
+            self._log.error("Init: controller Table exception: "+repr(e))
         try:
             self._log.debug("Init: hardware Table")
             db.hardwareTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: hardware Table exception: "+repr(e))
+            self._log.error("Init: hardware Table exception: "+repr(e))
         try:
             self._log.debug("Init: dxpin Table")
             db.dxpinTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: dxpin Table exception: "+repr(e))
+            self._log.error("Init: dxpin Table exception: "+repr(e))
         try:
             self._log.debug("Init: dxmap Table")
             db.dxmapTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: dxmap Table exception: "+repr(e))
+            self._log.error("Init: dxmap Table exception: "+repr(e))
         try:
             self._log.debug("Init: plugin Table")
             db.pluginTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: plugin Table exception: "+repr(e))
+            self._log.error("Init: plugin Table exception: "+repr(e))
         try:
             self._log.debug("Init: pluginstore Table")
             db.pluginstoreTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: pluginstore Table exception: "+repr(e))
+            self._log.error("Init: pluginstore Table exception: "+repr(e))
         try:
             self._log.debug("Init: device Table")
             db.deviceTable.create_table(True)
@@ -136,27 +136,27 @@ class init (object):
             self._log.debug("Init: service Table")
             db.serviceTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: service Table exception: "+repr(e))
+            self._log.error("Init: service Table exception: "+repr(e))
         try:
             self._log.debug("Init: notification Table")
             db.notificationTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: notification Table exception: "+repr(e))
+            self._log.error("Init: notification Table exception: "+repr(e))
         try:
             self._log.debug("Init: advanced Table")
             db.advancedTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: advanced Table exception: "+repr(e))
+            self._log.error("Init: advanced Table exception: "+repr(e))
         try:
             self._log.debug("Init: script Table")
             db.scriptTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: script Table exception: "+repr(e))
+            self._log.error("Init: script Table exception: "+repr(e))
         try:
             self._log.debug("Init: rule Table")
             db.ruleTable.create_table(True)
         except OSError as e:
-            self._log.debug("Init: rule Table exception: "+repr(e))
+            self._log.error("Init: rule Table exception: "+repr(e))
 
         gc.collect()
 
@@ -207,9 +207,10 @@ class init (object):
         netconnected = self._hal.init_network()
             
         # Init all protocols
-        self._protocols = protocol()
-        core._protocols = self._protocols
-        self._protocols.init()
+        if core.initial_upyeasywifi != core.NET_STA_AP:
+            self._protocols = protocol()
+            core._protocols = self._protocols
+            self._protocols.init()
            
         # Init all plugins
         self._plugins = plugins()

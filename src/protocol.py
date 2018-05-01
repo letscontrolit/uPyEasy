@@ -44,9 +44,9 @@ class protocol(object):
                 if db.protocolTable.delete(protocol['timestamp']):
                     self._log.debug("Protocols: Record delete succeeded: "+db.protocolTable.fname(protocol['timestamp']))
                 else:
-                    self._log.debug("Protocols: Record delete failed: "+db.protocolTable.fname(protocol['timestamp']))
+                    self._log.error("Protocols: Record delete failed: "+db.protocolTable.fname(protocol['timestamp']))
             elif not tprotocols: 
-                self._log.debug("Protocols: No protocol records found!")
+                self._log.warning("Protocols: No protocol records found!")
                 cnt = 0
             else: 
                 self._log.debug("Protocols: Protocol record found: {}".format(protocol['name']))
@@ -66,7 +66,7 @@ class protocol(object):
                 try:
                     cid = db.protocolTable.create(id=cnt,name=name,protocol=protocol,template=template, module=modname)
                 except OSError:
-                    self._log.debug("Protocols: Exception creating protocol record:"+modname)
+                    self._log.error("Protocols: Exception creating protocol record:"+modname)
                 cnt += 1
             
     def initcontroller(self, controller):
@@ -95,7 +95,7 @@ class protocol(object):
                 _initcomplete = True
                 
         if not _initcomplete: 
-            self._log.debug("Protocols: Init controller {} failed!".format(controller['protocol']))
+            self._log.error("Protocols: Init controller {} failed!".format(controller['protocol']))
         
     def getqueue(self,controller):
         self._log.debug("Protocols: GetQueue controller "+controller["hostname"]+"-"+controller["protocol"]+"-"+str(controller["id"]))
@@ -130,6 +130,6 @@ class protocol(object):
                                     protocol_function = getattr(self._protocol[controllername],'process')
                                     if protocol_function: protocol_function()
                             except KeyError:
-                                self._log.debug("Protocols: Async processing protocols KeyError exception, controller: "+controllername)
+                                self._log.error("Protocols: Async processing protocols KeyError exception, controller: "+controllername)
                 await asyncio.sleep(0)
             await asyncio.sleep(1)

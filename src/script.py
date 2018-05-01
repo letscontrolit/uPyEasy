@@ -68,7 +68,7 @@ class scripts(object):
             if db.scriptTable.delete(script['timestamp']):
                 self._log.debug("Scripts: Script record delete succeeded: "+db.scriptTable.fname(script['timestamp']))
             else:
-                self._log.debug("Scripts: Script record delete failed: "+db.scriptTable.fname(script['timestamp']))
+                self._log.error("Scripts: Script record delete failed: "+db.scriptTable.fname(script['timestamp']))
 
         cnt = 1
         advanced = db.advancedTable.getrow()
@@ -92,7 +92,7 @@ class scripts(object):
             try:
                 cid = db.scriptTable.create(id=cnt,name=scriptname, filename=module,pluginid=0,enable=autoscript, delay=self._mod[modname].delay)
             except OSError:
-                self._log.debug("Scripts: Exception creating script record:"+modname)
+                self._log.error("Scripts: Exception creating script record:"+modname)
 
             # init script!
             script = {}
@@ -124,7 +124,7 @@ class scripts(object):
             if db.ruleTable.delete(rule['timestamp']):
                 self._log.debug("Scripts: Rule record delete succeeded: "+db.ruleTable.fname(rule['timestamp']))
             else:
-                self._log.debug("Scripts: Rule record delete failed: "+db.ruleTable.fname(rule['timestamp']))
+                self._log.error("Scripts: Rule record delete failed: "+db.ruleTable.fname(rule['timestamp']))
 
         cnt = 1
         advanced = db.advancedTable.getrow()
@@ -156,10 +156,10 @@ class scripts(object):
                     ruleevent = match.group(1)
                     self._log.debug("Scripts: Rule: {}, event: {}".format(rulename,ruleevent))
                 else:
-                    self._log.debug("Scripts: Rule error, no event match: "+rulename)
+                    self._log.warning("Scripts: Rule error, no event match 2: "+rulename)
                     continue                                
             else:
-                self._log.debug("Scripts: Rule error, no event match: "+rulename)
+                self._log.warning("Scripts: Rule error, no event match: "+rulename)
                 continue                
             
             # done, save rule
@@ -169,7 +169,7 @@ class scripts(object):
             try:
                 cid = db.ruleTable.create(id=cnt,name=rulename,event=ruleevent,filename=module,pluginid=0,enable=autorule)
             except OSError:
-                self._log.debug("Scripts: Exception creating rule record:"+rulename)
+                self._log.error("Scripts: Exception creating rule record:"+rulename)
            
             # next rule, if any
             cnt += 1
@@ -206,7 +206,7 @@ class scripts(object):
             
             # Reschedule timerX
             loop.call_later(delay, self.asynctimer(timer))
-        else: self._log.debug("Rules: Run rule {}, incorrect timer number: {}".format(self._rulename,timer))
+        else: self._log.warning("Rules: Run rule {}, incorrect timer number: {}".format(self._rulename,timer))
 
     def gpio(self, gpio, level):
         swpin = self._hal.pin(gpio, core.PIN_IN, core.PIN_PULL_UP)
@@ -227,7 +227,7 @@ class scripts(object):
         try:
             exec(content, {}, {'gpio':self.gpio,'timerSet':self.timerSet,'event':event})
         except Exception as e:
-            self._log.debug("Rules: Run rule: {}, exception: {}".format(rule['name'],repr(e)))
+            self._log.error("Rules: Run rule: {}, exception: {}".format(rule['name'],repr(e)))
         
     async def asyncscripts(self):
         # Async coroutine to process all script work todo 
@@ -247,7 +247,7 @@ class scripts(object):
                 devicedata['valuename'] = self._scriptqueue.get_nowait()
                 devicedata['value'] = self._scriptqueue.get_nowait()
             except Exception as e:
-                self._log.debug("Script: scriptqueue proces Exception: "+repr(e))
+                self._log.error("Script: scriptqueue proces Exception: "+repr(e))
 
             # Assemble triggername
             devicedata['triggername'] = devicedata['name']+'#'+devicedata['valuename']

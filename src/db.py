@@ -37,10 +37,14 @@ class configTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        _config = next(cls.get())
-        print(_config)
-        print('_config id: {}'.format(id(_config)))
-        return _config
+        # if cached: return cached record
+        if hasattr(cls,'_config'):  return cls._config
+        # no cache: fetch it!
+        try:
+            cls._config = next(cls.get())
+        except StopIteration:
+            return None
+        return cls._config
 
 class networkTable(uorm.Model):
 
@@ -65,7 +69,10 @@ class networkTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
 class controllerTable(uorm.Model):
@@ -89,12 +96,21 @@ class controllerTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
-        return res
+        # if cached: return cached table
+        if hasattr(cls,'_controller'):  return cls._controller
+        # no cache: fetch it!
+        try:
+            cls._controller = [x for x in cls.get()]
+        except StopIteration:
+            return None
+        return cls._controller
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None           
         return res
 
     @classmethod
@@ -122,12 +138,18 @@ class protocolTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
+        try:
+            res = [x for x in cls.get()]
+        except StopIteration:
+            return None
         return res
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -218,7 +240,10 @@ class hardwareTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
 class dxpinTable(uorm.Model):
@@ -273,7 +298,10 @@ class dxpinTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
 class dxmapTable(uorm.Model):
@@ -329,7 +357,10 @@ class dxmapTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
 class pluginTable(uorm.Model):
@@ -358,12 +389,18 @@ class pluginTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
+        try:
+            res = [x for x in cls.get()]
+        except StopIteration:
+            return None
         return res
         
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -404,13 +441,25 @@ class deviceTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
-        return res
+        # if cached: return cached table
+        if hasattr(cls,'_device'):  return cls._device
+        # no cache: fetch it!
+        try:
+            cls._device = [x for x in cls.get()]
+        except StopIteration:
+            return None
+        return cls._device
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
-        return res
+        # if cached: return cached record
+        if hasattr(cls,'_device'):  return cls._device
+        # no cache: fetch it!
+        try:
+            cls._device = next(cls.get())
+        except StopIteration:
+            return None
+        return cls._device
 
     @classmethod
     def delete(cls, timestamp):
@@ -435,12 +484,18 @@ class notificationTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
+        try:
+            res = [x for x in cls.get()]
+        except StopIteration:
+            return None
         return res
         
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -468,12 +523,18 @@ class serviceTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
+        try:
+            res = [x for x in cls.get()]
+        except StopIteration:
+            return None
         return res
         
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -520,7 +581,10 @@ class advancedTable(uorm.Model):
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
 class pluginstoreTable(uorm.Model):
@@ -536,12 +600,18 @@ class pluginstoreTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
+        try:
+            res = [x for x in cls.get()]
+        except StopIteration:
+            return None
         return res
         
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -570,12 +640,21 @@ class scriptTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
-        return res
+        # if cached: return cached table
+        if hasattr(cls,'_script'):  return cls._script
+        # no cache: fetch it!
+        try:
+            cls._script = [x for x in cls.get()]
+        except StopIteration:
+            return None
+        return cls._script
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod
@@ -603,12 +682,21 @@ class ruleTable(uorm.Model):
 
     @classmethod
     def public(cls):
-        res = [x for x in cls.get()]
-        return res
+        # if cached: return cached table
+        if hasattr(cls,'_rule'):  return cls._rule
+        # no cache: fetch it!
+        try:
+            cls._rule = [x for x in cls.get()]
+        except StopIteration:
+            return None
+        return cls._rule
 
     @classmethod
     def getrow(cls):
-        res = next(cls.get())
+        try:
+            res = next(cls.get())
+        except StopIteration:
+            return None
         return res
 
     @classmethod

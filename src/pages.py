@@ -30,7 +30,6 @@ def auth_page(request, response):
 
     # Get admin password if any
     config = db.configTable.getrow()
-    print('config address id: {}'.format(id(config)))
     if config["password"]:
         _log.debug("Pages: Authorize User is set, verifying password")
 
@@ -46,7 +45,7 @@ def auth_page(request, response):
             if hash == password:
                 return True
 
-        _log.debug("Pages: Authorize User is set, password failed or not given")
+        _log.warning("Pages: Authorize User is set, password failed or not given")
         return False
     else: return True
         
@@ -263,8 +262,8 @@ def homepage(request, response):
                 loop = asyncio.get_event_loop()
                 loop.call_later(10,_hal.reboot_async())
             else:
-                _log.debug("Pages: SSID failed: "+network['ssid'])
-                _log.debug("Pages: SSID failed password: "+network['key'])
+                _log.error("Pages: SSID failed: "+network['ssid'])
+                _log.error("Pages: SSID failed password: "+network['key'])
 
                 # could not connect, retry!
                 yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
@@ -505,7 +504,7 @@ def controllersettingpage(request, response):
             if db.controllerTable.delete(controller['timestamp']):
                 _log.debug("Pages: remove record file succeeded: "+db.controllerTable.fname(controller['timestamp']))
             else:
-                _log.debug("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
+                _log.error("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
             
             #gc.collect()
             #deleted, return to controllers page
@@ -606,7 +605,7 @@ def controllersettingpage(request, response):
                 if controller['hostname']:
                     cid = db.controllerTable.update({"timestamp":controller['timestamp']},id=controller['id'],usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
                 else:
-                    _log.debug("Failed to update controller entry: not all fields are filled")
+                    _log.error("Failed to update controller entry: not all fields are filled")
 
                 #return to controllers page
                 yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
@@ -727,11 +726,13 @@ def controllersettingpage(request, response):
                 if controller['hostname']:
                     cid = db.controllerTable.create(id=cnt+1,usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
                 else:
-                    _log.debug("Failed to create controller entry: not all fields are filled")
+                    _log.error("Failed to create controller entry: not all fields are filled")
 
-                #init controller!
-                _protocols.initcontroller(controller)
-                
+                #only do init IF non-AP mode!
+                if core.initial_upyeasywifi != core.NET_STA_AP:
+                    #init controller!
+                    _protocols.initcontroller(controller)
+                    
                 #return to controllers page
                 yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
                 yield from response.awrite("Location: /controllers\r\n")
@@ -1008,7 +1009,7 @@ def devicesettingpage(request, response):
             if db.deviceTable.delete(device['timestamp']):
                 _log.debug("Pages: remove record file succeeded: "+db.deviceTable.fname(device['timestamp']))
             else:
-                _log.debug("Pages: remove record file failed: "+db.deviceTable.fname(device['timestamp']))
+                _log.error("Pages: remove record file failed: "+db.deviceTable.fname(device['timestamp']))
             
             # Get dxpin config
             dxpin = db.dxpinTable.getrow()
@@ -1129,7 +1130,7 @@ def devicesettingpage(request, response):
                 if device['id']:
                     cid = db.deviceTable.update({"timestamp":device['timestamp']},id=device['id'],enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
                 else:
-                    _log.debug("Pages: Failed to update device entry: not all fields are filled")
+                    _log.error("Pages: Failed to update device entry: not all fields are filled")
 
                 # init device!
                 _plugins.initdevice(device)
@@ -1401,7 +1402,7 @@ def devicesettingpage(request, response):
                 if device['name']:
                     cid = db.deviceTable.create(id=cnt+1,enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
                 else:
-                    _log.debug("Pages: Failed to create device entry: not all fields are filled")
+                    _log.error("Pages: Failed to create device entry: not all fields are filled")
 
                 # init device!
                 _plugins.initdevice(device)
@@ -1524,7 +1525,7 @@ def rulesettingpage(request, response):
             try:
                 cid = db.ruleTable.update({"timestamp":rule['timestamp']},enable=rule["enable"])
             except OSError:
-                self._log.debug("Rules: Exception creating  rule record: "+modname)
+                self._log.error("Rules: Exception creating  rule record: "+modname)
 
             #gc.collect()
             #deleted, return to rules page
@@ -1614,7 +1615,7 @@ def rulesettingpage(request, response):
                 rule_file.write(content)
                 rule_file.close() 
             except TypeError:
-                _log.debug("Pages: Exception getting rule creation from data!")
+                _log.error("Pages: Exception getting rule creation from data!")
 
             # reload all rules
             _scripts.loadrules()
@@ -1735,7 +1736,7 @@ def scriptsettingpage(request, response):
             try:
                 cid = db.scriptTable.update({"timestamp":script['timestamp']},enable=script["enable"])
             except OSError:
-                self._log.debug("Scripts: Exception creating  script record: "+modname)
+                self._log.error("Scripts: Exception creating  script record: "+modname)
 
             #gc.collect()
             #deleted, return to scripts page
@@ -1825,7 +1826,7 @@ def scriptsettingpage(request, response):
                 script_file.write(content)
                 script_file.close() 
             except TypeError:
-                _log.debug("Pages: Exception getting script creation from data!")
+                _log.error("Pages: Exception getting script creation from data!")
 
             # reload all scripts
             _scripts.loadscripts()
@@ -1949,7 +1950,7 @@ def notificationsettingpage(request, response):
             if db.notificationTable.delete(notification['timestamp']):
                 _log.debug("Pages: remove record file succeeded: "+db.notificationTable.fname(notification['timestamp']))
             else:
-                _log.debug("Pages: remove record file failed: "+db.notificationTable.fname(notification['timestamp']))
+                _log.error("Pages: remove record file failed: "+db.notificationTable.fname(notification['timestamp']))
             
             _dbc.close()
             
@@ -2175,7 +2176,7 @@ def notificationsettingpage(request, response):
                 if serviceid != 0:
                     cid = db.notificationTable.create(id=cnt+1,serviceid=notification['serviceid'],enable=notification['enable'],custom1=notification['custom1'],custom2=notification['custom2'],custom3=notification['custom3'],custom4=notification['custom4'],custom5=notification['custom5'],custom6=notification['custom6'],custom7=notification['custom7'],custom8=notification['custom8'],custom9=notification['custom9'],custom10=notification['custom10'])
                 else:
-                    _log.debug("Pages: Failed to create notification entry: not all fields are filled")
+                    _log.error("Pages: Failed to create notification entry: not all fields are filled")
 
                 _dbc.close()
 
@@ -2313,7 +2314,7 @@ def toolpage(request, response):
             try:
                 dirs = sorted(uos.ilistdir('config'))
             except OSError as e:
-               _log.debug("Pages: savesettings dir exception: "+repr(e))
+               _log.error("Pages: savesettings dir exception: "+repr(e))
                return False
             
             # get all config files
@@ -2324,7 +2325,7 @@ def toolpage(request, response):
                     try:
                         files = sorted(uos.ilistdir(fulldir))
                     except OSError as e:
-                        _log.debug("Pages: savesettings file exception: "+repr(e))
+                        _log.error("Pages: savesettings file exception: "+repr(e))
                         return False
                     for file in files:
                         if file[0] != '.' and file[0] != '..':
@@ -2392,7 +2393,7 @@ def toolpage(request, response):
                         file_desc.write(content[cnt+1][1:-1])
                         file_desc.close() 
                     except TypeError:
-                        _log.debug("Pages: Loadsettings: Exception writing settings file!")
+                        _log.error("Pages: Loadsettings: Exception writing settings file!")
                     _log.debug("Pages: Loadsettings: Settingsfile "+content[cnt]+" processed")
             else:
                 _log.debug("Pages: Loadsettings: Loaded backupfile: "+content[cnt])
@@ -2440,7 +2441,7 @@ def filespage(request, response):
                 if qs_name != '..': os.chdir(qs_name)
                 else: os.chdir('..')
             except OSError as e:
-                _log.debug('Changing directory error: '+repr(e))
+                _log.error('Changing directory error: '+repr(e))
         
         # get all file names
         import uos
@@ -2541,7 +2542,7 @@ def filesettingpage(request, response):
                 _log.debug("Pages: Delete directory: "+qs_name)
                 os.rmdir(''.join(qs_name))
             else: 
-                _log.debug("Pages: Delete file error: "+qs_name)
+                _log.error("Pages: Delete file error: "+qs_name)
 
             #gc.collect()
             #deleted, return to scripts page
@@ -2605,7 +2606,7 @@ def filesettingpage(request, response):
                 file_desc.write(content)
                 file_desc.close() 
             except TypeError:
-                _log.debug("Pages: Exception getting file creation form data!")
+                _log.error("Pages: Exception getting file creation form data!")
 
             #return to devices page
             yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
@@ -2737,7 +2738,7 @@ def infopage(request, response):
         try:
             info['unique'] = str(machine.unique_id(), 'utf8')
         except UnicodeError as e:
-            _log.debug("Pages: Entering info Page unicode machine id error: "+repr(e))
+            _log.error("Pages: Entering info Page unicode machine id error: "+repr(e))
             info['unique'] = str(machine.unique_id())
     else: info['unique'] = '-'
     #if hasattr(machine,'freq'): info['freq'] = str(machine.freq())

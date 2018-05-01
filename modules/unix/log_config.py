@@ -33,16 +33,16 @@ levels=['debug', 'info', 'warning', 'error']
 sinks = {
     'console': {
         'output': sys.stderr,
-        'level': 1
+        'level': 4
     },
     'syslog': {
         'host': '0.0.0.0',
         'port': 514,
-        'level': 0
+        'level': 4
     },
     'log': {
         'buffersize': 25,
-        'level': 0
+        'level': 4
     },
 }
 
