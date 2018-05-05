@@ -11,6 +11,7 @@
         document.getElementById('rx').innerHTML = document.getElementById('boardled').innerHTML.replace(/boardled/,"rx");
     }
     function setSel() {
+        document.querySelector('#boardled [value="' + document.getElementById('boardled').getAttribute("dxpin") + '"]').selected = true;
         document.querySelector('#sda [value="' + document.getElementById('sda').getAttribute("dxpin") + '"]').selected = true;
         document.querySelector('#scl [value="' + document.getElementById('scl').getAttribute("dxpin") + '"]').selected = true;
         document.querySelector('#miso [value="' + document.getElementById('miso').getAttribute("dxpin") + '"]').selected = true;
@@ -34,12 +35,12 @@
       <TH>
       <TR>
          <TD>Status LED:
-         <TD><div id="boardled">
+         <TD><div id="boardled" dxpin="{{hardware['boardled']}}">
             <select name='boardled'>
                <option value=''{% if hardware['boardled'] == "" %} selected{% endif %}> </option>
                {% for cnt in range(0,dx_label["count"]) %}
                     {% set dstr = 'd{}'.format(cnt) %}
-                    <option value='{{dstr}}' {% if hardware[dstr] == 8  or dxpin[dstr] != '' %}disabled{% endif %}{% if hardware['boardled'] == dstr %} selected{% endif %}>{{dx_label[dstr]}}</option>
+                    <option value='{{dstr}}' {% if hardware[dstr] == 8  or dxpin[dstr] != '' %}disabled{% endif %}>{{dx_label[dstr]}}</option>
                {% endfor %}
             </select></div>
       <TR>

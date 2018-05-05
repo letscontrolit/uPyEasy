@@ -15,6 +15,7 @@ def render(info, hardware, dx_label, dxpin):
     }
     function setSel() """
     yield """{
+        document.querySelector('#boardled [value=\"' + document.getElementById('boardled').getAttribute(\"dxpin\") + '\"]').selected = true;
         document.querySelector('#sda [value=\"' + document.getElementById('sda').getAttribute(\"dxpin\") + '\"]').selected = true;
         document.querySelector('#scl [value=\"' + document.getElementById('scl').getAttribute(\"dxpin\") + '\"]').selected = true;
         document.querySelector('#miso [value=\"' + document.getElementById('miso').getAttribute(\"dxpin\") + '\"]').selected = true;
@@ -39,7 +40,9 @@ def render(info, hardware, dx_label, dxpin):
       <TH>
       <TR>
          <TD>Status LED:
-         <TD><div id=\"boardled\">
+         <TD><div id=\"boardled\" dxpin=\""""
+    yield str(hardware['boardled'])
+    yield """\">
             <select name='boardled'>
                <option value=''"""
     if hardware['boardled'] == "":
@@ -56,8 +59,6 @@ def render(info, hardware, dx_label, dxpin):
         yield """' """
         if hardware[dstr] == 8  or dxpin[dstr] != '':
             yield """disabled"""
-        if hardware['boardled'] == dstr:
-            yield """ selected"""
         yield """>"""
         yield str(dx_label[dstr])
         yield """</option>
