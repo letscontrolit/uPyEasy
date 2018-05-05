@@ -269,7 +269,8 @@ class WebApp:
 
     def handle_static(self, req, resp):
         path = req.url_match.group(1)
-        print(path)
+        if self.debug > 0:
+            print(path)
         if ".." in path:
             yield from http_error(resp, "403")
             return

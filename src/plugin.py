@@ -137,8 +137,6 @@ class plugins(object):
             self._plugin[plugindata['name']].loadform(plugindata)
         except KeyError:
             self._log.error("Plugins: Loadform plugin KeyError Exception: "+plugindata['name'])
-        else: 
-            self._log.error("Plugins: Loadform plugin Exception: ")
         
     def saveform(self, plugindata): 
         self._log.debug("Plugins: Saveform plugin "+plugindata['name'])

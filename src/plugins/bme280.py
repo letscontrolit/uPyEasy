@@ -32,7 +32,7 @@ delay               = 60
 pincnt              = 0
 valuecnt            = 3
 i2c                 = 1
-bme_i2c             = 118
+i2c_addr            = 118
 bme_elev            = 0
 content             = '<a class="button link" href="" target="_blank">?</a>'
  
@@ -99,12 +99,12 @@ class bme280_plugin:
         datastore               = self._plugins.readstore(device["name"])
         # plugin specific section
         self.bme_elev           = bme_elev
-        self.bme_i2c            = bme_i2c
+        self.i2c_addr            = i2c_addr
         self.i2c                = core._hal.get_i2c(i2c)
         if self.i2c != None: 
             try:
                 self._log.debug("Plugin: bme280 init i2c")
-                self.bme280_init(address=self.bme_i2c)
+                self.bme280_init(address=self.i2c_addr)
             except OSError as e:
                 self._log.debug("Plugin: bme280 init OSError exception: "+repr(e))
                 return False
@@ -114,25 +114,29 @@ class bme280_plugin:
         self._log.debug("Plugin: bme280 loadform")
         # generic section
         self._utils.plugin_loadform(self, plugindata)
+        plugindata['i2c']   = i2c
+        plugindata['i2c_addr']   = self.i2c_addr
         # plugin specific section
-        plugindata['bme_i2c']   = self.bme_i2c
         plugindata['bme_elev']  = self.bme_elev
         
     def saveform(self,plugindata):
         self._log.debug("Plugin: bme280 saveform")
         # generic section
         self._utils.plugin_saveform(self, plugindata)
+        sf_i2c                  = plugindata.get('i2c',None)
+        if sf_i2c: self.sf_i2c = int(sf_i2c)
+        else: self.sf_i2c = None
+        sf_i2c_addr                  = plugindata.get('i2c_addr',None)
+        if sf_i2c_addr: self.i2c_addr = int(sf_i2c_addr)
+        else: self.i2c_addr = None
         # plugin specific section
-        sf_bme_i2c                  = plugindata.get('bme_i2c',None)
-        if sf_bme_i2c: self.bme_i2c = int(sf_bme_i2c)
-        else: self.bme_i2c = None
         sf_bme_elev                 = plugindata.get('bme_elev',None)
         if sf_bme_elev: self.bme_elev = int(sf_bme_elev)
         else: self.bme_elev = None
         self.i2c                    = core._hal.get_i2c(i2c)
         if self.i2c:
             try:
-                if self.i2c != None: self.bme280_init(address=self.bme_i2c)
+                if self.i2c != None: self.bme280_init(address=self.i2c_addr)
             except OSError as e:
                 self._log.debug("Plugin: bme280 saveform OSError exception: "+repr(e))
 

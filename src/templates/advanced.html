@@ -46,7 +46,7 @@
             <TR>
                <TD>Syslog Level:
                <TD><select name='sysloglevel'>
-                   <option value='0' {% if advanced['sysloglevel'] == 0 %}selected{% endif %}>Off</option>
+                   <option value='5' {% if advanced['sysloglevel'] == 5 %}selected{% endif %}>Off</option>
                    <option value='1' {% if advanced['sysloglevel'] == 1 %}selected{% endif %}>Debug</option>
                    <option value='2' {% if advanced['sysloglevel'] == 2 %}selected{% endif %}>Info</option>
                    <option value='3' {% if advanced['sysloglevel'] == 3 %}selected{% endif %}>Warning</option>
@@ -55,7 +55,7 @@
             <TR>
                <TD>Serial log Level:
                <TD><select name='serialloglevel'>
-                   <option value='0' {% if advanced['serialloglevel'] == 0 %}selected{% endif %}>Off</option>
+                   <option value='5' {% if advanced['serialloglevel'] == 5 %}selected{% endif %}>Off</option>
                    <option value='1' {% if advanced['serialloglevel'] == 1 %}selected{% endif %}>Debug</option>
                    <option value='2' {% if advanced['serialloglevel'] == 2 %}selected{% endif %}>Info</option>
                    <option value='3' {% if advanced['serialloglevel'] == 3 %}selected{% endif %}>Warning</option>
@@ -64,22 +64,19 @@
             <TR>
                <TD>Web log Level:
                <TD><select name='webloglevel'>
-                   <option value='0' {% if advanced['webloglevel'] == 0 %}selected{% endif %}>Off</option>
+                   <option value='5' {% if advanced['webloglevel'] == 5 %}selected{% endif %}>Off</option>
                    <option value='1' {% if advanced['webloglevel'] == 1 %}selected{% endif %}>Debug</option>
                    <option value='2' {% if advanced['webloglevel'] == 2 %}selected{% endif %}>Info</option>
                    <option value='3' {% if advanced['webloglevel'] == 3 %}selected{% endif %}>Warning</option>
                    <option value='4' {% if advanced['webloglevel'] == 4 %}selected{% endif %}>Error</option>
                 </select>
             <TR>
-               <TD>Web log Lines:
-               <TD><input type='number' name='webloglines' min=10 max=500 style='width:5em;' value={{advanced['webloglines']}}>
-            <TR>
                <TD>SD Card Value Logger:
                <TD><input type=checkbox id='enablesdlog' name='enablesdlog' {% if advanced['enablesdlog'] == 'on' %}checked{% endif %}>
             <TR>
                <TD>SD Card log Level:
                <TD><select name='sdloglevel'>
-                   <option value='0' {% if advanced['sdloglevel'] == 0 %}selected{% endif %}>Off</option>
+                   <option value='0' {% if advanced['sdloglevel'] == 5 %}selected{% endif %}>Off</option>
                    <option value='1' {% if advanced['sdloglevel'] == 1 %}selected{% endif %}>Debug</option>
                    <option value='2' {% if advanced['sdloglevel'] == 2 %}selected{% endif %}>Info</option>
                    <option value='3' {% if advanced['sdloglevel'] == 3 %}selected{% endif %}>Warning</option>

@@ -22,16 +22,17 @@ from .script import scripts
 
 class init (object):
     
-    def __init__(self, debug=4):
+    def __init__(self, debug=2):
         logger              = ulog.get_config()
         logger['name']      = core.initial_upyeasyname
         self._log           = ulog.Log(logger)
         core._log           = self._log
-
-        #Set log levels
-        self._log.changelevel('syslog',4)
+        self.debug          = debug
+        
+        #Set initial log levels
+        self._log.changelevel('syslog',2)
         self._log.changelevel('console',debug)
-        self._log.changelevel('log',4)
+        self._log.changelevel('log',2)
         
         core._log.debug("Init: Init constructor")
         
@@ -192,8 +193,14 @@ class init (object):
             self._log.debug("Init: Create dxpin Record")
             # create pin record
             db.dxpinTable.create(d0="")
-            #create pin mapping
-            self._hal.dxpins_init()
+            
+        #dxmap table init
+        dxmap = db.dxmapTable.getrow()
+        #Test is dxmap table = empty, if so create initial record
+        if not dxmap:
+            self._log.debug("Init: Create dxmap Record")
+            #create pin mapping record
+            self._hal.dxmaps_init()
             
         #advanced table init
         advanced = db.advancedTable.getrow()
@@ -207,7 +214,7 @@ class init (object):
         netconnected = self._hal.init_network()
             
         # Init all protocols
-        if core.initial_upyeasywifi != core.NET_STA_AP:
+        if core.initial_upyeasywifi != core.NET_AP:
             self._protocols = protocol()
             core._protocols = self._protocols
             self._protocols.init()
@@ -224,7 +231,13 @@ class init (object):
 
         #Get advanced record key
         advanced = db.advancedTable.getrow()
-       
+
+        # set log levels!
+        self._log.changelevel('syslog',advanced['sysloglevel'])
+        if self.debug > advanced['serialloglevel']:
+            self._log.changelevel('console',advanced['serialloglevel'])
+        self._log.changelevel('log',advanced['webloglevel'])
+        
         #Set right syslog hostname
         if core._utils.get_syslog_hostname():
             self._log.changehost(core.__logname__+"-"+core._utils.get_upyeasy_name(),core._utils.get_syslog_hostname())
@@ -232,7 +245,8 @@ class init (object):
             self._log.changehost(core.__logname__+"-"+core._utils.get_upyeasy_name(),'0.0.0.0')
         
         #Set the right time!
-        self._hal.settime()
+        if core.initial_upyeasywifi != core.NET_AP:
+            self._hal.settime()
         
         gc.collect()
        

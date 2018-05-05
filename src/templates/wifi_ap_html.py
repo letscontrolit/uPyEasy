@@ -24,7 +24,8 @@ def render(wifilist):
           <input class=\"button link\" type='submit' value='Submit'>
    </table>
 </form>
-<form name = 'frmselect' method=\"post\">
+<BR>
+<form name = 'apmode' method=\"post\">
     <table cellpadding='4' border='1' frame='box' rules='all'>
        <TR>
             <input type='hidden' name='ssid' maxlength='6' value='APMODE'>

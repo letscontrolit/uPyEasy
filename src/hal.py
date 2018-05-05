@@ -56,6 +56,7 @@ class hal(object):
 
         if self._utils.get_platform() == 'linux':
             self._log.debug("Hal: linux")
+            core.initial_upyeasywifi = core.NET_ETH
             if network: return True
             else: return False
         elif self._utils.get_platform() == 'pyboard': 
@@ -882,33 +883,33 @@ class hal(object):
 
         return pin
         
-    def dxpins_init(self):
-        self._log.debug("Hal: dxpins_init")
+    def dxmaps_init(self):
+        self._log.debug("Hal: dxmaps_init")
         
         #connect to database
         _dbc.connect()
 
         if self._utils.get_platform() == 'linux':
-            self._log.debug("Hal: dxpins_init linux")
+            self._log.debug("Hal: dxmaps_init linux")
             # Create pin mapping
             db.dxmapTable.create(count=20,d0="0;PA0",d1="1;PA1",d2="2;PA2",d3="3;PA3",d4="4;PA4",d5="5;PA5",d6="6;PA6",d7="7;PA7",d8="8;PA8",d9="9;PA9",d10="10;PA10",d11="11;PA11",d12="12;PA12",d13="13;PA13",d14="14;PA14",d15="15;PA15",d16="16;PA16",d17="17;PA17",d18="18;PA18",d19="19;PA19")        
         elif self._utils.get_platform() == 'pyboard': 
-            self._log.debug("Hal: dxpins_init pyboard")
+            self._log.debug("Hal: dxmaps_init pyboard")
             # create platform disabled pins
             hwboard = self.board()
             from .stm32 import board
             stm32_pin = board()
             stm32_pin.init_pindb(hwboard)
         elif self._utils.get_platform() == 'esp32':
-            self._log.debug("Hal: dxpins_init esp32")
+            self._log.debug("Hal: dxmaps_init esp32")
             # create platform disabled pins
-            db.dxmapTable.create(count=34,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d12="12;GPIO12",d13="13;GPIO13",d14="14;GPIO14",d15="15;GPIO15",d16="16;GPIO16",d17="17;GPIO17",d18="18;GPIO18",d19="19;GPIO19",d20="21;GPIO21",d21="22;GPIO22",d22="23;GPIO23",d23="25;GPIO25",d24="26;GPIO26",d25="27;GPIO27",d26="32;GPIO32",d27="33;GPIO33",d28="34;GPIO34",d29="35;GPIO35",d30="36;GPIO35",d31="37;GPIO37",d32="38;GPIO38",d33="39;GPIO39")        
+            db.dxmapTable.create(count=28,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d6="12;GPIO12",d7="13;GPIO13",d8="14;GPIO14",d9="15;GPIO15",d10="16;GPIO16",d11="17;GPIO17",d12="18;GPIO18",d13="19;GPIO19",d14="21;GPIO21",d15="22;GPIO22",d16="23;GPIO23",d17="25;GPIO25",d18="26;GPIO26",d19="27;GPIO27",d20="32;GPIO32",d21="33;GPIO33",d22="34;GPIO34",d23="35;GPIO35",d24="36;GPIO35",d25="37;GPIO37",d26="38;GPIO38",d27="39;GPIO39")        
         elif self._utils.get_platform() == 'esp8266':
-            self._log.debug("Hal: dxpins_init esp82662")
+            self._log.debug("Hal: dxmaps_init esp82662")
             # create platform disabled pins
             db.dxmapTable.create(count=12,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d6="9;GPIO9",d7="10;GPIO10",d8="12;GPIO12",d9="13;GPIO13",d10="14;GPIO14",d11="15;GPIO15")        
         else:
-            self._log.error("Hal: dxpins_init failure")
+            self._log.error("Hal: dxmaps_init failure")
         
         _dbc.close()
 

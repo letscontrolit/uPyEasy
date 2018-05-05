@@ -75,7 +75,8 @@ class Log :
                     mod = __import__(sink_name)
                     self._mod[name] = mod
                     ret[name] = mod.Sink(config)
-                    print("loaded sink {}".format(name))
+                    if config['level'] <= 1:
+                        print("loaded sink {}".format(name))
                 except Exception as e :
                     print("Error: failed to load sink {} with config {}.  Error: {}".format(name, config, e))
                     sys.print_exception(e)
@@ -142,13 +143,13 @@ class Log :
             for name, config in sink_configs.items() :
                 if name == "syslog" :
                     config['host'] = hostname
-                    print("Set syslog hostname {}".format(hostname))
+                    self.debug("Set syslog hostname {}".format(hostname))
                     try :
                         self._mod[name] = self.reload(self._mod[name])
                         ret[name] = self._mod[name].Sink(config)
-                        print("reloaded sink {}".format(name))
+                        self.debug("reloaded sink {}".format(name))
                     except Exception as e :
-                        print("Error: failed to load sink {} with config {}.  Error: {}".format(name, config, e))
+                        self.debug("Error: failed to load sink {} with config {}.  Error: {}".format(name, config, e))
                         sys.print_exception(e)
                 else: ret[name] = self._mod[name].Sink(config)
             self._sinks = ret

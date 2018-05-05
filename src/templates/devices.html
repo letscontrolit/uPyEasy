@@ -19,7 +19,10 @@
               <TD>{% for plugin in plugins %}
                        {% if plugin['id'] == device['pluginid'] %} {{plugin['name']}} {% endif %}
                   {% endfor %}
-              <TD>{{device['dxpin']}}
+              <TD>{% if device['dxpin'] != '' %} {{device['dxpin']}} 
+                  {% elif device['i2c'] > 0 %} I2C({{device['i2c']}}) 
+                  {% elif device['spi'] > 0  %} SPI({{device['spi']}}) 
+                  {% elif device['uart'] > 0 %} UART({{device['uart']}}) {% endif %}
               <TD>{% for controller in controllers %}
                        {% if controller['id'] == device['controller'] %} {{controller['protocol']}} {% endif %}
                   {% endfor %}

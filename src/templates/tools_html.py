@@ -11,7 +11,7 @@ def render(info):
                   <h3>System</h3>
             <TR>
                <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=reboot'>Reboot</a>
-               <TD>Reboots ESP
+               <TD>Reboots IoT Device
             <TR>
                <TD HEIGHT=\"30\"><a class='button link' href='/tools?ucmd=log'>Log</a>
                <TD>Open log output

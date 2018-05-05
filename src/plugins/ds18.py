@@ -100,7 +100,6 @@ class ds18_plugin:
         self._log.debug("Plugin: ds18 loadform")
         # generic section
         self._utils.plugin_loadform(self, plugindata)
-        plugindata['dxpin0']    = self.dxpin
         # plugin specific section
         plugindata['resolution']= resolution
         romcnt = 0
@@ -117,7 +116,6 @@ class ds18_plugin:
         self._log.debug("Plugin: ds18 saveform")
         # generic section
         self._utils.plugin_saveform(self, plugindata)
-        self.dxpin                  = plugindata['dxpin0']
 
         # plugin specific section
         self.romid                  = plugindata.get('deviceid','')

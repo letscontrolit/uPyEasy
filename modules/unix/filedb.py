@@ -57,6 +57,14 @@ class Model:
         pkey = fields[pkey_field]
         with open(cls.fname(pkey), "w") as f:
             f.write(ujson.dumps(fields))
+        # if cached: delete cached record
+        if hasattr(cls,'_{}'.format(cls.__table__)): 
+            name = '_{}'.format(cls.__table__)
+            delattr(cls,name)
+            print("cache deleted: {}".format(name))
+            # clean up var
+            import gc
+            gc.collect()
         return pkey
 
     @classmethod
@@ -77,6 +85,7 @@ class Model:
         if hasattr(cls,'_{}'.format(cls.__table__)): 
             name = '_{}'.format(cls.__table__)
             delattr(cls,name)
+            print("cache deleted: {}".format(name))
             # clean up var
             import gc
             gc.collect()

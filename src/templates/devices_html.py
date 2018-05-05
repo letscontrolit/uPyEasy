@@ -40,7 +40,25 @@ def render(info,devices, plugins, controllers):
                   """
             yield """
               <TD>"""
-            yield str(device['dxpin'])
+            if device['dxpin'] != '':
+                yield """ """
+                yield str(device['dxpin'])
+                yield """ 
+                  """
+            elif device['i2c'] > 0:
+                yield """ I2C("""
+                yield str(device['i2c'])
+                yield """) 
+                  """
+            elif device['spi'] > 0:
+                yield """ SPI("""
+                yield str(device['spi'])
+                yield """) 
+                  """
+            elif device['uart'] > 0:
+                yield """ UART("""
+                yield str(device['uart'])
+                yield """) """
             yield """
               <TD>"""
             for controller in controllers:

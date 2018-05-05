@@ -30,7 +30,7 @@ def setwifi(ssid,key,ssid2='',key2='', port=80):
 	
 def main(**params):
     # set debug value
-    _debug=4
+    _debug=2
     for param, value in params.items():
         if param == "loglevel":
             _debug=value
@@ -47,6 +47,9 @@ def main(**params):
         # load pages
         from . import pages
         
+        # get loop
+        loop = asyncio.get_event_loop()
+
         # Run only in STA, STA+AP or ETH mode!
         if core.initial_upyeasywifi == core.NET_STA or core.initial_upyeasywifi == core.NET_STA_AP or core.initial_upyeasywifi == core.NET_ETH:
             if core.initial_upyeasywifi == core.NET_STA:
@@ -62,18 +65,19 @@ def main(**params):
             port=config["port"]
             # Schedule plugin/protocol async coro's!
             core._log.debug("Main: Schedule async loops")
-            # get loop
-            loop = asyncio.get_event_loop()
-            # Create async tasks
-            loop.create_task(core._plugins.asyncdevices())
+            # Create async controller tasks
             loop.create_task(core._protocols.asynccontrollers())
-            loop.create_task(core._scripts.asyncscripts())
         else:
             # WIFI AP mode
             core._log.info("Main: uPyEasy running in Access Point mode")
             ip_address = "0.0.0.0"
             port = 80
-        
+
+        # Create async tasks
+        loop.create_task(core._plugins.asyncdevices())
+        loop.create_task(core._scripts.asyncscripts())
+
+        # Run main loop
         core._log.info("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
         app.run(host=ip_address, port=port, debug=False, log=core._log)
         #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert)   # SSL version

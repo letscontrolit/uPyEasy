@@ -5,14 +5,7 @@
 <TH>Value
 <TR>
    <TD>PlugIn:
-   <TD>
-      <select name='pluginid' LANGUAGE=javascript onchange="return dept_onchange(frmselect)">
-      {% for plugin in plugins %}
-      <option value='{{plugin["id"]}}' {% if info["pluginname"] == plugin["name"] %}selected{% endif %}>{{plugin["name"]}}</option>
-      {% endfor %}
-      </select>
-      <input type='hidden' name='currentpluginid' maxlength='40' value='{{info["pluginid"]}}'>
-      <a class="button link" href="" target="_blank">?</a>
+   <TD style="font-size: 12pt; font-weight: bold; color: blue">{{info["pluginname"]}}
 <TR>
    <TD>Name:
    <TD><input type='text' name='name' maxlength='40' value='{{device["name"]}}'>
@@ -30,6 +23,30 @@
       {% endfor %}
       </select>
 {% endfor %}
+{% endif %}
+{% if device["i2c"] > 0 %}
+<TR>
+   <TD>I2C:
+   <TD>
+      <select name='i2c'>
+         <option value=1 {% if device['i2c'] == 1 %}selected{% endif %}>1 - (default)</option>
+      </select>
+{% endif %}
+{% if device["spi"] > 0 %}
+<TR>
+   <TD>SPI:
+   <TD>
+      <select name='spi'>
+         <option value=1 {% if device['spi'] == 1 %}selected{% endif %}>1 - (default)</option>
+      </select>
+{% endif %}
+{% if device["uart"] > 0 %}
+<TR>
+   <TD>UART:
+   <TD>
+      <select name='uart'>
+         <option value=1 {% if device['uart'] == 1 %}selected{% endif %}>1 - (default)</option>
+      </select>
 {% endif %}
 <TR>
    <TD>Pull UP:

@@ -750,17 +750,12 @@ def hardwarepage(request, response):
     _log.debug("Pages: Entering Hardware Page")
     if request.method == 'GET':
         _log.debug("Pages: Display hardware Page")
-
-        #connect to database
-        _dbc.connect()
         
         # Get hardware config
         hardware = db.hardwareTable.getrow()
 
         # Get dxpin config
         dxpin = db.dxpinTable.getrow()
-
-        _dbc.close()
 
         #General info
         info = {}
@@ -784,9 +779,6 @@ def hardwarepage(request, response):
     elif request.method == 'POST':
          #Update config
         _log.debug("Pages: Update hardware")
-        
-        #connect to database
-        _dbc.connect()
         
         # Get dxpin config, but it's a generator!
         dxpin = db.dxpinTable.getrow()
@@ -816,18 +808,83 @@ def hardwarepage(request, response):
         _utils.pin_assignment('rx',hardware['rx'],dxmap["count"],dxpin)
 
         # Verify mandatory fields!
-        cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},boardled=hardware['boardled'],inverseled=hardware['inverseled'],sda=hardware['sda'],scl=hardware['scl'],mosi=hardware['mosi'],miso=hardware['miso'],sck=hardware['sck'],nss=hardware['nss'],tx=hardware['tx'],rx=hardware['rx'],d0=hardware['d0'],d1=hardware['d1'],d2=hardware['d2'],d3=hardware['d3'],d4=hardware['d4'],d5=hardware['d5'],d6=hardware['d6'],d7=hardware['d7'],d8=hardware['d8'],d9=hardware['d9'],d10=hardware['d10'],d11=hardware['d11'],d12=hardware['d12'],d13=hardware['d13'],d14=hardware['d14'],d15=hardware['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+        cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},boardled=hardware['boardled'],inverseled=hardware['inverseled'],sda=hardware['sda'],scl=hardware['scl'],mosi=hardware['mosi'],miso=hardware['miso'],sck=hardware['sck'],nss=hardware['nss'],tx=hardware['tx'],rx=hardware['rx'])
 
+        # Update pin assignments
         cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
-        
-        _dbc.close()
- 
+
         #return to hardwares page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
         yield from response.awrite("Location: /hardware\r\n")
         yield from response.awrite("Content-Type: text/html\r\n")
         yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
  
+@app.route("/dxbootstate", methods=['GET','POST'])
+def dxbootstatepage(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display dxbootstate page
+    _log.debug("Pages: Entering dxbootstate Page")
+    if request.method == 'GET':
+        _log.debug("Pages: Display dxbootstate Page")
+
+        # Get hardware config
+        hardware = db.hardwareTable.getrow()
+
+        # Get dxpin config
+        dxpin = db.dxpinTable.getrow()
+
+        #General info
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+
+        # Get dx labels
+        dx_label = _utils.get_dxlabels()
+        #_log.debug("Pages: dx_label: "+"-".join(dx_label))
+
+        # menu settings
+        menu = 4
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "dxbootstate.html",(info, hardware, dx_label, dxpin,))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif request.method == 'POST':
+         #Update config
+        _log.debug("Pages: Update hardware")
+        
+        # Get dxpin config, but it's a generator!
+        dxpin = db.dxpinTable.getrow()
+        # convert namedtuple to list which can be muted
+
+        # Get hardware config, but it's a generator!
+        dbhardware = db.hardwareTable.getrow()
+
+        # get dx map
+        dxmap = db.dxmapTable.getrow()
+        
+        # Get all form values in a dict
+        yield from request.read_form_data()
+        uform = _utils.get_form_values(request.form)
+
+        hardware = _utils.map_form2db(dbhardware, uform)
+
+        # Verify mandatory fields!
+        cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},d0=hardware['d0'],d1=hardware['d1'],d2=hardware['d2'],d3=hardware['d3'],d4=hardware['d4'],d5=hardware['d5'],d6=hardware['d6'],d7=hardware['d7'],d8=hardware['d8'],d9=hardware['d9'],d10=hardware['d10'],d11=hardware['d11'],d12=hardware['d12'],d13=hardware['d13'],d14=hardware['d14'],d15=hardware['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+ 
+        #return to hardwares page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /dxbootstate\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+
 @app.route("/devices", methods=['GET,POST'])
 def devicespage(request, response):
     if not auth_page(request, response): 
@@ -856,11 +913,20 @@ def devicespage(request, response):
     for device in devices:
         if device['enable'] == 'on':
             # get plugin data from plugin
+            pluginfound = False
             values={}
             _plugins.read(device, values)
             for plugin in plugins:
                 if plugin['id'] == device['pluginid']:
+                    pluginfound = True
                     break
+            
+            # no plugin? abort!
+            if not pluginfound: 
+                device['values'] = ''
+                break
+            
+            # get values
             deval = ''
             if values:
                 deval += "<table>"
@@ -1144,68 +1210,7 @@ def devicesettingpage(request, response):
                 yield from response.awrite("Location: /devices\r\n")
                 yield from response.awrite("Content-Type: text/html\r\n")
                 yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-            else:
-                # Different  plugin, empty device!
-                _log.debug("Pages: Update device: different plugin")
-                
-                # Get correct device
-                devices = db.deviceTable.public()
-                for device in devices:
-                    if device['id'] == id:
-                       break
-                
-                # Get list of plugins
-                plugins = db.pluginTable.public()
-                for plugin in plugins:
-                    if plugin['id'] == pluginid:
-                       break
-                
-                # Get correct controller
-                controllers=db.controllerTable.public()
 
-                info={}
-                info['name'] = _utils.get_upyeasy_name()
-                info['copyright']=core.__copyright__
-                info['holder']= core.__author__
-                info['id'] = 1
-                info['pluginname'] = plugin['name']
-
-                # Get dx labels
-                dx_label = _utils.get_dxlabels()
-                #_log.debug("Pages: dx_label: "+"-".join(dx_label))
-                
-                # Get hardware config
-                hardware = db.hardwareTable.getrow()
-
-                # Get dxpin config
-                dxpin = db.dxpinTable.getrow()
-
-                # Empty device, dict converted to list
-                device = db.deviceTable.__schema__
-                
-                plugindata = {}
-                plugindata['name'] = plugin['name']
-                # get plugin data from plugin
-                _plugins.loadform(plugindata)
-
-
-                # Convert pin settings
-                for cnt in range(0,plugindata["pincnt"]):
-                    device['dxpin'+str(cnt)] = 0
-
-                _log.debug("Pages: Loading plugin page update: "+plugin['template'])
-
-                # menu settings
-                menu = 5
-                advanced = db.advancedTable.getrow()
-                gc.collect()
-
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header.html",(info, menu, advanced))
-                yield from app.render_template(response, "plugin_header.html",(info, controllers, plugins, plugindata, device, dxpin, dx_label, hardware,))
-                yield from app.render_template(response, plugin['template'],(info, plugindata,))
-                yield from app.render_template(response, "plugin_footer.html",(info, plugindata,))
-                yield from app.render_template(response, "footer.html",(info,))
         elif id == 0:
             #Create Device
             _log.debug("Pages: Create Device")
@@ -1216,69 +1221,7 @@ def devicesettingpage(request, response):
             else: devicename = None
             
             #Device creation/plugin change
-            if not devicename and not pluginchange and not pluginid:
-                #empty: return to devices page
-                _log.debug("Pages: Empty new Device")
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /devices\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-            elif pluginchange:
-                #Plugin change
-                _log.debug("Pages: Empty device plugin change, new plugin")
-                
-                # Get list of plugins
-                plugins = db.pluginTable.public()
-                for plugin in plugins:
-                    if plugin['id'] == pluginid:
-                       break
-
-                info={}
-                info['name'] = _utils.get_upyeasy_name()
-                info['copyright']=core.__copyright__
-                info['holder']= core.__author__
-                info['pluginid'] = pluginid
-                info['pluginname'] = plugin['name']
-
-                # Get dx labels
-                dx_label = _utils.get_dxlabels()
-                #_log.debug("Pages: dx_label: "+"-".join(dx_label))
-                
-                # Get hardware config
-                hardware = db.hardwareTable.getrow()
-
-                # Get correct controller
-                controllers=db.controllerTable.public()
-
-                # Empty device, dict converted to list
-                device = db.deviceTable.__schema__
-                
-                # Get dxpin config
-                dxpin = db.dxpinTable.getrow()
-
-                plugindata = {}
-                plugindata['name'] = plugin['name']
-                # get plugin data from plugin
-                _plugins.loadform(plugindata)
-
-                # Convert pin settings
-                for cnt in range(0,plugindata["pincnt"]):
-                    device['dxpin'+str(cnt)] = 0
-
-                _log.debug("Pages: Loading plugin page new plugin: "+plugin['template'])
-
-                # menu settings
-                menu = 5
-                advanced = db.advancedTable.getrow()
-                gc.collect()
-
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header.html",(info, menu, advanced))
-                yield from app.render_template(response, "plugin_header.html",(info, controllers, plugins, plugindata, device, dxpin, dx_label, hardware,))
-                yield from app.render_template(response, plugin['template'],(info, plugindata,))
-                yield from app.render_template(response, "plugin_footer.html",(info, plugindata, ))
-                yield from app.render_template(response, "footer.html",(info,))
-            elif pluginid and not devicename:
+            if pluginid and not devicename:
                 #New device
                 _log.debug("Pages: New Device and plugin choosen: "+str(pluginid))
                 
@@ -1328,7 +1271,10 @@ def devicesettingpage(request, response):
                 # Convert pin settings
                 for cnt in range(0,plugindata["pincnt"]):
                     device['dxpin'+str(cnt)] = "d0"
-                
+                if 'i2c' in plugindata.keys(): device['i2c'] = plugindata['i2c']
+                elif 'spi' in plugindata.keys(): device['spi'] = plugindata['spi']
+                elif 'uart' in plugindata.keys(): device['uart'] = plugindata['uart']
+
                 _log.debug("Pages: Loading plugin page new plugin: "+plugin['template'])
 
                 # menu settings
@@ -1400,7 +1346,7 @@ def devicesettingpage(request, response):
 
                 # Verify mandatory fields!
                 if device['name']:
-                    cid = db.deviceTable.create(id=cnt+1,enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
+                    cid = db.deviceTable.create(id=cnt+1,enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'],spi=device['spi'],uart=device['uart'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
                 else:
                     _log.error("Pages: Failed to create device entry: not all fields are filled")
 
@@ -2752,7 +2698,7 @@ def infopage(request, response):
     info['peak'] = _utils.get_mem_peak ()
     info['current'] = _utils.get_mem_current ()
     import micropython
-    info['memorymap'] = micropython.mem_info(1)
+    micropython.mem_info(1)
     info['ip'] = _hal.get_ip_address()    
     info['gateway'] = _hal.get_ip_gw()    
     info['subnet'] = _hal.get_ip_netmask('eth0')    

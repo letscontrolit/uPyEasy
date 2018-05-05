@@ -7,26 +7,9 @@ def render(info, controllers, plugins, plugindata, device, dxpin, dx_label, hard
 <TH>Value
 <TR>
    <TD>PlugIn:
-   <TD>
-      <select name='pluginid' LANGUAGE=javascript onchange=\"return dept_onchange(frmselect)\">
-      """
-    for plugin in plugins:
-        yield """
-      <option value='"""
-        yield str(plugin["id"])
-        yield """' """
-        if info["pluginname"] == plugin["name"]:
-            yield """selected"""
-        yield """>"""
-        yield str(plugin["name"])
-        yield """</option>
-      """
+   <TD style=\"font-size: 12pt; font-weight: bold; color: blue\">"""
+    yield str(info["pluginname"])
     yield """
-      </select>
-      <input type='hidden' name='currentpluginid' maxlength='40' value='"""
-    yield str(info["pluginid"])
-    yield """'>
-      <a class=\"button link\" href=\"\" target=\"_blank\">?</a>
 <TR>
    <TD>Name:
    <TD><input type='text' name='name' maxlength='40' value='"""
@@ -69,6 +52,48 @@ def render(info, controllers, plugins, plugindata, device, dxpin, dx_label, hard
       </select>
 """
         yield """
+"""
+    yield """
+"""
+    if device["i2c"] > 0:
+        yield """
+<TR>
+   <TD>I2C:
+   <TD>
+      <select name='i2c'>
+         <option value=1 """
+        if device['i2c'] == 1:
+            yield """selected"""
+        yield """>1 - (default)</option>
+      </select>
+"""
+    yield """
+"""
+    if device["spi"] > 0:
+        yield """
+<TR>
+   <TD>SPI:
+   <TD>
+      <select name='spi'>
+         <option value=1 """
+        if device['spi'] == 1:
+            yield """selected"""
+        yield """>1 - (default)</option>
+      </select>
+"""
+    yield """
+"""
+    if device["uart"] > 0:
+        yield """
+<TR>
+   <TD>UART:
+   <TD>
+      <select name='uart'>
+         <option value=1 """
+        if device['uart'] == 1:
+            yield """selected"""
+        yield """>1 - (default)</option>
+      </select>
 """
     yield """
 <TR>

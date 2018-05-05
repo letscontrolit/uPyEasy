@@ -118,6 +118,8 @@ class controllerTable(uorm.Model):
         # delete the table record
         try:
             os.remove(cls.fname(timestamp))
+            # if cached: delete cached table
+            if hasattr(cls,'_controller'):  del cls._controller
         except KeyError:
             return False
         return True
@@ -425,10 +427,12 @@ class deviceTable(uorm.Model):
         ("name", ""),
         ("controller",  0),
         ("controllerid",  0),
-        ("dxpin", "d0"),
+        ("dxpin", ""),
         ("delay",  60),
         ("sync",  ""),
-        ("i2c",  ""),
+        ("i2c",  0),
+        ("spi",  0),
+        ("uart",  0),
         ("bootstate", ""),
         ("pullup", ""),
         ("inverse", ""),
@@ -466,6 +470,8 @@ class deviceTable(uorm.Model):
         # delete the table record
         try:
             os.remove(cls.fname(timestamp))
+            # if cached: delete cached table
+            if hasattr(cls,'_device'):  del cls._device
         except KeyError:
             return False
         return True
@@ -562,12 +568,12 @@ class advancedTable(uorm.Model):
         ("ntptimezone",  60),
         ("ntpdst", ""),
         ("sysloghostname", ""),
-        ("sysloglevel",  0),
-        ("serialloglevel",  1),
-        ("webloglevel",  0),
-        ("webloglines",  10),
+        ("sysloglevel",  5),
+        ("serialloglevel",  4),
+        ("webloglevel",  5),
+        ("webloglines",  25),
         ("enablesdlog", ""),
-        ("sdloglevel",  0),
+        ("sdloglevel",  5),
         ("enableserial", ""),
         ("serialbaudrate",  115200),
         ("enablesync", ""),
@@ -662,6 +668,8 @@ class scriptTable(uorm.Model):
         # delete the table record
         try:
             os.remove(cls.fname(timestamp))
+            # if cached: delete cached table
+            if hasattr(cls,'_script'):  del cls._script
         except KeyError:
             return False
         return True
@@ -704,6 +712,8 @@ class ruleTable(uorm.Model):
         # delete the table record
         try:
             os.remove(cls.fname(timestamp))
+            # if cached: delete cached table
+            if hasattr(cls,'_rule'):  del cls._rule
         except KeyError:
             return False
         return True

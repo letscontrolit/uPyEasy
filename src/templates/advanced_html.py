@@ -71,8 +71,8 @@ def render(info, advanced):
             <TR>
                <TD>Syslog Level:
                <TD><select name='sysloglevel'>
-                   <option value='0' """
-    if advanced['sysloglevel'] == 0:
+                   <option value='5' """
+    if advanced['sysloglevel'] == 5:
         yield """selected"""
     yield """>Off</option>
                    <option value='1' """
@@ -95,8 +95,8 @@ def render(info, advanced):
             <TR>
                <TD>Serial log Level:
                <TD><select name='serialloglevel'>
-                   <option value='0' """
-    if advanced['serialloglevel'] == 0:
+                   <option value='5' """
+    if advanced['serialloglevel'] == 5:
         yield """selected"""
     yield """>Off</option>
                    <option value='1' """
@@ -119,8 +119,8 @@ def render(info, advanced):
             <TR>
                <TD>Web log Level:
                <TD><select name='webloglevel'>
-                   <option value='0' """
-    if advanced['webloglevel'] == 0:
+                   <option value='5' """
+    if advanced['webloglevel'] == 5:
         yield """selected"""
     yield """>Off</option>
                    <option value='1' """
@@ -141,11 +141,6 @@ def render(info, advanced):
     yield """>Error</option>
                 </select>
             <TR>
-               <TD>Web log Lines:
-               <TD><input type='number' name='webloglines' min=10 max=500 style='width:5em;' value="""
-    yield str(advanced['webloglines'])
-    yield """>
-            <TR>
                <TD>SD Card Value Logger:
                <TD><input type=checkbox id='enablesdlog' name='enablesdlog' """
     if advanced['enablesdlog'] == 'on':
@@ -155,7 +150,7 @@ def render(info, advanced):
                <TD>SD Card log Level:
                <TD><select name='sdloglevel'>
                    <option value='0' """
-    if advanced['sdloglevel'] == 0:
+    if advanced['sdloglevel'] == 5:
         yield """selected"""
     yield """>Off</option>
                    <option value='1' """
