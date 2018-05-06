@@ -32,7 +32,7 @@ class configTable(uorm.Model):
         ("sleepenable", ""),
         ("sleeptime",  60),
         ("sleepfailure", ""),
-        ("version", int(core.__build__)),
+        ("version", core.__build__),
     ])
 
     @classmethod

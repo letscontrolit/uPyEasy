@@ -124,11 +124,13 @@ class plugins(object):
                             db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
                     except Exception as e:
                         self._log.error("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, exception: "+repr(e))
-                
-                _initcomplete = True
+                    else: 
+                        _initcomplete = True
                 
         if not _initcomplete: 
             self._log.debug("Plugins: Init device {} failed!".format(device['name']))
+            # device init failed, disable!
+            db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
                                      
     def loadform(self, plugindata): 
         self._log.debug("Plugins: Loadform plugin "+plugindata['name'])

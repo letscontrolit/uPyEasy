@@ -779,9 +779,6 @@ class hal(object):
     def hardwaredb_init(self):
         self._log.debug("Hal: hardwaredb init")
         
-        #connect to database
-        _dbc.connect()
-
         if self._utils.get_platform() == 'linux':
             self._log.debug("Hal: hardwaredb linux")
             # create hardwareTable
@@ -804,12 +801,9 @@ class hal(object):
             db.hardwareTable.create(boardled1="")
         else:
             self._log.error("Hal: hardwaredb failure")
-        
-        _dbc.close()
-        
  
     def pin(self, vpin, mode = None, pull = None):
-        self._log.debug("Hal: pin = "+vpin)
+        self._log.debug("Hal: pin = {}".format(vpin))
         
         from machine import Pin
         
@@ -882,13 +876,26 @@ class hal(object):
             self._log.error("Hal: pin failure")
 
         return pin
+
+    def vpin2pin(self, vpin):
+        self._log.debug("Hal: vpin2pin = {}".format(vpin))
+
+        # check if id is present
+        if not vpin: 
+            self._log.error("Hal: vpin = None!")
+            return None
+        
+        # get dx map
+        dxmap = db.dxmapTable.getrow()
+
+        # received virtual pin, transforming to actual pin
+        pin = dxmap[vpin].split(';')[0]        
+        
+        return pin
         
     def dxmaps_init(self):
         self._log.debug("Hal: dxmaps_init")
         
-        #connect to database
-        _dbc.connect()
-
         if self._utils.get_platform() == 'linux':
             self._log.debug("Hal: dxmaps_init linux")
             # Create pin mapping
@@ -910,8 +917,6 @@ class hal(object):
             db.dxmapTable.create(count=12,d0="0;GPIO0",d1="1;GPIO1",d2="2;GPIO2",d3="3;GPIO3",d4="4;GPIO4",d5="5;GPIO5",d6="9;GPIO9",d7="10;GPIO10",d8="12;GPIO12",d9="13;GPIO13",d10="14;GPIO14",d11="15;GPIO15")        
         else:
             self._log.error("Hal: dxmaps_init failure")
-        
-        _dbc.close()
 
     def board(self):
         self._log.debug("Hal: board info")
@@ -1015,7 +1020,7 @@ class hal(object):
 
             # Create new or reuse existing
             if id not in self._i2c.keys():
-                self._log.debug("Hal: get i2c esp32, create i2c object with id: "+str(id))
+                self._log.debug("Hal: get i2c esp32, create i2c object with id: {}, sda={}, scl={} ".format(id,hardware["sda"],hardware["scl"]))
                 try:
                     self._i2c[id] = I2C(sda=self.pin(hardware["sda"]), scl=self.pin(hardware["scl"]))
                 except ValueError:
@@ -1155,9 +1160,11 @@ class hal(object):
 
             # Create new or reuse existing
             if id not in self._uart.keys():
-                self._log.debug("Hal: get uart esp32, create uart object with id: "+str(id))
+                txpin = int(self.vpin2pin(hardware["tx"]))
+                rxpin = int(self.vpin2pin(hardware["rx"]))
+                self._log.debug("Hal: get uart esp32, create uart object with id: {}, tx={}, rx={}".format(id,txpin,rxpin))
                 try:
-                    self._uart[id] = UART(id, tx=int(hardware["tx"][1:]), rx=int(hardware["rx"][1:]))
+                    self._uart[id] = UART(id, tx=txpin, rx=rxpin)
                 except ValueError:
                     self._log.error("Hal: get uart esp32, exception valueerror")
                     return None
