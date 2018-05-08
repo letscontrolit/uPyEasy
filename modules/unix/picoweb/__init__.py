@@ -96,8 +96,6 @@ class WebApp:
         # Instantiated lazily
         self.template_loader = None
         self.headers_mode = "parse"
-        # fixed buffer for anti-mem fragmentation
-        self.pagebuff = bytearray(255)
 
     def parse_headers(self, reader):
         headers = {}
@@ -164,12 +162,14 @@ class WebApp:
                 pattern = e[0]
                 handler = e[1]
                 extra = {}
+                methods = []
                 if len(e) > 2:
                     extra = e[2]
-
-                if path == pattern:
-                    found = True
-                    break
+                    methods = extra['methods']
+                    
+                if path == pattern and method in methods:
+                   found = True
+                   break
                 elif not isinstance(pattern, str):
                     # Anything which is non-string assumed to be a ducktype
                     # pattern matcher, whose .match() method is called. (Note:
@@ -228,6 +228,8 @@ class WebApp:
         self.mounts.append(app)
 
     def route(self, url, **kwargs):
+        print(url)
+        print(kwargs)
         def _route(f):
             self.url_map.append((url, f, kwargs))
             return f
@@ -246,8 +248,8 @@ class WebApp:
 
     def render_template(self, writer, tmpl_name, args=()):
         tmpl = self._load_template(tmpl_name)
-        for self.pagebuff in tmpl(*args):
-            yield from writer.awrite(self.pagebuff)
+        for s in tmpl(*args):
+            yield from writer.awrite(s)
 
     def render_str(self, tmpl_name, args=()):
         #TODO: bloat
@@ -269,8 +271,7 @@ class WebApp:
 
     def handle_static(self, req, resp):
         path = req.url_match.group(1)
-        if self.debug > 0:
-            print(path)
+        print(path)
         if ".." in path:
             yield from http_error(resp, "403")
             return

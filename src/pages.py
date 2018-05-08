@@ -49,106 +49,57 @@ def auth_page(request, response):
         return False
     else: return True
         
-@app.route("/password", methods=['GET','POST'])
-def authenticate_page(request, response):
-    _log.debug("Pages: Entering Authentication Page")
+@app.route("/password", methods=['GET'])
+def get_authenticate_page(request, response):
+    _log.debug("Pages GET: Entering Authentication Page")
 
-    if request.method == 'GET':
-        info={}
+    info={}
 
-        info['name']        = _utils.get_upyeasy_name()
-        info['copyright']   = core.__copyright__
-        info['holder']      = core.__author__
-        info['message']     = ""
+    info['name']        = _utils.get_upyeasy_name()
+    info['copyright']   = core.__copyright__
+    info['holder']      = core.__author__
+    info['message']     = ""
 
-        # menu settings
-        menu = 1
-        advanced = db.advancedTable.getrow()
-        gc.collect()
+    # menu settings
+    menu = 1
+    advanced = db.advancedTable.getrow()
+    gc.collect()
 
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "password.html",(info,))
-        yield from app.render_template(response, "footer.html",(info,))
-    elif request.method == 'POST':
-         #Auth password
-        _log.debug("Pages: Authenticatie password")
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "password.html",(info,))
+    yield from app.render_template(response, "footer.html",(info,))
 
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-        # same password = ok, no password -> password page redirect
-        if uform["password"]:
-            #print (uform["password"])
-            # Get admin password if any
-            config = db.configTable.getrow()
-            #print(config["password"])
-            if config["password"] == uform["password"]:
-                import uhashlib
-                configpw = config["password"]
-                hash = str(uhashlib.sha256(configpw).digest())
-                #print(hash)
-                # same password, send the cookie and redirect to homepage
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Set-Cookie: upyeasy="+hash+"\r\n")
-                yield from response.awrite("Location: /\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-                return
-            else:
+@app.route("/password", methods=['POST'])
+def post_authenticate_page(request, response):
+     #Auth password
+    _log.debug("Pages POST: Authenticatie password")
 
-                info={}
-                info['name']        = _utils.get_upyeasy_name()
-                info['copyright']   = core.__copyright__
-                info['holder']      = core.__author__
-                info['message']     = "Authentication Failed!"
-                
-                # menu settings
-                menu = 1
-                advanced = db.advancedTable.getrow()
-                gc.collect()
-
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header.html",(info, menu, advanced))
-                yield from app.render_template(response, "password.html",(info,))
-                yield from app.render_template(response, "footer.html",(info,))
-    
-@app.route("/", methods=['GET'])
-def homepage(request, response):
-    if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        return
-    
-    #Display home page
-    _log.debug("Pages: Entering Home Page")
-
-    if request.method == 'GET':
-        # opstartmode == config mode?
-        
-        #Get network record key
-        network = db.networkTable.getrow()
-
-        if core.initial_upyeasywifi == network['mode'] or core.initial_upyeasywifi == core.NET_ETH:
-            #Display home page in station mode
-            _log.debug("Pages: Home Page Station mode")
-            
-            # set info array
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+    # same password = ok, no password -> password page redirect
+    if uform["password"]:
+        # Get admin password if any
+        config = db.configTable.getrow()
+        if config["password"] == uform["password"]:
+            import uhashlib
+            configpw = config["password"]
+            hash = str(uhashlib.sha256(configpw).digest())
+            #print(hash)
+            # same password, send the cookie and redirect to homepage
+            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+            yield from response.awrite("Set-Cookie: upyeasy="+hash+"\r\n")
+            yield from response.awrite("Location: /\r\n")
+            yield from response.awrite("Content-Type: text/html\r\n")
+            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            return
+        else:
             info={}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['unit'] = _utils.get_unit_nr()
-            info['version'] = core.__version__
-            info['time'] = _hal.get_time()
-            info['platform'] = _utils.get_platform()
-            info['uptime'] = _utils.get_uptime()
-            info['heap'] = _utils.get_mem()
-            info['ip'] = _hal.get_ip_address()    
-            info['stack'] = _utils.get_stack_current()
-            _log.debug("Pages: Home Page Data collected")
-            
-            nodes = {}
+            info['name']        = _utils.get_upyeasy_name()
+            info['copyright']   = core.__copyright__
+            info['holder']      = core.__author__
+            info['message']     = "Authentication Failed!"
             
             # menu settings
             menu = 1
@@ -157,242 +108,300 @@ def homepage(request, response):
 
             yield from picoweb.start_response(response)
             yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "homepage.html",(info,nodes,))
+            yield from app.render_template(response, "password.html",(info,))
             yield from app.render_template(response, "footer.html",(info,))
-        else:
-            #Display home page in config access point mode
-            _log.debug("Pages: Home Page Config STA/AP mode")
-            
-            # set info array
-            info={}
-            info['name'] = "Set SSID!"
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            
-            # setup wifi
-            import network as wifi
-            wnic = wifi.WLAN(wifi.STA_IF)
-            wnic.active(True)
-            
-            # Get list of ssid's
-            wifilist = wnic.scan()
-            
-            # close wifi station
-            wnic.active(False)
-            
-            # parse list, exchange encryption
-            wifiaplist = []
-            wifisec = ['Open','WEP','WPA-PSK','WPA2-PSK','WPA/WPA2-PSK']
-            wifihide = ['Visible','Hidden']
-            for wifi in wifilist:
-                _log.debug("Hal: esp32, Scan: Ssid found: "+str(wifi[0], 'utf8')+" Channel: "+str(wifi[2])+" Strength: "+str(wifi[3]) + ' dBm' + " Security: " + str(wifi[4])+ " Hidden: " + str(wifi[5]))
-                wifi_info = {
-                    "ssid":    str(wifi[0], 'utf8'),
-                    "channel":    str(wifi[2]),
-                    "strength":    str(wifi[3]),
-                    "security":    wifisec[wifi[4]],
-                    "hidden":    wifihide[wifi[5]],
-                }
-                wifiaplist.append(wifi_info)
-            wifi_ap = sorted(wifiaplist, key=lambda k: (k['ssid'],k['strength'])) 
-            
-            # Show wifi list page
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header_ap.html",(info,))
-            yield from app.render_template(response, "wifi_ap.html",(wifi_ap,))   
-            yield from app.render_template(response, "footer.html",(info,))
-    elif request.method == 'POST':
-         #Update config
-        _log.debug("Pages: Update SSID config")
+    
+@app.route("/", methods=['GET'])
+def get_home_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+    
+    #Display home page
+    _log.debug("Pages GET: Entering Home Page")
 
+    #Get network record key
+    network = db.networkTable.getrow()
+
+    if core.initial_upyeasywifi == network['mode'] or core.initial_upyeasywifi == core.NET_ETH:
+        #Display home page in station mode
+        _log.debug("Pages: Home Page Station mode")
+        
+        # set info array
+        info={}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['unit'] = _utils.get_unit_nr()
+        info['version'] = core.__version__
+        info['time'] = _hal.get_time()
+        info['platform'] = _utils.get_platform()
+        info['uptime'] = _utils.get_uptime()
+        info['heap'] = _utils.get_mem()
+        info['ip'] = _hal.get_ip_address()    
+        info['stack'] = _utils.get_stack_current()
+        _log.debug("Pages: Home Page Data collected")
+        
+        nodes = {}
+        
+        # menu settings
+        menu = 1
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "homepage.html",(info,nodes,))
+        yield from app.render_template(response, "footer.html",(info,))
+    else:
+        #Display home page in config access point mode
+        _log.debug("Pages: Home Page Config STA/AP mode")
+        
         # set info array
         info={}
         info['name'] = "Set SSID!"
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
+        
+        # setup wifi
+        import network as wifi
+        wnic = wifi.WLAN(wifi.STA_IF)
+        wnic.active(True)
+        
+        # Get list of ssid's
+        wifilist = wnic.scan()
+        
+        # close wifi station
+        wnic.active(False)
+        
+        # parse list, exchange encryption
+        wifiaplist = []
+        wifisec = ['Open','WEP','WPA-PSK','WPA2-PSK','WPA/WPA2-PSK']
+        wifihide = ['Visible','Hidden']
+        for wifi in wifilist:
+            _log.debug("Hal: esp32, Scan: Ssid found: "+str(wifi[0], 'utf8')+" Channel: "+str(wifi[2])+" Strength: "+str(wifi[3]) + ' dBm' + " Security: " + str(wifi[4])+ " Hidden: " + str(wifi[5]))
+            wifi_info = {
+                "ssid":    str(wifi[0], 'utf8'),
+                "channel":    str(wifi[2]),
+                "strength":    str(wifi[3]),
+                "security":    wifisec[wifi[4]],
+                "hidden":    wifihide[wifi[5]],
+            }
+            wifiaplist.append(wifi_info)
+        wifi_ap = sorted(wifiaplist, key=lambda k: (k['ssid'],k['strength'])) 
+        
+        # Show wifi list page
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header_ap.html",(info,))
+        yield from app.render_template(response, "wifi_ap.html",(wifi_ap,))   
+        yield from app.render_template(response, "footer.html",(info,))
 
-        #Get network record key
-        dbnetwork = db.networkTable.getrow()
+@app.route("/", methods=['POST'])
+def post_home_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+    
+    #Display home page
+    _log.debug("Pages POST: Entering Home Page")
 
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
+     #Update config
+    _log.debug("Pages: Update SSID config")
 
-        # map form values to db records
-        network = _utils.map_form2db(dbnetwork, uform)
+    # set info array
+    info={}
+    info['name'] = "Set SSID!"
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
 
-        # STA mode or AP mode?
-        if network['ssid'] == 'APMODE':
-            _log.debug("Pages: Update SSID config, AP mode")
+    #Get network record key
+    dbnetwork = db.networkTable.getrow()
+
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    # map form values to db records
+    network = _utils.map_form2db(dbnetwork, uform)
+
+    # STA mode or AP mode?
+    if network['ssid'] == 'APMODE':
+        _log.debug("Pages: Update SSID config, AP mode")
+        # update network
+        db.networkTable.update({"timestamp":dbnetwork['timestamp']},mode='AP')
+
+        # redirect to homepage!
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+
+        # Reboot in 1 seconds!
+        loop = asyncio.get_event_loop()
+        loop.call_later(3,_hal.reboot_async())
+    else:
+        _log.debug("Pages: Update SSID config, STA mode")
+        ipaddress = ''
+        # connect to network to get ip-address
+        if _hal.init_wifi(network['ssid'], network['key'], ipaddress):
+        
+            _log.debug("Pages: Update SSID config, wifi connect succesfull")
+            info['ipaddress'] = ipaddress
+            info['ssid'] = network['ssid']
+
+            _log.debug("Pages: SSID: "+info['ssid'])
+            _log.debug("Pages: SSID ip address: "+info['ipaddress'])
+
             # update network
-            db.networkTable.update({"timestamp":dbnetwork['timestamp']},mode='AP')
+            cid = db.networkTable.update({"timestamp":dbnetwork['timestamp']},ssid=network['ssid'],key=network['key'])
 
-            # redirect to homepage!
+            # Show wifi reboot page
+            yield from picoweb.start_response(response)
+            yield from app.render_template(response, "header_ap.html",(info,))
+            yield from app.render_template(response, "wifi_reboot.html",(info,))   
+            yield from app.render_template(response, "footer.html",(info,))
+
+            # Reboot in 10 seconds!
+            loop = asyncio.get_event_loop()
+            loop.call_later(10,_hal.reboot_async())
+        else:
+            _log.error("Pages: SSID failed: "+network['ssid'])
+            _log.error("Pages: SSID failed password: "+network['key'])
+
+            # could not connect, retry!
             yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
             yield from response.awrite("Location: /\r\n")
             yield from response.awrite("Content-Type: text/html\r\n")
             yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
-            # Reboot in 1 seconds!
-            loop = asyncio.get_event_loop()
-            loop.call_later(3,_hal.reboot_async())
-        else:
-            _log.debug("Pages: Update SSID config, STA mode")
-            ipaddress = ''
-            # connect to network to get ip-address
-            if _hal.init_wifi(network['ssid'], network['key'], ipaddress):
-            
-                _log.debug("Pages: Update SSID config, wifi connect succesfull")
-                info['ipaddress'] = ipaddress
-                info['ssid'] = network['ssid']
-
-                _log.debug("Pages: SSID: "+info['ssid'])
-                _log.debug("Pages: SSID ip address: "+info['ipaddress'])
-
-                # update network
-                cid = db.networkTable.update({"timestamp":dbnetwork['timestamp']},ssid=network['ssid'],key=network['key'])
-
-                # Show wifi reboot page
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header_ap.html",(info,))
-                yield from app.render_template(response, "wifi_reboot.html",(info,))   
-                yield from app.render_template(response, "footer.html",(info,))
-
-                # Reboot in 10 seconds!
-                loop = asyncio.get_event_loop()
-                loop.call_later(10,_hal.reboot_async())
-            else:
-                _log.error("Pages: SSID failed: "+network['ssid'])
-                _log.error("Pages: SSID failed password: "+network['key'])
-
-                # could not connect, retry!
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-            
-@app.route("/config", methods=['GET','POST'])
-def configpage(request, response):
+                
+@app.route("/config", methods=['GET'])
+def get_config_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Edit Config
+    _log.debug("Pages GET: Display Config Page")
     
-    if request.method == 'GET':
-        _log.debug("Pages: Display Config Page")
-        
-        #init ONLY!
-        try:
-            _log.debug("Pages: Init Config Table")
-            db.configTable.create_table()
-        except OSError:
-            pass
+    #init ONLY!
+    try:
+        _log.debug("Pages: Init Config Table")
+        db.configTable.create_table()
+    except OSError:
+        pass
 
-        config = db.configTable.getrow()
-        
-        #Get network record key
-        network = db.networkTable.getrow()
-
-        info={}
-
-        info['name'] = config['name']
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
-        info['unit'] = config['unit']
-        info['port']=config['port']
-        info['password'] = config['password']
-        if network['ssid']: info['ssid'] = network['ssid']
-        else: info['ssid'] = '' 
-        if network['key']: info['key'] = network['key']
-        else: info['key'] = '' 
-        if network['fbssid']: info['fbssid'] = network['fbssid']
-        else: info['fbssid'] = '' 
-        if network['fbkey']: info['fbkey'] = network['fbkey']
-        else: info['fbkey'] = '' 
-        if network['ip']: info['ip'] = network['ip']
-        else: info['ip'] = ''  
-        if network['gateway']: info['gateway'] = network['gateway']
-        else: info['gateway'] = ''
-        if network['subnet']: info['subnet'] = network['subnet']
-        else: info['subnet'] = ''
-        if network['dns']: info['dns'] = network['dns']
-        else: info['dns'] = ''
-        if network['mode']: info['mode'] = network['mode']
-        else: info['mode'] = 'STA'
-        info['sleepenable'] = config['sleepenable']
-        info['sleeptime'] = config['sleeptime']
-        info['sleepfailure'] = config['sleepfailure']
-        if _utils.get_platform() == 'linux':
-           info['wifi'] = "disabled"
-           info['ethernet'] = "disabled"
-           info['sleep'] = ""
-        elif _utils.get_platform() == 'pyboard':
-           info['wifi'] = "disabled"
-           info['ethernet'] = ""
-           info['sleep'] = ""
-        elif _utils.get_platform() == 'esp32':
-           info['wifi'] = ""
-           info['ethernet'] = ""
-           info['sleep'] = ""
-        elif _utils.get_platform() == 'esp8266':
-           info['wifi'] = ""
-           info['ethernet'] = ""
-           info['sleep'] = ""
-        else:
-           info['wifi'] = ""
-           info['ethernet'] = ""
-           info['sleep'] = ""
-
-        # menu settings
-        menu = 2
-        advanced = db.advancedTable.getrow()
-        gc.collect()
-
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "config.html",(info,))
-        yield from app.render_template(response, "footer.html",(info,))
-
-    elif request.method == 'POST':
-         #Update config
-        _log.debug("Pages: Update config")
-        
-        #init ONLY!
-        try:
-            db.configTable.create_table()
-        except OSError:
-            pass
-
-        #Get config record key
-        _dbconfig = db.configTable.getrow()
-
-        #Get network record key
-        dbnetwork = db.networkTable.getrow()
-
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        # map form values to db records
-        config = _utils.map_form2db(_dbconfig, uform)
-        network = _utils.map_form2db(dbnetwork, uform)
-
-        # Update config
-        cid = db.configTable.update({"timestamp":config['timestamp']},name=config['name'],unit=config['unit'],password=config['password'],sleepenable=config['sleepenable'],sleeptime=config['sleeptime'],sleepfailure=config['sleepfailure'],port=config['port'])
-
-        # update network
-        cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'],fbssid=network['fbssid'],fbkey=network['fbkey'],ip=network['ip'],gateway=network['gateway'],subnet=network['subnet'],dns=network['dns'],mode=network['mode'])
-
-        #return to controllers page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-        yield from response.awrite("Location: /config\r\n")
-        yield from response.awrite("Content-Type: text/html\r\n")
-        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+    config = db.configTable.getrow()
     
+    #Get network record key
+    network = db.networkTable.getrow()
+
+    info={}
+
+    info['name'] = config['name']
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+    info['unit'] = config['unit']
+    info['port']=config['port']
+    info['password'] = config['password']
+    if network['ssid']: info['ssid'] = network['ssid']
+    else: info['ssid'] = '' 
+    if network['key']: info['key'] = network['key']
+    else: info['key'] = '' 
+    if network['fbssid']: info['fbssid'] = network['fbssid']
+    else: info['fbssid'] = '' 
+    if network['fbkey']: info['fbkey'] = network['fbkey']
+    else: info['fbkey'] = '' 
+    if network['ip']: info['ip'] = network['ip']
+    else: info['ip'] = ''  
+    if network['gateway']: info['gateway'] = network['gateway']
+    else: info['gateway'] = ''
+    if network['subnet']: info['subnet'] = network['subnet']
+    else: info['subnet'] = ''
+    if network['dns']: info['dns'] = network['dns']
+    else: info['dns'] = ''
+    if network['mode']: info['mode'] = network['mode']
+    else: info['mode'] = 'STA'
+    info['sleepenable'] = config['sleepenable']
+    info['sleeptime'] = config['sleeptime']
+    info['sleepfailure'] = config['sleepfailure']
+    if _utils.get_platform() == 'linux':
+       info['wifi'] = "disabled"
+       info['ethernet'] = "disabled"
+       info['sleep'] = ""
+    elif _utils.get_platform() == 'pyboard':
+       info['wifi'] = "disabled"
+       info['ethernet'] = ""
+       info['sleep'] = ""
+    elif _utils.get_platform() == 'esp32':
+       info['wifi'] = ""
+       info['ethernet'] = ""
+       info['sleep'] = ""
+    elif _utils.get_platform() == 'esp8266':
+       info['wifi'] = ""
+       info['ethernet'] = ""
+       info['sleep'] = ""
+    else:
+       info['wifi'] = ""
+       info['ethernet'] = ""
+       info['sleep'] = ""
+
+    # menu settings
+    menu = 2
+    advanced = db.advancedTable.getrow()
+    gc.collect()
+
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "config.html",(info,))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/config", methods=['POST'])
+def post_config_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Update config
+    _log.debug("Pages POST: Update config")
+    
+    #init ONLY!
+    try:
+        db.configTable.create_table()
+    except OSError:
+        pass
+
+    #Get config record key
+    _dbconfig = db.configTable.getrow()
+
+    #Get network record key
+    dbnetwork = db.networkTable.getrow()
+
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    # map form values to db records
+    config = _utils.map_form2db(_dbconfig, uform)
+    network = _utils.map_form2db(dbnetwork, uform)
+
+    # Update config
+    cid = db.configTable.update({"timestamp":config['timestamp']},name=config['name'],unit=config['unit'],password=config['password'],sleepenable=config['sleepenable'],sleeptime=config['sleeptime'],sleepfailure=config['sleepfailure'],port=config['port'])
+
+    # update network
+    cid = db.networkTable.update({"timestamp":network['timestamp']},ssid=network['ssid'],key=network['key'],fbssid=network['fbssid'],fbkey=network['fbkey'],ip=network['ip'],gateway=network['gateway'],subnet=network['subnet'],dns=network['dns'],mode=network['mode'])
+
+    #return to controllers page
+    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+    yield from response.awrite("Location: /config\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        
 @app.route("/controllers", methods=['GET'])
-def controllerspage(request, response):
+def get_controllers_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
@@ -419,113 +428,211 @@ def controllerspage(request, response):
     yield from app.render_template(response, "controllers.html",(info,controllers,))
     yield from app.render_template(response, "footer.html",(info,))
 
-@app.route("/controller_setting", methods=['GET','POST'])
-def controllersettingpage(request, response):
+@app.route("/controller_setting", methods=['GET'])
+def get_controller_setting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display controller settings page
-    _log.debug("Pages: Entering Controller Settings Page")
+    _log.debug("Pages GET: Entering Controller Settings Page")
 
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug(''.join(list(parsed_qs)))
-        qs_id = parsed_qs.get("id")
-        _log.debug(''.join(qs_id))
-        id = int(qs_id[0])
-        _log.debug(str(id))
-        qs_oper = parsed_qs.get("oper")
-        if qs_oper: 
-            oper = qs_oper[0] 
-            _log.debug(oper)
-        else: oper = None
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    _log.debug('Parsed QS: {}'.format(parsed_qs))
+    qs_id = parsed_qs.get("id")
+    _log.debug(''.join(qs_id))
+    id = int(qs_id[0])
+    _log.debug('id = {}'.format(id))
+    qs_oper = parsed_qs.get("oper")
+    if qs_oper: 
+        oper = qs_oper[0] 
+        _log.debug(oper)
+    else: oper = None
+    
+    if id > 0 and not oper:
+        #Edit controller
+        _log.debug("Pages: Edit Controller: "+str(id))
         
-        if id > 0 and not oper:
-            #Edit controller
-            _log.debug("Pages: Edit Controller: "+str(id))
+        #init ONLY!
+        try:
+            db.protocolTable.create_table()
+        except OSError:
+            pass
+        try:
+            db.controllerTable.create_table()  
+        except OSError:
+            pass
+                
+        info={}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+
+        # Get correct controller
+        controllers = db.controllerTable.public()
+        for controller in controllers:
+            if controller['id'] == id:
+               break
+        
+        # Get list of protocols
+        protocols = db.protocolTable.public()
+        for protocol in protocols:
+            if protocol['name'] == controller['protocol']:
+               break
+        info['id'] = protocol['id']
+        info['protocolname']=protocol['name']
+       
+        # menu settings
+        menu = 3
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "controller_header.html",(info, protocol))
+        yield from app.render_template(response, protocol['template'],(info,protocols,controller,))
+        yield from app.render_template(response, "controller_footer.html",(info,controller))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif id > 0 and oper == 'del':
+        # delete controller
+        import os
+
+        _log.debug("Pages: Delete Controller: "+str(id))
+        
+        try:
+            db.controllerTable.create_table()  
+        except OSError:
+            pass
+
+        # Get correct controller
+        controllers = db.controllerTable.public()
+        for controller in controllers:
+            if controller['id'] == id:
+               break
+        if db.controllerTable.delete(controller['timestamp']):
+            _log.debug("Pages: remove record file succeeded: "+db.controllerTable.fname(controller['timestamp']))
+        else:
+            _log.error("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
+        
+        #gc.collect()
+        #deleted, return to controllers page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /controllers\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+    elif id == 0:
+        #New device
+        _log.debug("Pages: New controller, choose controller")
+        
+        # Get list of protocols
+        protocols = db.protocolTable.public()
+
+        protocols = sorted(protocols, key=lambda k: k['name'])
+
+        info={}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+
+        # menu settings
+        menu = 3
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+        
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "controller.html",(info, protocols,))
+        yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/controller_setting", methods=['POST'])
+def post_controller_settingpage(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display controller settings page
+    _log.debug("Pages POST: Entering Controller Settings Page")
+
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    _log.debug('Parsed QS: {}'.format(parsed_qs))
+    id = int(''.join(parsed_qs.get("id")))
+    _log.debug('id = {}'.format(id))
+    qs_oper = parsed_qs.get("oper")
+    if qs_oper: 
+        oper = qs_oper[0] 
+        _log.debug(oper)
+    else: oper = None
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+    
+    if id > 0:
+        #Update controller
+        _log.debug("Pages: Update Controller: {}".format(id))
+        
+        #init ONLY!
+        try:
+            db.protocolTable.create_table()
+        except OSError:
+            pass
+        try:
+            db.controllerTable.create_table()  
+        except OSError:
+            pass
+
+        # Get list of protocols
+        protocols = db.protocolTable.public()
+        for protocol in protocols:
+            if protocol['name'] == uform['protocol']:
+               break
+        _log.debug('Protocol: {}'.format(protocol['name']))
+
+        # Get correct controller
+        controllers = db.controllerTable.public()
+        for _dbcontroller in controllers:
+            if _dbcontroller['id'] == id:
+               break
+
+        controller = _utils.map_form2db(_dbcontroller, uform)
+        
+        # Verify mandatory fields!
+        if controller['hostname']:
+            cid = db.controllerTable.update({"timestamp":controller['timestamp']},id=controller['id'],usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
+        else:
+            _log.error("Failed to update controller entry: not all fields are filled")
+
+        #return to controllers page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /controllers\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+    elif id == 0:
+        #Create controller
+        _log.debug("Pages: Create Controller")
+
+        protocolname = uform.get('protocol','')
+        _log.debug("Pages: Controller protocolid: {}".format(protocolname))
+
+        #Controller creation/protocol change
+        if not protocolname:
+            #New controller
+            _log.debug("Pages: New Controller: {}".format(id))
             
             #init ONLY!
             try:
                 db.protocolTable.create_table()
             except OSError:
                 pass
-            try:
-                db.controllerTable.create_table()  
-            except OSError:
-                pass
                     
-            info={}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-
-            # Get correct controller
-            controllers = db.controllerTable.public()
-            for controller in controllers:
-                if controller['id'] == id:
-                   break
-            
             # Get list of protocols
+            protocolid = int(uform.get('protocolid',0))
             protocols = db.protocolTable.public()
             for protocol in protocols:
-                if protocol['name'] == controller['protocol']:
-                   break
-            info['id'] = protocol['id']
-            info['protocolname']=protocol['name']
-           
-            # menu settings
-            menu = 3
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, protocol['template'],(info,protocols,controller,))
-            yield from app.render_template(response, "footer.html",(info,))
-        elif id > 0 and oper == 'del':
-            # delete controller
-            import os
-
-            _log.debug("Pages: Delete Controller: "+str(id))
-            
-            try:
-                db.controllerTable.create_table()  
-            except OSError:
-                pass
-
-            # Get correct controller
-            controllers = db.controllerTable.public()
-            for controller in controllers:
-                if controller['id'] == id:
-                   break
-            if db.controllerTable.delete(controller['timestamp']):
-                _log.debug("Pages: remove record file succeeded: "+db.controllerTable.fname(controller['timestamp']))
-            else:
-                _log.error("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
-            
-            #gc.collect()
-            #deleted, return to controllers page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /controllers\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
-        elif id == 0:
-            #New controller
-            _log.debug("Pages: New Controller: "+str(id))
-            
-            #init ONLY!
-            try:
-                db.protocolTable.create_table()
-            except OSError:
-                pass
-                    
-            # Get list of protocols
-            protocols = db.protocolTable.public()
-            protocol = db.protocolTable.getrow()
+                print(protocol['id'])
+                if protocol['id'] == protocolid:
+                    break
 
             info={}
             info['name']=_utils.get_upyeasy_name()
@@ -544,349 +651,214 @@ def controllersettingpage(request, response):
 
             yield from picoweb.start_response(response)
             yield from app.render_template(response, "header.html",(info, menu, advanced))
+            yield from app.render_template(response, "controller_header.html",(info, protocol))
             yield from app.render_template(response, protocol['template'],(info,protocols,controller,))
+            yield from app.render_template(response, "controller_footer.html",(info,controller))
             yield from app.render_template(response, "footer.html",(info,))
-
-    elif request.method == 'POST' and request.qs != "":
-        _log.debug("Pages: POST")
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug(''.join(list(parsed_qs)))
-        id = int(''.join(parsed_qs.get("id")))
-        _log.debug(str(id))
-        qs_oper = parsed_qs.get("oper")
-        if qs_oper: 
-            oper = qs_oper[0] 
-            _log.debug(oper)
-        else: oper = None
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-        
-        if uform['currentprotocol'] != uform['protocol']:
-            protocolchange = True
-        else: protocolchange = False
-        _log.debug('Current Protocol: '+ uform['currentprotocol'])
-        _log.debug('New Protocol: '+ uform['protocol'])
-
-        if id > 0:
-            #Update controller
-            _log.debug("Pages: Update Controller: "+str(id))
+        else:
+            #Controller creation
+            _log.debug("Pages: Create new Controller")
             
-            if not protocolchange:
-                # Same  protocol, update controller!
-                _log.debug("Pages: Update controller: Same  protocol")
+            try:
+                db.controllerTable.create_table()  
+            except OSError:
+                pass
 
-                #init ONLY!
-                try:
-                    db.protocolTable.create_table()
-                except OSError:
-                    pass
-                try:
-                    db.controllerTable.create_table()  
-                except OSError:
-                    pass
+             #init ONLY!
+            try:
+                db.protocolTable.create_table()
+            except OSError:
+                pass
 
-                # Get list of protocols
-                protocols = db.protocolTable.public()
-                for protocol in protocols:
-                    if protocol['name'] == uform['protocol']:
-                       break
-                _log.debug('Protocol: {}'.format(protocol['name']))
+            # Get correct controller max count
+            controllers = db.controllerTable.public()
+            cnt = 0
+            for controller in controllers:
+                if controller['id'] > cnt:
+                   cnt = controller['id']
+            _log.debug("Pages: Controller Count: {}".format(cnt))
+             
+            # Empty controller
+            _dbcontroller = db.controllerTable.__schema__
 
-                # Get correct controller
-                controllers = db.controllerTable.public()
-                for _dbcontroller in controllers:
-                    if _dbcontroller['id'] == id:
-                       break
-
-                controller = _utils.map_form2db(_dbcontroller, uform)
-                
-                # Verify mandatory fields!
-                if controller['hostname']:
-                    cid = db.controllerTable.update({"timestamp":controller['timestamp']},id=controller['id'],usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
-                else:
-                    _log.error("Failed to update controller entry: not all fields are filled")
-
-                #return to controllers page
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /controllers\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            controller = _utils.map_form2db(_dbcontroller, uform)
+            print(controller)
+            print(uform)
+            # Verify mandatory fields!
+            if controller['hostname']:
+                cid = db.controllerTable.create(id=cnt+1,usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
             else:
-                # Different  protocol, empty controller!
-                _log.debug("Pages: Update controller: different protocol")
+                _log.error("Failed to create controller entry: not all fields are filled")
+
+            #only do init IF non-AP mode!
+            if core.initial_upyeasywifi != core.NET_STA_AP:
+                #init controller!
+                _protocols.initcontroller(controller)
                 
-                # Get list of protocols
-                protocols = db.protocolTable.public()
-                for protocol in protocols:
-                    if protocol['name'] == uform['protocol']:
-                       break
-                _log.debug('Protocol: {}'.format(protocol['name']))
-
-                info={}
-                info['name'] = _utils.get_upyeasy_name()
-                info['copyright']=core.__copyright__
-                info['holder']= core.__author__
-                info['id'] = protocol['id']
-                info['protocolname'] = protocol['name']
-
-                # Empty controller
-                controller = db.controllerTable.__schema__
+            #return to controllers page
+            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+            yield from response.awrite("Location: /controllers\r\n")
+            yield from response.awrite("Content-Type: text/html\r\n")
+            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
                 
-                # menu settings
-                menu = 3
-                advanced = db.advancedTable.getrow()
-                gc.collect()
-
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header.html",(info, menu, advanced))
-                yield from app.render_template(response, protocol['template'],(info,protocols,controller,))
-                yield from app.render_template(response, "footer.html",(info,))
-                
-        elif id == 0:
-            #Create controller
-            _log.debug("Pages: Create Controller")
-
-            controllerhostname = uform['hostname']
-            _log.debug("Pages: Controller hostname: "+controllerhostname)
-            
-            #Controller creation/protocol change
-            if not controllerhostname and not protocolchange:
-                #empty: return to controllers page
-                _log.debug("Pages: Empty new Controller")
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /controllers\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-            elif not controllerhostname and protocolchange:
-                #Protocol change
-                _log.debug("Pages: Empty controller protocol change, new protocol: "+uform['protocol'])
-                
-                #init ONLY!
-                try:
-                    db.protocolTable.create_table()
-                except OSError:
-                    pass
-                        
-                # Get list of protocols
-                protocols = db.protocolTable.public()
-                for protocol in protocols:
-                    if protocol['name'] == uform['protocol']:
-                       break
-                _log.debug('Protocol: {}'.format( protocol['name']))
-
-                info={}
-                info['name'] = _utils.get_upyeasy_name()
-                info['copyright']=core.__copyright__
-                info['holder']= core.__author__
-                info['id'] = protocol['id']
-                info['protocolname'] = protocol['name']
-
-                # Empty controller
-                controller = db.controllerTable.__schema__
-                
-                # menu settings
-                menu = 3
-                advanced = db.advancedTable.getrow()
-                gc.collect()
-
-                yield from picoweb.start_response(response)
-                yield from app.render_template(response, "header.html",(info, menu, advanced))
-                yield from app.render_template(response, protocol['template'],(info,protocols,controller,))
-                yield from app.render_template(response, "footer.html",(info,))
-            else:
-                #Controller creation
-                _log.debug("Pages: Create new Controller")
-                
-                try:
-                    db.controllerTable.create_table()  
-                except OSError:
-                    pass
-
-                 #init ONLY!
-                try:
-                    db.protocolTable.create_table()
-                except OSError:
-                    pass
-
-                # Get correct controller max count
-                controllers = db.controllerTable.public()
-                cnt = 0
-                for controller in controllers:
-                    if controller['id'] > cnt:
-                       cnt = controller['id']
-                _log.debug("Pages: Controller Count: {}".format(cnt))
-                 
-                # Empty controller
-                _dbcontroller = db.controllerTable.__schema__
-
-                controller = _utils.map_form2db(_dbcontroller, uform)
- 
-                # Verify mandatory fields!
-                if controller['hostname']:
-                    cid = db.controllerTable.create(id=cnt+1,usedns=controller['usedns'],hostname=controller['hostname'],port=controller['port'],user=controller['user'],password=controller['password'],subscribe=controller['subscribe'],publish=controller['publish'], enable=controller['enable'], protocol=controller['protocol'])
-                else:
-                    _log.error("Failed to create controller entry: not all fields are filled")
-
-                #only do init IF non-AP mode!
-                if core.initial_upyeasywifi != core.NET_STA_AP:
-                    #init controller!
-                    _protocols.initcontroller(controller)
-                    
-                #return to controllers page
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /controllers\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-                    
-@app.route("/hardware", methods=['GET','POST'])
-def hardwarepage(request, response):
+@app.route("/hardware", methods=['GET'])
+def get_hardware_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display hardware page
-    _log.debug("Pages: Entering Hardware Page")
-    if request.method == 'GET':
-        _log.debug("Pages: Display hardware Page")
+    _log.debug("Pages GET: Display hardware Page")
+    
+    # Get hardware config
+    hardware = db.hardwareTable.getrow()
+
+    # Get dxpin config
+    dxpin = db.dxpinTable.getrow()
+
+    #General info
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+
+    # Get dx labels
+    dx_label = _utils.get_dxlabels()
+    #_log.debug("Pages: dx_label: "+"-".join(dx_label))
+
+    # menu settings
+    menu = 4
+    advanced = db.advancedTable.getrow()
+    gc.collect()
+
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "hardware.html",(info, hardware, dx_label, dxpin,))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/hardware", methods=['POST'])
+def post_hardware_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+     #Update config
+    _log.debug("Pages POST: Update hardware")
+    
+    # Get dxpin config, but it's a generator!
+    dxpin = db.dxpinTable.getrow()
+    # convert namedtuple to list which can be muted
+
+    # Get hardware config, but it's a generator!
+    dbhardware = db.hardwareTable.getrow()
+
+    # get dx map
+    dxmap = db.dxmapTable.getrow()
+    
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    hardware = _utils.map_form2db(dbhardware, uform)
+
+    # New/reassigned/delete pin assignment
+    _utils.pin_assignment('boardled',hardware['boardled'],dxmap["count"],dxpin)
+    _utils.pin_assignment('sda',hardware['sda'],dxmap["count"],dxpin)
+    _utils.pin_assignment('scl',hardware['scl'],dxmap["count"],dxpin)
+    _utils.pin_assignment('mosi',hardware['mosi'],dxmap["count"],dxpin)
+    _utils.pin_assignment('miso',hardware['miso'],dxmap["count"],dxpin)
+    _utils.pin_assignment('sck',hardware['sck'],dxmap["count"],dxpin)
+    _utils.pin_assignment('nss',hardware['nss'],dxmap["count"],dxpin)
+    _utils.pin_assignment('tx',hardware['tx'],dxmap["count"],dxpin)
+    _utils.pin_assignment('rx',hardware['rx'],dxmap["count"],dxpin)
+
+    # Verify mandatory fields!
+    cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},boardled=hardware['boardled'],inverseled=hardware['inverseled'],sda=hardware['sda'],scl=hardware['scl'],mosi=hardware['mosi'],miso=hardware['miso'],sck=hardware['sck'],nss=hardware['nss'],tx=hardware['tx'],rx=hardware['rx'])
+
+    # Update pin assignments
+    cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+
+    #return to hardwares page
+    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+    yield from response.awrite("Location: /hardware\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         
-        # Get hardware config
-        hardware = db.hardwareTable.getrow()
-
-        # Get dxpin config
-        dxpin = db.dxpinTable.getrow()
-
-        #General info
-        info = {}
-        info['name'] = _utils.get_upyeasy_name()
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
-
-        # Get dx labels
-        dx_label = _utils.get_dxlabels()
-        #_log.debug("Pages: dx_label: "+"-".join(dx_label))
-
-        # menu settings
-        menu = 4
-        advanced = db.advancedTable.getrow()
-        gc.collect()
-
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "hardware.html",(info, hardware, dx_label, dxpin,))
-        yield from app.render_template(response, "footer.html",(info,))
-    elif request.method == 'POST':
-         #Update config
-        _log.debug("Pages: Update hardware")
-        
-        # Get dxpin config, but it's a generator!
-        dxpin = db.dxpinTable.getrow()
-        # convert namedtuple to list which can be muted
-
-        # Get hardware config, but it's a generator!
-        dbhardware = db.hardwareTable.getrow()
-
-        # get dx map
-        dxmap = db.dxmapTable.getrow()
-        
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        hardware = _utils.map_form2db(dbhardware, uform)
-
-        # New/reassigned/delete pin assignment
-        _utils.pin_assignment('boardled',hardware['boardled'],dxmap["count"],dxpin)
-        _utils.pin_assignment('sda',hardware['sda'],dxmap["count"],dxpin)
-        _utils.pin_assignment('scl',hardware['scl'],dxmap["count"],dxpin)
-        _utils.pin_assignment('mosi',hardware['mosi'],dxmap["count"],dxpin)
-        _utils.pin_assignment('miso',hardware['miso'],dxmap["count"],dxpin)
-        _utils.pin_assignment('sck',hardware['sck'],dxmap["count"],dxpin)
-        _utils.pin_assignment('nss',hardware['nss'],dxmap["count"],dxpin)
-        _utils.pin_assignment('tx',hardware['tx'],dxmap["count"],dxpin)
-        _utils.pin_assignment('rx',hardware['rx'],dxmap["count"],dxpin)
-
-        # Verify mandatory fields!
-        cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},boardled=hardware['boardled'],inverseled=hardware['inverseled'],sda=hardware['sda'],scl=hardware['scl'],mosi=hardware['mosi'],miso=hardware['miso'],sck=hardware['sck'],nss=hardware['nss'],tx=hardware['tx'],rx=hardware['rx'])
-
-        # Update pin assignments
-        cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
-
-        #return to hardwares page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-        yield from response.awrite("Location: /hardware\r\n")
-        yield from response.awrite("Content-Type: text/html\r\n")
-        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
- 
-@app.route("/dxbootstate", methods=['GET','POST'])
-def dxbootstatepage(request, response):
+@app.route("/dxbootstate", methods=['GET'])
+def get_dxbootstate_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display dxbootstate page
-    _log.debug("Pages: Entering dxbootstate Page")
-    if request.method == 'GET':
-        _log.debug("Pages: Display dxbootstate Page")
+    _log.debug("Pages GET: Display dxbootstate Page")
 
-        # Get hardware config
-        hardware = db.hardwareTable.getrow()
+    # Get hardware config
+    hardware = db.hardwareTable.getrow()
 
-        # Get dxpin config
-        dxpin = db.dxpinTable.getrow()
+    # Get dxpin config
+    dxpin = db.dxpinTable.getrow()
 
-        #General info
-        info = {}
-        info['name'] = _utils.get_upyeasy_name()
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
+    #General info
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
 
-        # Get dx labels
-        dx_label = _utils.get_dxlabels()
-        #_log.debug("Pages: dx_label: "+"-".join(dx_label))
+    # Get dx labels
+    dx_label = _utils.get_dxlabels()
+    #_log.debug("Pages: dx_label: "+"-".join(dx_label))
 
-        # menu settings
-        menu = 4
-        advanced = db.advancedTable.getrow()
-        gc.collect()
+    # menu settings
+    menu = 4
+    advanced = db.advancedTable.getrow()
+    gc.collect()
 
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "dxbootstate.html",(info, hardware, dx_label, dxpin,))
-        yield from app.render_template(response, "footer.html",(info,))
-    elif request.method == 'POST':
-         #Update config
-        _log.debug("Pages: Update hardware")
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "dxbootstate.html",(info, hardware, dx_label, dxpin,))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/dxbootstate", methods=['POST'])
+def post_dxbootstate_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Update config
+    _log.debug("Pages POST: Update hardware")
+    
+    # Get dxpin config, but it's a generator!
+    dxpin = db.dxpinTable.getrow()
+    # convert namedtuple to list which can be muted
+
+    # Get hardware config, but it's a generator!
+    dbhardware = db.hardwareTable.getrow()
+
+    # get dx map
+    dxmap = db.dxmapTable.getrow()
+    
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    hardware = _utils.map_form2db(dbhardware, uform)
+
+    # Verify mandatory fields!
+    cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},d0=hardware['d0'],d1=hardware['d1'],d2=hardware['d2'],d3=hardware['d3'],d4=hardware['d4'],d5=hardware['d5'],d6=hardware['d6'],d7=hardware['d7'],d8=hardware['d8'],d9=hardware['d9'],d10=hardware['d10'],d11=hardware['d11'],d12=hardware['d12'],d13=hardware['d13'],d14=hardware['d14'],d15=hardware['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+
+    #return to hardwares page
+    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+    yield from response.awrite("Location: /dxbootstate\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         
-        # Get dxpin config, but it's a generator!
-        dxpin = db.dxpinTable.getrow()
-        # convert namedtuple to list which can be muted
-
-        # Get hardware config, but it's a generator!
-        dbhardware = db.hardwareTable.getrow()
-
-        # get dx map
-        dxmap = db.dxmapTable.getrow()
-        
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        hardware = _utils.map_form2db(dbhardware, uform)
-
-        # Verify mandatory fields!
-        cid = db.hardwareTable.update({"timestamp":hardware['timestamp']},d0=hardware['d0'],d1=hardware['d1'],d2=hardware['d2'],d3=hardware['d3'],d4=hardware['d4'],d5=hardware['d5'],d6=hardware['d6'],d7=hardware['d7'],d8=hardware['d8'],d9=hardware['d9'],d10=hardware['d10'],d11=hardware['d11'],d12=hardware['d12'],d13=hardware['d13'],d14=hardware['d14'],d15=hardware['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
- 
-        #return to hardwares page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-        yield from response.awrite("Location: /dxbootstate\r\n")
-        yield from response.awrite("Content-Type: text/html\r\n")
-        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
-@app.route("/devices", methods=['GET,POST'])
-def devicespage(request, response):
+@app.route("/devices", methods=['GET'])
+def get_devices_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
@@ -950,17 +922,16 @@ def devicespage(request, response):
     yield from app.render_template(response, "devices.html",(info,devices,plugins, controllers,))
     yield from app.render_template(response, "footer.html",(info,))
 
-@app.route("/device_setting", methods=['GET,POST'])
-def devicesettingpage(request, response):
+@app.route("/device_setting", methods=['GET'])
+def get_devicesetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display device settings page
-    _log.debug("Pages: Entering Device Settings Page")
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
+    _log.debug("Pages GET: Entering Device Settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed qs: {}'.format(list(parsed_qs)))
         qs_id = parsed_qs.get("id")
@@ -1121,8 +1092,17 @@ def devicesettingpage(request, response):
             yield from app.render_template(response, "header.html",(info, menu, advanced))
             yield from app.render_template(response, "plugin.html",(info, plugins,))
             yield from app.render_template(response, "footer.html",(info,))
-    elif request.method == 'POST' and request.qs != "":
-        _log.debug("Pages: POST")
+
+@app.route("/device_setting", methods=['POST'])
+def post_devicesetting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display device settings page
+    _log.debug("Pages POST: Entering Device Settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed QS:{}'.format(list(parsed_qs)))
         qs_id = parsed_qs.get("id")
@@ -1139,13 +1119,6 @@ def devicesettingpage(request, response):
         yield from request.read_form_data()
         uform = _utils.get_form_values(request.form)
  
-        if 'currentpluginid' in uform: 
-            _log.debug('Current Plugin: {}'.format(uform['currentpluginid']))
-            if uform['currentpluginid'] != uform['pluginid']:
-                pluginchange = True
-            else: pluginchange = False
-        else: pluginchange = False
-
         if 'pluginid' in uform: 
             #get new plugin id
             pluginid = int(uform['pluginid'])
@@ -1157,60 +1130,58 @@ def devicesettingpage(request, response):
             #Update Device
             _log.debug("Pages: Update Device: {}".format(id))
             
-            if not pluginchange:
-                # Same  plugin, update Device!
-                _log.debug("Pages: Update Device: Same  plugin")
+            # Same  plugin, update Device!
+            _log.debug("Pages: Update Device: Same  plugin")
 
-                #init ONLY!
-                try:
-                    db.deviceTable.create_table()
-                except OSError:
-                    pass
+            #init ONLY!
+            try:
+                db.deviceTable.create_table()
+            except OSError:
+                pass
 
-                # Get correct device
-                dbdevices = db.deviceTable.public()
-                for dbdevice in dbdevices:
-                    if dbdevice['id'] == id:
-                       break
+            # Get correct device
+            dbdevices = db.deviceTable.public()
+            for dbdevice in dbdevices:
+                if dbdevice['id'] == id:
+                   break
 
-                # Get list of plugins
-                plugins = db.pluginTable.public()
-                for plugin in plugins:
-                    if plugin['id'] == dbdevice['pluginid']:
-                       break
+            # Get list of plugins
+            plugins = db.pluginTable.public()
+            for plugin in plugins:
+                if plugin['id'] == dbdevice['pluginid']:
+                   break
 
-                # Get dxpin config
-                dxpin = db.dxpinTable.getrow()
+            # Get dxpin config
+            dxpin = db.dxpinTable.getrow()
 
-                #contract dxpin fields
-                dbdevice['dxpin'] = ""
-                for dxcnt in range(0,plugin['pincnt']):
-                    dxpin[uform['dxpin'+str(dxcnt)]] = dbdevice['name']
-                    dbdevice['dxpin'] += str(uform['dxpin'+str(dxcnt)])
-                    if dxcnt < plugin['pincnt']-1: dbdevice['dxpin'] += ";"
-                    
-                # exchange values from form to device
-                device = _utils.map_form2db(dbdevice, uform)
-
-                # Verify mandatory fields!
-                if device['id']:
-                    cid = db.deviceTable.update({"timestamp":device['timestamp']},id=device['id'],enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
-                else:
-                    _log.error("Pages: Failed to update device entry: not all fields are filled")
-
-                # init device!
-                _plugins.initdevice(device)
+            #contract dxpin fields
+            dbdevice['dxpin'] = ""
+            for dxcnt in range(0,plugin['pincnt']):
+                dxpin[uform['dxpin'+str(dxcnt)]] = dbdevice['name']
+                dbdevice['dxpin'] += str(uform['dxpin'+str(dxcnt)])
+                if dxcnt < plugin['pincnt']-1: dbdevice['dxpin'] += ";"
                 
-                # call saveform device!
-                uform['name'] = device['name']
-                _plugins.saveform(uform)
+            # exchange values from form to device
+            device = _utils.map_form2db(dbdevice, uform)
 
-                #return to devices page
-                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-                yield from response.awrite("Location: /devices\r\n")
-                yield from response.awrite("Content-Type: text/html\r\n")
-                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            # Verify mandatory fields!
+            if device['id']:
+                cid = db.deviceTable.update({"timestamp":device['timestamp']},id=device['id'],enable=device['enable'],pluginid=device['pluginid'],name=device['name'],controller=device['controller'],controllerid=device['controllerid'],dxpin=device['dxpin'],delay=device['delay'], sync=device['sync'], i2c=device['i2c'], bootstate=device['bootstate'], pullup=device['pullup'],inverse=device['inverse'],port=device['port'])
+            else:
+                _log.error("Pages: Failed to update device entry: not all fields are filled")
 
+            # init device!
+            _plugins.initdevice(device)
+            
+            # call saveform device!
+            uform['name'] = device['name']
+            _plugins.saveform(uform)
+
+            #return to devices page
+            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+            yield from response.awrite("Location: /devices\r\n")
+            yield from response.awrite("Content-Type: text/html\r\n")
+            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         elif id == 0:
             #Create Device
             _log.debug("Pages: Create Device")
@@ -1362,50 +1333,47 @@ def devicesettingpage(request, response):
                 yield from response.awrite("Location: /devices\r\n")
                 yield from response.awrite("Content-Type: text/html\r\n")
                 yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
-@app.route("/rules", methods=['GET','POST'])
-def rulepage(request, response):
+                
+@app.route("/rules", methods=['GET'])
+def get_rule_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Edit Config
+    _log.debug("Pages GET: Display Rules Page")
+
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+    info['id']=6
     
-    if request.method == 'GET':
-        _log.debug("Pages: Display Rules Page")
+    # Get list of Rules
+    rules = db.ruleTable.public()
+    rules = sorted(rules, key=lambda k: k['name'])
+    
+    # menu settings
+    menu = 6
+    advanced = db.advancedTable.getrow()
+    gc.collect()
 
-        info = {}
-        info['name'] = _utils.get_upyeasy_name()
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
-        info['id']=6
-        
-        # Get list of Rules
-        rules = db.ruleTable.public()
-        rules = sorted(rules, key=lambda k: k['name'])
-        
-        # menu settings
-        menu = 6
-        advanced = db.advancedTable.getrow()
-        gc.collect()
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "rules.html",(info,rules))
+    yield from app.render_template(response, "footer.html",(info,))
 
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "rules.html",(info,rules))
-        yield from app.render_template(response, "footer.html",(info,))
-
-@app.route("/rule_setting", methods=['GET,POST'])
-def rulesettingpage(request, response):
+@app.route("/rule_setting", methods=['GET'])
+def get_rulesetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display device settings page
-    _log.debug("Pages: Entering rule Settings Page")
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
+    _log.debug("Pages GET: Entering rule Settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed qs: '.join(list(parsed_qs)))
         # get id
@@ -1536,85 +1504,89 @@ def rulesettingpage(request, response):
             yield from app.render_template(response, "rule_edit.html",(info,rule))
             yield from app.render_template(response, "footer.html",(info,))
 
-    elif request.method == 'POST':
-        _log.debug("Pages: POST")
-        # Get all form values in a dict
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        if uform['filename']:
-            #Create rule
-            _log.debug("Pages: Create rule: {}".format(uform['filename']))
-            
-            try:
-                content = uform['content']
-            except TypeError:
-                content = ""
-                        
-            # get filename
-            filename = 'rules/'+uform['filename']
-
-            _log.debug("Pages: rule filename: "+filename)
-            try:
-                rule_file = open(filename, 'w')
-                rule_file.write(content)
-                rule_file.close() 
-            except TypeError:
-                _log.error("Pages: Exception getting rule creation from data!")
-
-            # reload all rules
-            _scripts.loadrules()
-                
-            #return to devices page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /rules\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        
-@app.route("/scripts", methods=['GET','POST'])
-def scriptpage(request, response):
-    if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        return
-
-    #Edit Config
-    
-    if request.method == 'GET':
-        _log.debug("Pages: Display Scripts Page")
-
-        info = {}
-        info['name'] = _utils.get_upyeasy_name()
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
-        info['id']=7
-        
-        # Get list of scripts
-        scripts = db.scriptTable.public()
-        scripts = sorted(scripts, key=lambda k: k['name'])
-        
-        # menu settings
-        menu = 7
-        advanced = db.advancedTable.getrow()
-        gc.collect()
-
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "scripts.html",(info,scripts))
-        yield from app.render_template(response, "footer.html",(info,))
-
-@app.route("/script_setting", methods=['GET,POST'])
-def scriptsettingpage(request, response):
+@app.route("/rule_setting", methods=['POST'])
+def post_rulesetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display device settings page
-    _log.debug("Pages: Entering Script Settings Page")
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
+    _log.debug("Pages POST: Entering rule Settings Page")
+    # Get all form values in a dict
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    if uform['filename']:
+        #Create rule
+        _log.debug("Pages: Create rule: {}".format(uform['filename']))
+        
+        try:
+            content = uform['content']
+        except TypeError:
+            content = ""
+                    
+        # get filename
+        filename = 'rules/'+uform['filename']
+
+        _log.debug("Pages: rule filename: "+filename)
+        try:
+            rule_file = open(filename, 'w')
+            rule_file.write(content)
+            rule_file.close() 
+        except TypeError:
+            _log.error("Pages: Exception getting rule creation from data!")
+
+        # reload all rules
+        _scripts.loadrules()
+            
+        #return to devices page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /rules\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+             
+@app.route("/scripts", methods=['GET'])
+def get_script_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Edit Config
+    _log.debug("Pages GET: Display Scripts Page")
+
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+    info['id']=7
+    
+    # Get list of scripts
+    scripts = db.scriptTable.public()
+    scripts = sorted(scripts, key=lambda k: k['name'])
+    
+    # menu settings
+    menu = 7
+    advanced = db.advancedTable.getrow()
+    gc.collect()
+
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "scripts.html",(info,scripts))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/script_setting", methods=['GET'])
+def get_scriptsetting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display device settings page
+    _log.debug("Pages GET: Entering Script Settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed qs: '.join(list(parsed_qs)))
         # get id
@@ -1747,87 +1719,91 @@ def scriptsettingpage(request, response):
             yield from app.render_template(response, "script_edit.html",(info,script))
             yield from app.render_template(response, "footer.html",(info,))
 
-    elif request.method == 'POST':
-        _log.debug("Pages: POST")
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
+@app.route("/script_setting", methods=['POST'])
+def post_scriptsetting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
 
-        if uform['filename']:
-            #Create Script
-            _log.debug("Pages: Create Script: {} ".format(uform['filename']))
+    #Display device settings page
+    _log.debug("Pages POST: Entering Script Settings Page")
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    if uform['filename']:
+        #Create Script
+        _log.debug("Pages: Create Script: {} ".format(uform['filename']))
+        
+        try:
+            content = uform['content']
+        except TypeError:
+            content = ""
+        
+        # get filename
+        filename = 'scripts/'+uform['filename']
+
+        _log.debug("Pages: Script filename: "+filename)
+        try:
+            script_file = open(filename, 'w')
+            script_file.write(content)
+            script_file.close() 
+        except TypeError:
+            _log.error("Pages: Exception getting script creation from data!")
+
+        # reload all scripts
+        _scripts.loadscripts()
             
-            try:
-                content = uform['content']
-            except TypeError:
-                content = ""
-            
-            # get filename
-            filename = 'scripts/'+uform['filename']
+        #return to devices page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /scripts\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
 
-            _log.debug("Pages: Script filename: "+filename)
-            try:
-                script_file = open(filename, 'w')
-                script_file.write(content)
-                script_file.close() 
-            except TypeError:
-                _log.error("Pages: Exception getting script creation from data!")
-
-            # reload all scripts
-            _scripts.loadscripts()
-                
-            #return to devices page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /scripts\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
-@app.route("/notifications", methods=['GET','POST'])
-def notificationpage(request, response):
+@app.route("/notifications", methods=['GET'])
+def get_notification_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Edit notifications
+    _log.debug("Pages GET: Display Notifications Page")
+
+    info = {}
+    info['name'] = _utils.get_upyeasy_name
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+
     
-    if request.method == 'GET':
-        _log.debug("Pages: Display Notifications Page")
+    # Get notifications
+    notifications = db.notificationTable.public()
 
-        info = {}
-        info['name'] = _utils.get_upyeasy_name
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
+    # Get services
+    services = db.serviceTable.public()
+   
+    # menu settings
+    menu = 8
+    advanced = db.advancedTable.getrow()
+    gc.collect()
 
-        
-        # Get notifications
-        notifications = db.notificationTable.public()
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu,advanced))
+    yield from app.render_template(response, "notifications.html",(info,services,notifications))
+    yield from app.render_template(response, "footer.html",(info,))
 
-        # Get services
-        services = db.serviceTable.public()
-       
-        # menu settings
-        menu = 8
-        advanced = db.advancedTable.getrow()
-        gc.collect()
-
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu,advanced))
-        yield from app.render_template(response, "notifications.html",(info,services,notifications))
-        yield from app.render_template(response, "footer.html",(info,))
-
-@app.route("/notification_setting", methods=['GET,POST'])
-def notificationsettingpage(request, response):
+@app.route("/notification_setting", methods=['GET'])
+def get_notificationsetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display notification settings page
-    _log.debug("Pages: Entering notification Settings Page")
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
+    _log.debug("Pages GET: Entering notification Settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed qs: '.join(list(parsed_qs)))
         qs_id = parsed_qs.get("id")
@@ -1947,7 +1923,16 @@ def notificationsettingpage(request, response):
             yield from app.render_template(response, service['template'],(info,services,notification,))
             yield from app.render_template(response, "footer.html",(info,))
 
-    elif request.method == 'POST' and request.qs != "":
+@app.route("/notification_setting", methods=['POST'])
+def post_notificationsetting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display notification settings page
+    _log.debug("Pages POST: Entering notification Settings Page")
+    if request.qs != "":
         _log.debug("Pages: POST")
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug(''.join(list(parsed_qs)))
@@ -2132,275 +2117,168 @@ def notificationsettingpage(request, response):
                 yield from response.awrite("Content-Type: text/html\r\n")
                 yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
 
-@app.route("/tools", methods=['GET', 'POST'])
-def toolpage(request, response):
+@app.route("/tools", methods=['GET'])
+def get_tool_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
-    _log.debug("Pages: Entering Tools Page")
-
-    if request.method == 'GET':
-
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug('Parsed qs: '.join(list(parsed_qs)))
-        qs_cmd = parsed_qs.get("ucmd")
-        if qs_cmd: 
-            cmd = qs_cmd[0] 
-            _log.debug("Pages: cmd: "+cmd)
-        else: cmd = None
-        
-        if not cmd:
-            _log.debug("Pages: Display Tools Page")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-            if _utils.get_platform() == 'esp32' or _utils.get_platform() == 'esp8266':
-                info['wifi'] = True
-            else: info['wifi'] = False
-            
-            # menu settings
-            menu = 9
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "tools.html",(info,))
-            yield from app.render_template(response, "footer.html",(info,))
-        elif cmd == "reboot":
-            _log.debug("Pages: Reboot command given")
-            _hal.reboot()
-        elif cmd == "log":
-            _log.debug("Pages: Log command given")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-
-            logger  = {}
-            logger['content'] = _log.readlog()
-            
-            # menu settings
-            menu = 9
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "log.html",(logger,))
-            yield from app.render_template(response, "footer.html",(info,))
-        elif cmd == "wifiscanner":
-            _log.debug("Pages: wifiscanner command given")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-
-            wifilist = _hal.wifiscan()
-            
-            # menu settings
-            menu = 9
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "wifi.html",(wifilist,))
-            yield from app.render_template(response, "footer.html",(info,))
-        elif cmd == "i2cscanner":
-            _log.debug("Pages: i2cscanner command given")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-
-            i2c_hw = _hal.get_i2c()
-            if i2c_hw: i2clist = i2c_hw.scan()
-            else: i2clist = []
-            
-            # menu settings
-            menu = 9
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "i2c.html",(i2clist,))
-            yield from app.render_template(response, "footer.html",(info,))
-        elif cmd == "savesettings":
-            _log.debug("Pages: savesettings command given")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-            
-            # totals config file backup data
-            backupfilename = "upyeasy_settings.bak"
-            backupfilesize = 0
-            
-            # Return to root!
-            import os
-            os.chdir(core.working_dir)
-            
-            # start html transfer
-            yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename={}\r\n".format(backupfilename))
-            
-            # get all config file names
-            import uos 
-            
-            # get all config dirs
-            try:
-                dirs = sorted(uos.ilistdir('config'))
-            except OSError as e:
-               _log.error("Pages: savesettings dir exception: "+repr(e))
-               return False
-            
-            # get all config files
-            for dir in dirs: 
-                if dir[0] != '.' and dir[0] != '..':
-                    fulldir = 'config/'+dir[0]
-                    _log.debug("Pages: savesettings fulldir: "+fulldir)
-                    try:
-                        files = sorted(uos.ilistdir(fulldir))
-                    except OSError as e:
-                        _log.error("Pages: savesettings file exception: "+repr(e))
-                        return False
-                    for file in files:
-                        if file[0] != '.' and file[0] != '..':
-                            fullfile = fulldir +'/'+ file[0]
-                            gc.collect()
-                            file_desc = open(fullfile, 'r')
-                            content = ujson.dumps(file_desc.read())
-                            file_desc.close()
-                            filedata = fullfile+"\r\n"+content+"\r\n"
-                            yield from response.awrite(filedata)
-                            backupfilesize += len(filedata)
-            
-            # end file with filename and size
-            filedata = "Backup Filename: "+backupfilename+"\r\nBackup File Size: "
-            backupfilesize += len(filedata) + len(str(backupfilesize))
-            filedata += str(backupfilesize)
-            yield from response.awrite(filedata)
-                            
-        elif cmd == "loadsettings":
-            _log.debug("Pages: loadsettings command given")
-            info = {}
-            info['name'] = _utils.get_upyeasy_name()
-            info['copyright']=core.__copyright__
-            info['holder']= core.__author__
-            info['id'] = 9
-
-            # menu settings
-            menu = 9
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "loadsettings.html",(info,))
-            yield from app.render_template(response, "footer.html",(info,))
-        else:
-            #return to tools page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /tools\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-    elif request.method == 'POST':
-        _log.debug("Pages: tools POST")
-
-        # get data and size of return backup file
-        size = int(request.headers[b"Content-Length"])
-        data = yield from request.reader.read(size)
-        # We're cutting off the boundary part
-        size -= 214
-
-        # Get all data in a string
-        content = data.decode("utf-8").split("octet-stream")[1].split("------")[0].replace("\\","").strip().splitlines()
-        
-        # save all files
-        for cnt in range(0, len(content), 2):
-            # don't import backup file data
-            if content[cnt][:16] != 'Backup Filename:':
-                # don't import protocol/plugin data which are regenerated everytime upyeasy starts!
-                if content[cnt][:15] != 'config/protocol' and content[cnt][:13] != 'config/plugin':
-                    gc.collect()
-                    _log.debug("Pages: Loadsettings: Loading Filename: "+content[cnt])
-                    _log.debug("Pages: Loadsettings: Filename content: "+content[cnt+1][1:20]+"...")
-                    try:
-                        file_desc = open(content[cnt], 'w')
-                        file_desc.write(content[cnt+1][1:-1])
-                        file_desc.close() 
-                    except TypeError:
-                        _log.error("Pages: Loadsettings: Exception writing settings file!")
-                    _log.debug("Pages: Loadsettings: Settingsfile "+content[cnt]+" processed")
-            else:
-                _log.debug("Pages: Loadsettings: Loaded backupfile: "+content[cnt])
-                _log.debug("Pages: Loadsettings: Loaded backupfilesize: "+content[cnt+1])
-                _log.debug("Pages: Loadsettings: original backupfilesize: "+str(size))
-
-        #return to tools page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-        yield from response.awrite("Location: /tools\r\n")
-        yield from response.awrite("Content-Type: text/html\r\n")
-        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        
-@app.route("/files", methods=['GET','POST'])
-def filespage(request, response):
-    if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        return
-
-    #Edit Config
+    _log.debug("Pages GET: Entering Tools Page")
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    _log.debug('Parsed qs: '.join(list(parsed_qs)))
+    qs_cmd = parsed_qs.get("ucmd")
+    if qs_cmd: 
+        cmd = qs_cmd[0] 
+        _log.debug("Pages: cmd: "+cmd)
+    else: cmd = None
     
-    if request.method == 'GET':
-        import os
-        _log.debug("Pages: Display files Page")
-
-        parsed_qs = picoweb.utils.parse_qs(request.qs)
-        _log.debug('Parsed qs: '.join(list(parsed_qs)))
-        qs_name = ""
-        try:
-            qs_name = parsed_qs.get("name")[0]
-        except TypeError:
-            pass
-        _log.debug('Parsed name: '.join(qs_name))
-
+    if not cmd:
+        _log.debug("Pages: Display Tools Page")
         info = {}
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
-        info['id']=9
+        info['id'] = 9
+        if _utils.get_platform() == 'esp32' or _utils.get_platform() == 'esp8266':
+            info['wifi'] = True
+        else: info['wifi'] = False
         
-        # change dir if needed
-        if qs_name: 
-            try:
-                _log.debug('Changing directory: '+qs_name)
-                if qs_name != '..': os.chdir(qs_name)
-                else: os.chdir('..')
-            except OSError as e:
-                _log.error('Changing directory error: '+repr(e))
+        # menu settings
+        menu = 9
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "tools.html",(info,))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif cmd == "reboot":
+        _log.debug("Pages: Reboot command given")
+        _hal.reboot()
+    elif cmd == "log":
+        _log.debug("Pages: Log command given")
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['id'] = 9
+
+        logger  = {}
+        logger['content'] = _log.readlog()
         
-        # get all file names
-        import uos
+        # menu settings
+        menu = 9
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "log.html",(logger,))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif cmd == "wifiscanner":
+        _log.debug("Pages: wifiscanner command given")
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['id'] = 9
+
+        wifilist = _hal.wifiscan()
+        
+        # menu settings
+        menu = 9
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "wifi.html",(wifilist,))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif cmd == "i2cscanner":
+        _log.debug("Pages: i2cscanner command given")
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['id'] = 9
+
+        i2c_hw = _hal.get_i2c()
+        if i2c_hw: i2clist = i2c_hw.scan()
+        else: i2clist = []
+        
+        # menu settings
+        menu = 9
+        advanced = db.advancedTable.getrow()
+        gc.collect()
+
+        yield from picoweb.start_response(response)
+        yield from app.render_template(response, "header.html",(info, menu, advanced))
+        yield from app.render_template(response, "i2c.html",(i2clist,))
+        yield from app.render_template(response, "footer.html",(info,))
+    elif cmd == "savesettings":
+        _log.debug("Pages: savesettings command given")
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['id'] = 9
+        
+        # totals config file backup data
+        backupfilename = "upyeasy_settings.bak"
+        backupfilesize = 0
+        
+        # Return to root!
+        import os
+        os.chdir(core.working_dir)
+        
+        # start html transfer
+        yield from picoweb.start_response(response,content_type="text/plain\r\nContent-Disposition: attachment; filename={}\r\n".format(backupfilename))
+        
+        # get all config file names
+        import uos 
+        
+        # get all config dirs
         try:
-            files = sorted(uos.ilistdir())
-        except OSError:
-            files = []
-            
-        # display higher dir?
-        fworking_dir = os.getcwd()
-        if os.getcwd() != '/': fworking_dir+="/"
-        if core.working_dir == fworking_dir: info['rootdir']='Y'
-        else: info['rootdir']='N'
+            dirs = sorted(uos.ilistdir('config'))
+        except OSError as e:
+           _log.error("Pages: savesettings dir exception: "+repr(e))
+           return False
+        
+        # get all config files
+        for dir in dirs: 
+            if dir[0] != '.' and dir[0] != '..':
+                fulldir = 'config/'+dir[0]
+                _log.debug("Pages: savesettings fulldir: "+fulldir)
+                try:
+                    files = sorted(uos.ilistdir(fulldir))
+                except OSError as e:
+                    _log.error("Pages: savesettings file exception: "+repr(e))
+                    return False
+                for file in files:
+                    if file[0] != '.' and file[0] != '..':
+                        fullfile = fulldir +'/'+ file[0]
+                        gc.collect()
+                        file_desc = open(fullfile, 'r')
+                        content = ujson.dumps(file_desc.read())
+                        file_desc.close()
+                        filedata = fullfile+"\r\n"+content+"\r\n"
+                        yield from response.awrite(filedata)
+                        backupfilesize += len(filedata)
+        
+        # end file with filename and size
+        filedata = "Backup Filename: "+backupfilename+"\r\nBackup File Size: "
+        backupfilesize += len(filedata) + len(str(backupfilesize))
+        filedata += str(backupfilesize)
+        yield from response.awrite(filedata)
+                        
+    elif cmd == "loadsettings":
+        _log.debug("Pages: loadsettings command given")
+        info = {}
+        info['name'] = _utils.get_upyeasy_name()
+        info['copyright']=core.__copyright__
+        info['holder']= core.__author__
+        info['id'] = 9
 
         # menu settings
         menu = 9
@@ -2409,20 +2287,127 @@ def filespage(request, response):
 
         yield from picoweb.start_response(response)
         yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "files.html",(info,files))
+        yield from app.render_template(response, "loadsettings.html",(info,))
         yield from app.render_template(response, "footer.html",(info,))
+    else:
+        #return to tools page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /tools\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
 
-@app.route("/file_setting", methods=['GET,POST'])
-def filesettingpage(request, response):
+@app.route("/tools", methods=['POST'])
+def post_tool_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    _log.debug("Pages POST: Entering Tools Page")
+
+    # get data and size of return backup file
+    size = int(request.headers[b"Content-Length"])
+    data = yield from request.reader.read(size)
+    # We're cutting off the boundary part
+    size -= 214
+
+    # Get all data in a string
+    content = data.decode("utf-8").split("octet-stream")[1].split("------")[0].replace("\\","").strip().splitlines()
+    
+    # save all files
+    for cnt in range(0, len(content), 2):
+        # don't import backup file data
+        if content[cnt][:16] != 'Backup Filename:':
+            # don't import protocol/plugin data which are regenerated everytime upyeasy starts!
+            if content[cnt][:15] != 'config/protocol' and content[cnt][:13] != 'config/plugin':
+                gc.collect()
+                _log.debug("Pages: Loadsettings: Loading Filename: "+content[cnt])
+                _log.debug("Pages: Loadsettings: Filename content: "+content[cnt+1][1:20]+"...")
+                try:
+                    file_desc = open(content[cnt], 'w')
+                    file_desc.write(content[cnt+1][1:-1])
+                    file_desc.close() 
+                except TypeError:
+                    _log.error("Pages: Loadsettings: Exception writing settings file!")
+                _log.debug("Pages: Loadsettings: Settingsfile "+content[cnt]+" processed")
+        else:
+            _log.debug("Pages: Loadsettings: Loaded backupfile: "+content[cnt])
+            _log.debug("Pages: Loadsettings: Loaded backupfilesize: "+content[cnt+1])
+            _log.debug("Pages: Loadsettings: original backupfilesize: "+str(size))
+
+    #return to tools page
+    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+    yield from response.awrite("Location: /tools\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        
+@app.route("/files", methods=['GET'])
+def get_files_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    import os
+    _log.debug("Pages GET: Display files Page")
+
+    parsed_qs = picoweb.utils.parse_qs(request.qs)
+    _log.debug('Parsed qs: '.join(list(parsed_qs)))
+    qs_name = ""
+    try:
+        qs_name = parsed_qs.get("name")[0]
+    except TypeError:
+        pass
+    _log.debug('Parsed name: '.join(qs_name))
+
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+    info['id']=9
+    
+    # change dir if needed
+    if qs_name: 
+        try:
+            _log.debug('Changing directory: '+qs_name)
+            if qs_name != '..': os.chdir(qs_name)
+            else: os.chdir('..')
+        except OSError as e:
+            _log.error('Changing directory error: '+repr(e))
+    
+    # get all file names
+    import uos
+    try:
+        files = sorted(uos.ilistdir())
+    except OSError:
+        files = []
+        
+    # display higher dir?
+    fworking_dir = os.getcwd()
+    if os.getcwd() != '/': fworking_dir+="/"
+    if core.working_dir == fworking_dir: info['rootdir']='Y'
+    else: info['rootdir']='N'
+
+    # menu settings
+    menu = 9
+    advanced = db.advancedTable.getrow()
+    gc.collect()
+
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "files.html",(info,files))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/file_setting", methods=['GET'])
+def get_filesetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
     #Display device settings page
-    _log.debug("Pages: Entering file settings Page")
-    if request.method == 'GET' and request.qs != "":
-        _log.debug("Pages: GET")
+    _log.debug("Pages GET: Entering file settings Page")
+    if request.qs != "":
         parsed_qs = picoweb.utils.parse_qs(request.qs)
         _log.debug('Parsed qs: '.join(list(parsed_qs)))
         try:
@@ -2524,111 +2509,118 @@ def filesettingpage(request, response):
             yield from app.render_template(response, "file_edit.html",(info,file))
             yield from app.render_template(response, "footer.html",(info,))
 
-    elif request.method == 'POST':
-        _log.debug("Pages: Filesettings POST")
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        try:
-            qs_name = uform["filename"]
-        except TypeError:
-            qs_name = ""
-        _log.debug('Parsed name: {}'.format(qs_name))
-
-        if qs_name:
-            #Create Script
-            _log.debug("Pages: Create file: "+qs_name)
-            
-            try:
-                content = uform['content']
-            except TypeError:
-                content = ""
-            
-            filename = ''.join(qs_name)
-            _log.debug("Pages: File name: "+filename)
-            try:
-                file_desc = open(filename, 'w')
-                file_desc.write(content)
-                file_desc.close() 
-            except TypeError:
-                _log.error("Pages: Exception getting file creation form data!")
-
-            #return to devices page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /files\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-        
-@app.route("/advanced", methods=['GET, POST'])
-def advancedpage(request, response):
+@app.route("/file_setting", methods=['POST'])
+def post_filesetting_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
         return
 
-    _log.debug("Pages: Entering Advanced Page")
-    
-    if request.method == 'GET':
-        _log.debug("Pages: Display Advanced Page")
-        info = {}
-        info['name'] = _utils.get_upyeasy_name()
-        info['copyright']=core.__copyright__
-        info['holder']= core.__author__
-        info['id'] = 10
+    #Display device settings page
+    _log.debug("Pages POST: Entering file settings Page")
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
 
-        # menu settings
-        menu = 10
-        advanced = db.advancedTable.getrow()
-        gc.collect()
+    try:
+        qs_name = uform["filename"]
+    except TypeError:
+        qs_name = ""
+    _log.debug('Parsed name: {}'.format(qs_name))
 
-        yield from picoweb.start_response(response)
-        yield from app.render_template(response, "header.html",(info, menu, advanced))
-        yield from app.render_template(response, "advanced.html",(info, advanced,))
-        yield from app.render_template(response, "footer.html",(info,))
-
-    elif request.method == 'POST':
-         #Update Advanced
-        _log.debug("Pages: Update Advanced")
+    if qs_name:
+        #Create Script
+        _log.debug("Pages: Create file: "+qs_name)
         
-        # Get all form values in a dict
-        yield from request.read_form_data()
-        uform = _utils.get_form_values(request.form)
-
-        #connect to database
-        _dbc.connect()
-
-        #init ONLY!
         try:
-            db.advancedTable.create_table()
-        except OSError:
-            pass
-
-        #Get advanced record key
-        dbadvanced = db.advancedTable.getrow()
-
-        # get form values
-        advanced = _utils.map_form2db(dbadvanced, uform)
-
-        # new ntp server = run settime
-        if advanced['ntphostname'] != dbadvanced['ntphostname']: _hal.settime()
+            content = uform['content']
+        except TypeError:
+            content = ""
         
-        # Update advanced
-        cid = db.advancedTable.update({"timestamp":advanced['timestamp']},scripts=advanced['scripts'],rules=advanced['rules'],notifications=advanced['notifications'],mqttretain=advanced['mqttretain'],messagedelay=advanced['messagedelay'],ntphostname=advanced['ntphostname'],ntptimezone=advanced['ntptimezone'],ntpdst=advanced['ntpdst'],sysloghostname=advanced['sysloghostname'],sysloglevel=advanced['sysloglevel'],serialloglevel=advanced['serialloglevel'],webloglevel=advanced['webloglevel'],webloglines=advanced['webloglines'],enablesdlog=advanced['enablesdlog'],sdloglevel=advanced['sdloglevel'],enableserial=advanced['enableserial'],serialbaudrate=advanced['serialbaudrate'],enablesync=advanced['enablesync'],syncport=advanced['syncport'],fixedipoctet=advanced['fixedipoctet'],wdi2caddress=advanced['wdi2caddress'],usessdp=advanced['usessdp'],connectfailure=advanced['connectfailure'],i2cstretchlimit=advanced['i2cstretchlimit'])
-       
-        _dbc.close()
+        filename = ''.join(qs_name)
+        _log.debug("Pages: File name: "+filename)
+        try:
+            file_desc = open(filename, 'w')
+            file_desc.write(content)
+            file_desc.close() 
+        except TypeError:
+            _log.error("Pages: Exception getting file creation form data!")
 
-        #Set right syslog hostname
-        _log.changehost(core.__logname__+"-"+_utils.get_upyeasy_name(),advanced['sysloghostname'])
-
-        #return to controllers page
+        #return to devices page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-        yield from response.awrite("Location: /advanced\r\n")
+        yield from response.awrite("Location: /files\r\n")
         yield from response.awrite("Content-Type: text/html\r\n")
-        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n") 
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            
+@app.route("/advanced", methods=['GET'])
+def get_advanced_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    _log.debug("Pages GET: Entering Advanced Page")
+    info = {}
+    info['name'] = _utils.get_upyeasy_name()
+    info['copyright']=core.__copyright__
+    info['holder']= core.__author__
+    info['id'] = 10
+
+    # menu settings
+    menu = 10
+    advanced = db.advancedTable.getrow()
+    gc.collect()
+
+    yield from picoweb.start_response(response)
+    yield from app.render_template(response, "header.html",(info, menu, advanced))
+    yield from app.render_template(response, "advanced.html",(info, advanced,))
+    yield from app.render_template(response, "footer.html",(info,))
+
+@app.route("/advanced", methods=['POST'])
+def post_advanced_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    _log.debug("Pages POST: Entering Advanced Page")
+    
+     #Update Advanced
+    _log.debug("Pages: Update Advanced")
+    
+    # Get all form values in a dict
+    yield from request.read_form_data()
+    uform = _utils.get_form_values(request.form)
+
+    #init ONLY!
+    try:
+        db.advancedTable.create_table()
+    except OSError:
+        pass
+
+    #Get advanced record key
+    dbadvanced = db.advancedTable.getrow()
+
+    # get form values
+    advanced = _utils.map_form2db(dbadvanced, uform)
+
+    # new ntp server = run settime
+    if advanced['ntphostname'] != dbadvanced['ntphostname']: _hal.settime()
+    
+    # Update advanced
+    cid = db.advancedTable.update({"timestamp":advanced['timestamp']},scripts=advanced['scripts'],rules=advanced['rules'],notifications=advanced['notifications'],mqttretain=advanced['mqttretain'],messagedelay=advanced['messagedelay'],ntphostname=advanced['ntphostname'],ntptimezone=advanced['ntptimezone'],ntpdst=advanced['ntpdst'],sysloghostname=advanced['sysloghostname'],sysloglevel=advanced['sysloglevel'],serialloglevel=advanced['serialloglevel'],webloglevel=advanced['webloglevel'],webloglines=advanced['webloglines'],enablesdlog=advanced['enablesdlog'],sdloglevel=advanced['sdloglevel'],enableserial=advanced['enableserial'],serialbaudrate=advanced['serialbaudrate'],enablesync=advanced['enablesync'],syncport=advanced['syncport'],fixedipoctet=advanced['fixedipoctet'],wdi2caddress=advanced['wdi2caddress'],usessdp=advanced['usessdp'],connectfailure=advanced['connectfailure'],i2cstretchlimit=advanced['i2cstretchlimit'])
+
+    #Set right syslog hostname
+    _log.changehost(core.__logname__+"-"+_utils.get_upyeasy_name(),advanced['sysloghostname'])
+
+    #return to controllers page
+    yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+    yield from response.awrite("Location: /advanced\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n") 
 
 @app.route("/dxpins", methods=['GET'])
-def dxpinspage(request, response):
+def get_dxpins_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
@@ -2660,7 +2652,7 @@ def dxpinspage(request, response):
     yield from app.render_template(response, "footer.html",(info,))
  
 @app.route("/info", methods=['GET'])
-def infopage(request, response):
+def get_info_page(request, response):
     if not auth_page(request, response): 
         #send to password page
         yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
