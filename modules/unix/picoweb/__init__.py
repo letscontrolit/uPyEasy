@@ -133,6 +133,7 @@ class WebApp:
 
             #print("================")
             #print(req, writer)
+            #print(method, path, qs, proto)
             #print(req, (method, path, qs, proto), req.headers)
 
             # Find which mounted subapp (if any) should handle this request
@@ -156,6 +157,17 @@ class WebApp:
             if not app.inited:
                 app.init()
 
+            # RESTful request?
+            components = path.strip('/').split('/')
+            #print(components)
+            if len(components) >= 3: 
+                #reassemble path
+                path = '/'+'/'.join(components[:3])
+                qs = components[3:]
+                restful = True
+            else:   
+                restful = False
+            
             # Find handler to serve this request in app's url_map
             found = False
             for e in app.url_map:
@@ -228,8 +240,6 @@ class WebApp:
         self.mounts.append(app)
 
     def route(self, url, **kwargs):
-        print(url)
-        print(kwargs)
         def _route(f):
             self.url_map.append((url, f, kwargs))
             return f
@@ -271,7 +281,6 @@ class WebApp:
 
     def handle_static(self, req, resp):
         path = req.url_match.group(1)
-        print(path)
         if ".." in path:
             yield from http_error(resp, "403")
             return

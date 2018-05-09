@@ -454,16 +454,6 @@ def get_controller_setting_page(request, response):
         #Edit controller
         _log.debug("Pages: Edit Controller: "+str(id))
         
-        #init ONLY!
-        try:
-            db.protocolTable.create_table()
-        except OSError:
-            pass
-        try:
-            db.controllerTable.create_table()  
-        except OSError:
-            pass
-                
         info={}
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
@@ -500,11 +490,6 @@ def get_controller_setting_page(request, response):
 
         _log.debug("Pages: Delete Controller: "+str(id))
         
-        try:
-            db.controllerTable.create_table()  
-        except OSError:
-            pass
-
         # Get correct controller
         controllers = db.controllerTable.public()
         for controller in controllers:
@@ -700,7 +685,43 @@ def post_controller_settingpage(request, response):
             yield from response.awrite("Location: /controllers\r\n")
             yield from response.awrite("Content-Type: text/html\r\n")
             yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-                
+
+@app.route("/api/v1.0/controller", methods=['DELETE'])
+def del_controller_setting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display controller settings page
+    _log.debug("Pages DELETE: Entering Controller Settings Page")
+
+    _log.debug('Parsed QS: {}'.format(request.qs))
+    id = int(request.qs[0])
+    _log.debug('id = {}'.format(id))
+
+    # delete controller
+    import os
+
+    _log.debug("Pages: Delete Controller: "+str(id))
+
+    # Get correct controller
+    controllers = db.controllerTable.public()
+    for controller in controllers:
+        if controller['id'] == id:
+            if db.controllerTable.delete(controller['timestamp']):
+                _log.debug("Pages: remove record file succeeded: "+db.controllerTable.fname(controller['timestamp']))
+            else:
+                _log.error("Pages: remove record file failed: "+db.controllerTable.fname(controller['timestamp']))
+            break
+    
+    gc.collect()
+    #deleted, return to controllers page
+    yield from response.awrite("HTTP/1.0 303 Moved Permanently\r\n")
+    yield from response.awrite("Location: /controllers\r\n")
+    yield from response.awrite("Content-Type: text/html\r\n")
+    yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            
 @app.route("/hardware", methods=['GET'])
 def get_hardware_page(request, response):
     if not auth_page(request, response): 
@@ -1020,55 +1041,6 @@ def get_devicesetting_page(request, response):
             yield from app.render_template(response, "plugin_footer.html",(info, plugindata,))
             yield from app.render_template(response, "footer.html",(info,))
 
-        elif id > 0 and oper == 'del':
-            # delete device
-            import os
-
-            _log.debug("Pages: Delete Device: "+str(id))
-            
-            try:
-                db.deviceTable.create_table()  
-            except OSError:
-                pass
-
-            # Get correct device
-            devices = db.deviceTable.public()
-            for device in devices:
-                if device['id'] == id:
-                   break
-
-            # Get list of plugins
-            plugins = db.pluginTable.public()
-            for plugin in plugins:
-                if plugin['id'] == device['pluginid']:
-                   break
-
-            if db.deviceTable.delete(device['timestamp']):
-                _log.debug("Pages: remove record file succeeded: "+db.deviceTable.fname(device['timestamp']))
-            else:
-                _log.error("Pages: remove record file failed: "+db.deviceTable.fname(device['timestamp']))
-            
-            # Get dxpin config
-            dxpin = db.dxpinTable.getrow()
-
-            # Convert pin settings
-            dxpins = device["dxpin"].split(';')
-            for cnt in range(0,plugin["pincnt"]):
-                _log.debug("Pages: delete plugin, free pin: "+dxpins[cnt])
-                dxpin[dxpins[cnt]] = ''
-
-            # Updated deleted pins
-            cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
-
-            # clean up!
-            gc.collect()
-
-            #deleted, return to controllers page
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Location: /devices\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-
         elif id == 0:
             #New device
             _log.debug("Pages: New Device, choose plugin")
@@ -1093,6 +1065,67 @@ def get_devicesetting_page(request, response):
             yield from app.render_template(response, "plugin.html",(info, plugins,))
             yield from app.render_template(response, "footer.html",(info,))
 
+@app.route("/api/v1.0/device", methods=['DELETE'])
+def del_devicesetting_page(request, response):
+    if not auth_page(request, response): 
+        #send to password page
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        return
+
+    #Display device settings page
+    _log.debug("Pages DEL: Entering Device Settings Page")
+    if request.qs != "":
+        id = int(request.qs[0])
+        _log.debug('id = {}'.format(id))
+
+        # delete device
+        import os
+
+        _log.debug("Pages: Delete Device: {}".format(id))
+        
+        try:
+            db.deviceTable.create_table()  
+        except OSError:
+            pass
+
+        # Get correct device
+        devices = db.deviceTable.public()
+        for device in devices:
+            if device['id'] == id:
+               break
+
+        # Get list of plugins
+        plugins = db.pluginTable.public()
+        for plugin in plugins:
+            if plugin['id'] == device['pluginid']:
+               break
+
+        if db.deviceTable.delete(device['timestamp']):
+            _log.debug("Pages: remove record file succeeded: "+db.deviceTable.fname(device['timestamp']))
+        else:
+            _log.error("Pages: remove record file failed: "+db.deviceTable.fname(device['timestamp']))
+        
+        # Get dxpin config
+        dxpin = db.dxpinTable.getrow()
+
+        # Convert pin settings
+        dxpins = device["dxpin"].split(';')
+        for cnt in range(0,plugin["pincnt"]):
+            _log.debug("Pages: delete plugin, free pin: "+dxpins[cnt])
+            dxpin[dxpins[cnt]] = ''
+
+        # Updated deleted pins
+        cid = db.dxpinTable.update({"timestamp":dxpin['timestamp']},d0=dxpin['d0'],d1=dxpin['d1'],d2=dxpin['d2'],d3=dxpin['d3'],d4=dxpin['d4'],d5=dxpin['d5'],d6=dxpin['d6'],d7=dxpin['d7'],d8=dxpin['d8'],d9=dxpin['d9'],d10=dxpin['d10'],d11=dxpin['d11'],d12=dxpin['d12'],d13=dxpin['d13'],d14=dxpin['d14'],d15=dxpin['d15'],d16=dxpin['d16'],d17=dxpin['d17'],d18=dxpin['d18'],d19=dxpin['d19'],d20=dxpin['d20'],d21=dxpin['d21'],d22=dxpin['d22'],d23=dxpin['d23'],d24=dxpin['d24'],d25=dxpin['d25'],d26=dxpin['d26'],d27=dxpin['d27'],d28=dxpin['d28'],d29=dxpin['d29'],d30=dxpin['d30'],d31=dxpin['d31'],d32=dxpin['d32'],d33=dxpin['d33'],d34=dxpin['d34'],d35=dxpin['d35'],d36=dxpin['d36'],d37=dxpin['d37'],d38=dxpin['d38'],d39=dxpin['d39'])
+
+        # clean up!
+        gc.collect()
+
+        #deleted, return to controllers page
+        yield from response.awrite("HTTP/1.0 303 Moved Permanently\r\n")
+        yield from response.awrite("Location: /devices\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+            
 @app.route("/device_setting", methods=['POST'])
 def post_devicesetting_page(request, response):
     if not auth_page(request, response): 

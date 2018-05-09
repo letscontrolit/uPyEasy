@@ -1,4 +1,18 @@
 {% args info,controllers %}
+<script type="text/javascript">
+function controllerDelete(id) {
+  $.ajax({
+    url: "/api/v1.0/controller/" + id,
+    type: 'DELETE',
+    success: function (product) {
+      $(ctl).parents("tr").remove();
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+</script>
     <table cellpadding='4' border='1' frame='box' rules='all'>
        <TH>
        <TH>ID
@@ -16,7 +30,7 @@
               <TD>{{controller['hostname']}}
               <TD>{{controller['port']}}
               <TD><span style="color:{% if controller['enable']=='on' %}green{% else %}red{% endif %}">{% if controller['enable']=='on' %}Yes{% else %}No{% endif %}</span>
-              <TD><a class="button link" href="/controller_setting?id={{controller['id']}}&oper=del">Del</a>
+              <TD><a class="button link" onclick="controllerDelete({{controller['id']}});">Del</a>
            {% endif %}
        {% endfor %}
        <TR>

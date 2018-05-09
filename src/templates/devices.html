@@ -1,4 +1,18 @@
 {% args info,devices, plugins, controllers %}
+<script type="text/javascript">
+function deviceDelete(id) {
+  $.ajax({
+    url: "/api/v1.0/device/" + id,
+    type: 'DELETE',
+    success: function (product) {
+      $(ctl).parents("tr").remove();
+    },
+    error: function (request, message, error) {
+      handleException(request, message, error);
+    }
+  });
+}
+</script>
     <table cellpadding='4' border='1' frame='box' rules='all'>
        <TH>
        <TH>ID
@@ -29,7 +43,7 @@
               <TD>{{device['controllerid']}}
               <TD>{{device['values']}}
               <TD><span style="color:{% if device['enable'] == 'on' %}Green{% else %}Red{% endif %}">{% if device['enable'] == 'on' %}Yes{% else %}No{% endif %}</span>
-              <TD><a class="button link" href="/device_setting?id={{device['id']}}&oper=del">Del</a>
+              <TD><a class="button link" onclick="deviceDelete({{device['id']}});">Del</a>
            {% endif %}
        {% endfor %}
        <TR>
