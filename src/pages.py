@@ -26,98 +26,36 @@ _scripts    = core._scripts
 
 def auth_page(request, response):
     # Are you authorized to use uPyEasy?
-    _log.debug("Pages: Authorize User!?")
+    _log.debug("Pages: Authorized User?")
 
     # Get admin password if any
     config = db.configTable.getrow()
     if config["password"]:
         _log.debug("Pages: Authorize User is set, verifying password")
 
-        # get password cookie if any
-        password = request.headers.get(b"Cookie", None)
+        password = None
+        # get password basic authentication if any
+        basic = request.headers.get(b"Authorization", None)
+        if basic: 
+            if basic[:6] == b"Basic " and len(basic) >= 7: password = basic[6:].decode("utf-8")
 
         # same password = ok, no password -> password page redirect
         if password:
-            import uhashlib
-            password = password.decode().split('=')[1]
-            configpw = config["password"]
-            hash = str(uhashlib.sha256(configpw).digest())
-            if hash == password:
+            if config["password"] == password:
                 return True
 
         _log.warning("Pages: Authorize User is set, password failed or not given")
+        #send to password page
         return False
     else: return True
-        
-@app.route("/password", methods=['GET'])
-def get_authenticate_page(request, response):
-    _log.debug("Pages GET: Entering Authentication Page")
-
-    info={}
-
-    info['name']        = _utils.get_upyeasy_name()
-    info['copyright']   = core.__copyright__
-    info['holder']      = core.__author__
-    info['message']     = ""
-
-    # menu settings
-    menu = 1
-    advanced = db.advancedTable.getrow()
-    gc.collect()
-
-    yield from picoweb.start_response(response)
-    yield from app.render_template(response, "header.html",(info, menu, advanced))
-    yield from app.render_template(response, "password.html",(info,))
-    yield from app.render_template(response, "footer.html",(info,))
-
-@app.route("/password", methods=['POST'])
-def post_authenticate_page(request, response):
-     #Auth password
-    _log.debug("Pages POST: Authenticatie password")
-
-    # Get all form values in a dict
-    yield from request.read_form_data()
-    uform = _utils.get_form_values(request.form)
-    # same password = ok, no password -> password page redirect
-    if uform["password"]:
-        # Get admin password if any
-        config = db.configTable.getrow()
-        if config["password"] == uform["password"]:
-            import uhashlib
-            configpw = config["password"]
-            hash = str(uhashlib.sha256(configpw).digest())
-            #print(hash)
-            # same password, send the cookie and redirect to homepage
-            yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
-            yield from response.awrite("Set-Cookie: upyeasy="+hash+"\r\n")
-            yield from response.awrite("Location: /\r\n")
-            yield from response.awrite("Content-Type: text/html\r\n")
-            yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
-            return
-        else:
-            info={}
-            info['name']        = _utils.get_upyeasy_name()
-            info['copyright']   = core.__copyright__
-            info['holder']      = core.__author__
-            info['message']     = "Authentication Failed!"
-            
-            # menu settings
-            menu = 1
-            advanced = db.advancedTable.getrow()
-            gc.collect()
-
-            yield from picoweb.start_response(response)
-            yield from app.render_template(response, "header.html",(info, menu, advanced))
-            yield from app.render_template(response, "password.html",(info,))
-            yield from app.render_template(response, "footer.html",(info,))
     
 @app.route("/", methods=['GET'])
 def get_home_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='uPyEasy_Access', charset='UTF-8'\r\n")
         return
-    
+
     #Display home page
     _log.debug("Pages GET: Entering Home Page")
 
@@ -200,8 +138,8 @@ def get_home_page(request, response):
 @app.route("/", methods=['POST'])
 def post_home_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
     
     #Display home page
@@ -279,8 +217,8 @@ def post_home_page(request, response):
 @app.route("/config", methods=['GET'])
 def get_config_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Edit Config
@@ -361,8 +299,8 @@ def get_config_page(request, response):
 @app.route("/config", methods=['POST'])
 def post_config_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Update config
@@ -388,6 +326,11 @@ def post_config_page(request, response):
     config = _utils.map_form2db(_dbconfig, uform)
     network = _utils.map_form2db(dbnetwork, uform)
 
+    # convert password to base64 pw
+    if config['password']:
+        import ubinascii
+        config['password'] = ubinascii.b2a_base64("admin:{}".format(config['password'])).rstrip()
+    
     # Update config
     cid = db.configTable.update({"timestamp":config['timestamp']},name=config['name'],unit=config['unit'],password=config['password'],sleepenable=config['sleepenable'],sleeptime=config['sleeptime'],sleepfailure=config['sleepfailure'],port=config['port'])
 
@@ -403,8 +346,8 @@ def post_config_page(request, response):
 @app.route("/controllers", methods=['GET'])
 def get_controllers_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display controllers overview page
@@ -431,8 +374,8 @@ def get_controllers_page(request, response):
 @app.route("/controller_setting", methods=['GET'])
 def get_controller_setting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display controller settings page
@@ -533,8 +476,8 @@ def get_controller_setting_page(request, response):
 @app.route("/controller_setting", methods=['POST'])
 def post_controller_settingpage(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display controller settings page
@@ -689,8 +632,8 @@ def post_controller_settingpage(request, response):
 @app.route("/api/v1.0/controller", methods=['DELETE'])
 def del_controller_setting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display controller settings page
@@ -725,8 +668,8 @@ def del_controller_setting_page(request, response):
 @app.route("/hardware", methods=['GET'])
 def get_hardware_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display hardware page
@@ -761,8 +704,8 @@ def get_hardware_page(request, response):
 @app.route("/hardware", methods=['POST'])
 def post_hardware_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
      #Update config
@@ -810,8 +753,8 @@ def post_hardware_page(request, response):
 @app.route("/dxbootstate", methods=['GET'])
 def get_dxbootstate_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display dxbootstate page
@@ -846,8 +789,8 @@ def get_dxbootstate_page(request, response):
 @app.route("/dxbootstate", methods=['POST'])
 def post_dxbootstate_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Update config
@@ -881,8 +824,8 @@ def post_dxbootstate_page(request, response):
 @app.route("/devices", methods=['GET'])
 def get_devices_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display devices overview page
@@ -946,8 +889,8 @@ def get_devices_page(request, response):
 @app.route("/device_setting", methods=['GET'])
 def get_devicesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1068,8 +1011,8 @@ def get_devicesetting_page(request, response):
 @app.route("/api/v1.0/device", methods=['DELETE'])
 def del_devicesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1129,8 +1072,8 @@ def del_devicesetting_page(request, response):
 @app.route("/device_setting", methods=['POST'])
 def post_devicesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1370,8 +1313,8 @@ def post_devicesetting_page(request, response):
 @app.route("/rules", methods=['GET'])
 def get_rule_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Edit Config
@@ -1400,8 +1343,8 @@ def get_rule_page(request, response):
 @app.route("/rule_setting", methods=['GET'])
 def get_rulesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1540,8 +1483,8 @@ def get_rulesetting_page(request, response):
 @app.route("/rule_setting", methods=['POST'])
 def post_rulesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1583,8 +1526,8 @@ def post_rulesetting_page(request, response):
 @app.route("/scripts", methods=['GET'])
 def get_script_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Edit Config
@@ -1613,8 +1556,8 @@ def get_script_page(request, response):
 @app.route("/script_setting", methods=['GET'])
 def get_scriptsetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1755,8 +1698,8 @@ def get_scriptsetting_page(request, response):
 @app.route("/script_setting", methods=['POST'])
 def post_scriptsetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -1798,8 +1741,8 @@ def post_scriptsetting_page(request, response):
 @app.route("/notifications", methods=['GET'])
 def get_notification_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Edit notifications
@@ -1830,8 +1773,8 @@ def get_notification_page(request, response):
 @app.route("/notification_setting", methods=['GET'])
 def get_notificationsetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display notification settings page
@@ -1959,8 +1902,8 @@ def get_notificationsetting_page(request, response):
 @app.route("/notification_setting", methods=['POST'])
 def post_notificationsetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display notification settings page
@@ -2153,8 +2096,8 @@ def post_notificationsetting_page(request, response):
 @app.route("/tools", methods=['GET'])
 def get_tool_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages GET: Entering Tools Page")
@@ -2332,8 +2275,8 @@ def get_tool_page(request, response):
 @app.route("/tools", methods=['POST'])
 def post_tool_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages POST: Entering Tools Page")
@@ -2377,8 +2320,8 @@ def post_tool_page(request, response):
 @app.route("/files", methods=['GET'])
 def get_files_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     import os
@@ -2434,8 +2377,8 @@ def get_files_page(request, response):
 @app.route("/file_setting", methods=['GET'])
 def get_filesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -2545,8 +2488,8 @@ def get_filesetting_page(request, response):
 @app.route("/file_setting", methods=['POST'])
 def post_filesetting_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     #Display device settings page
@@ -2588,8 +2531,8 @@ def post_filesetting_page(request, response):
 @app.route("/advanced", methods=['GET'])
 def get_advanced_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages GET: Entering Advanced Page")
@@ -2612,8 +2555,8 @@ def get_advanced_page(request, response):
 @app.route("/advanced", methods=['POST'])
 def post_advanced_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages POST: Entering Advanced Page")
@@ -2655,8 +2598,8 @@ def post_advanced_page(request, response):
 @app.route("/dxpins", methods=['GET'])
 def get_dxpins_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages: Entering Dxpins Page")
@@ -2687,8 +2630,8 @@ def get_dxpins_page(request, response):
 @app.route("/info", methods=['GET'])
 def get_info_page(request, response):
     if not auth_page(request, response): 
-        #send to password page
-        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\nLocation: /password\r\nContent-Type: text/html\r\n<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+        yield from response.awrite('HTTP/1.1 401 Unauthorized\r\n')
+        yield from response.awrite("WWW-Authenticate: Basic realm='Access to uPyEasy', charset='UTF-8'\r\n")
         return
 
     _log.debug("Pages: Entering info Page")
