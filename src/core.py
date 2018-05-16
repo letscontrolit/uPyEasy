@@ -22,7 +22,7 @@ __version__             = "0.3.0."
 __email__               = "info@upyeasy.com"
 __status__              = "Beta"
 __logname__             = "uPyEasy"
-__build__               = "7be16ae8462bb326f9b6d1bcc07357d538124218"
+__build__               = "84e5d06"
 
 upyeasy_starttime       = 0
 initial_upyeasyname     = "uPyEasy"

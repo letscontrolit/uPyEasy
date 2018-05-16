@@ -79,8 +79,12 @@ def main(**params):
 
         # Run main loop
         core._log.info("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
-        app.run(host=ip_address, port=port, debug=False, log=core._log)
-        #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert)   # SSL version
+        while True:
+            try:
+                app.run(host=ip_address, port=port, debug=False, log=core._log)
+            except Exception as e:
+                core._log.debug("Main: Async loop exception: {}".format(repr(e)))
+            #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert)   # SSL version
     else:
         #No network, exit!
         print("Exiting: Network not available, set network values!")

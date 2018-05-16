@@ -1092,7 +1092,8 @@ class hal(object):
             if id not in self._spi.keys():
                 self._log.debug("Hal: get spi esp32, create spi object with id: "+str(id))
                 try:
-                    self._spi[id] = SPI(miso=self.pin(hardware["miso"]), mosi=self.pin(hardware["mosi"]), sck=self.pin(hardware["sck"]), nss=self.pin(hardware["nss"]))
+                    #self._spi[id] = SPI(miso=self.pin(hardware["miso"]), mosi=self.pin(hardware["mosi"]), sck=self.pin(hardware["sck"]), nss=self.pin(hardware["nss"]))
+                    self._spi[id] = SPI(miso=self.pin(hardware["miso"]), mosi=self.pin(hardware["mosi"]), sck=self.pin(hardware["sck"]))
                 except ValueError:
                     self._log.error("Hal: get spi esp32, exception valueerror")
                     return None
