@@ -40,13 +40,22 @@ class scripts(object):
         self._log.debug("Scripts: Init")
         
         # get plugins scriptqueue
-        self._scriptqueue = self._plugins.getqueue()
+        self._scriptqueue = self._plugins.getscriptqueue()
         
         # put system boot message in queue!
         self._scriptqueue.put_nowait(core.QUEUE_MESSAGE_START)
         self._scriptqueue.put_nowait("System")
         self._scriptqueue.put_nowait("Boot")
         self._scriptqueue.put_nowait(True)
+
+        # get plugins rulequeue
+        self._rulequeue = self._plugins.getrulequeue()
+        
+        # put system boot message in queue!
+        self._rulequeue.put_nowait(core.QUEUE_MESSAGE_START)
+        self._rulequeue.put_nowait("System")
+        self._rulequeue.put_nowait("Boot")
+        self._rulequeue.put_nowait(True)
         
         # create all script records
         self.loadscripts()
@@ -231,7 +240,7 @@ class scripts(object):
         
     async def asyncscripts(self):
         # Async coroutine to process all script work todo 
-        self._log.debug("Scripts: Async processing scripts/rules")
+        self._log.debug("Scripts: Async processing scripts")
 
         # get loop
         loop = asyncio.get_event_loop()
@@ -275,8 +284,29 @@ class scripts(object):
             # Give async a change to schedule something else
             await asyncio.sleep_ms(100)
 
-            ### RULES
-            
+    async def asyncrules(self):
+        # Async coroutine to process all script work todo 
+        self._log.debug("Scripts: Async processing rules")
+
+        # get loop
+        loop = asyncio.get_event_loop()
+
+        while True:
+            # get scriptqueue message
+            devicedata = {}
+            try:
+                while await(self._rulequeue.get()) != core.QUEUE_MESSAGE_START:
+                    # Give async a change to schedule something else
+                    await asyncio.sleep_ms(100)
+                devicedata['name'] = self._rulequeue.get_nowait()
+                devicedata['valuename'] = self._rulequeue.get_nowait()
+                devicedata['value'] = self._rulequeue.get_nowait()
+            except Exception as e:
+                self._log.error("Script: scriptqueue proces Exception: "+repr(e))
+
+            # Assemble triggername
+            devicedata['triggername'] = devicedata['name']+'#'+devicedata['valuename']
+
             # process all rules
             rules=db.ruleTable.public()
 

@@ -75,15 +75,23 @@ def main(**params):
 
         # Create async tasks
         loop.create_task(core._plugins.asyncdevices())
-        loop.create_task(core._scripts.asyncscripts())
+        loop.create_task(core._plugins.asyncvalues())
+        # check if rules/scripts are needed!
+        advanced = db.advancedTable.getrow()
+        if advanced["scripts"] == "on": loop.create_task(core._scripts.asyncscripts())
+        if advanced["rules"] == "on": loop.create_task(core._scripts.asyncrules())
 
         # Run main loop
         core._log.info("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
         while True:
-            try:
-                app.run(host=ip_address, port=port, debug=False, log=core._log)
-            except Exception as e:
-                core._log.debug("Main: Async loop exception: {}".format(repr(e)))
+            if _debug < 2: app.run(host=ip_address, port=port, debug=False, log=core._log)
+            else:
+                try:
+                    app.run(host=ip_address, port=port, debug=False, log=core._log)
+                except Exception as e:
+                    core._log.debug("Main: Async loop exception: {}".format(repr(e)))
+                    import sys
+                    sys.print_exception(e)
             #app.run(host=ip_address, port=config["port"],debug=True, key=ssl.key, cert=ssl.cert)   # SSL version
     else:
         #No network, exit!

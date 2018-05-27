@@ -10,6 +10,9 @@ def render(info, controllers, plugins, plugindata, device, dxpin, dx_label, hard
    <TD style=\"font-size: 12pt; font-weight: bold; color: blue\">"""
     yield str(info["pluginname"])
     yield """
+   <input type='hidden' name='pluginid' value='"""
+    yield str(device["pluginid"])
+    yield """'>
 <TR>
    <TD>Name:
    <TD><input type='text' name='name' maxlength='40' value='"""

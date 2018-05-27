@@ -1,6 +1,7 @@
 cd unix
 cp ../../../micropython/micropython-async/aswitch.py .
 cp ../../../micropython/micropython-async/asyn.py .
+cp ../../../micropython/micropython-lib/copy/copy.py .
 cp ../../../micropython/micropython/drivers/dht/dht.py .
 cp ../../../micropython/micropython/drivers/onewire/ds18x20.py .
 cp ../../../micropython/micropython-lib/ffilib/ffilib.py .
@@ -13,6 +14,7 @@ cp ../../../micropython/micropython-lib/pkg_resources/pkg_resources.py .
 cp ../../../micropython/micropython-lib/re-pcre/re.py .
 cp ../../../micropython/micropython/drivers/sdcard/sdcard.py .
 cp ../../../micropython/micropython/drivers/display/ssd1306.py .
+cp ../../../micropython/micropython-lib/types/types.py .
 cp ../../../micropython/micropython-lib/uaiohttpclient/uaiohttpclient.py .
 cp -fR ../../../micropython/modbus/uModbus .
 mv -f uModbus umodbus
@@ -48,6 +50,7 @@ cp ../../../micropython/micropython/drivers/onewire/ds18x20.py .
 cp ../../../micropython/micropython/drivers/onewire/onewire.py .
 ln -sf  ../unix/aswitch.py
 ln -sf  ../unix/asyn.py
+ln -sf  ../unix/copy.py
 ln -sf  ../unix/collections
 ln -sf  ../unix/console_sink.py
 ln -sf  ../unix/filedb.py
@@ -63,6 +66,7 @@ ln -sf  ../unix/re.py
 ln -sf  ../unix/sdcard.py
 ln -sf  ../unix/ssd1306.py
 ln -sf  ../unix/syslog_sink.py
+ln -sf  ../unix/types.py
 ln -sf  ../unix/uaiohttpclient.py
 ln -sf  ../unix/uasyncio
 ln -sf  ../unix/ulog.py
@@ -84,6 +88,7 @@ cp ../../../micropython/micropython/drivers/onewire/ds18x20.py .
 cp ../../../micropython/micropython/drivers/onewire/onewire.py .
 ln -sf  ../unix/aswitch.py
 ln -sf  ../unix/asyn.py
+ln -sf  ../unix/copy.py
 ln -sf  ../unix/collections
 ln -sf  ../unix/console_sink.py
 ln -sf  ../unix/filedb.py
@@ -99,6 +104,7 @@ ln -sf  ../unix/re.py
 ln -sf  ../unix/sdcard.py
 ln -sf  ../unix/ssd1306.py
 ln -sf  ../unix/syslog_sink.py
+ln -sf  ../unix/types.py
 ln -sf  ../unix/uaiohttpclient.py
 ln -sf  ../unix/uasyncio
 ln -sf  ../unix/ulog.py

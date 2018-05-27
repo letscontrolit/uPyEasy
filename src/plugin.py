@@ -38,6 +38,10 @@ class plugins(object):
         self._log.debug("Plugins: Init plugin records")
         # script queue
         self._scriptqueue = queues.Queue(maxsize=100)
+        # rules queue
+        self._rulequeue = queues.Queue(maxsize=100)
+        # script queue
+        self._valuequeue = queues.Queue(maxsize=100)
        
         # delete plugin record if plugin NOT present in frozen firmware!
         tplugins = db.pluginTable.public()
@@ -118,7 +122,7 @@ class plugins(object):
                 plugin['client_id'] = core.__logname__+self._utils.get_upyeasy_name()
                 if devicename: 
                     try:
-                        if not self._plugin[devicename].init(plugin, device, queue, self._scriptqueue):
+                        if not self._plugin[devicename].init(plugin, device, queue, self._scriptqueue, self._rulequeue, self._valuequeue):
                             self._log.debug("Plugins: Init device: "+device['name']+" with plugin: "+str(device['pluginid'])+" failed, disabling!")
                             # device init failed, disable!
                             db.deviceTable.update({"timestamp":device['timestamp']},enable="off")
@@ -137,17 +141,15 @@ class plugins(object):
 
         try:
             self._plugin[plugindata['name']].loadform(plugindata)
-        except KeyError:
-            self._log.error("Plugins: Loadform plugin KeyError Exception: "+plugindata['name'])
+        except Exception as e:
+            self._log.error("Plugins: Loadform plugin Exception: {}".format(repr(e)))
         
     def saveform(self, plugindata): 
         self._log.debug("Plugins: Saveform plugin "+plugindata['name'])
         try:
             self._plugin[plugindata['name']].saveform(plugindata)
-        except KeyError:
-            self._log.error("Plugins: Saveform plugin KeyError Exception: "+plugindata['name'])
-        else: 
-            self._log.error("Plugins: Saveform plugin Exception: ")
+        except Exception as e:
+            self._log.error("Plugins: Saveform plugin Exception: {}".format(repr(e)))
         
     def loadvalues(self, device, valuenames): 
         self._log.debug("Plugins: Loadvalues plugin")
@@ -230,10 +232,20 @@ class plugins(object):
         # create/update datastore entry
         db.pluginstoreTable.create(name=pname,data=data)
  
-    def getqueue(self):
-        self._log.debug("Plugins: GetQueue")
+    def getvaluequeue(self):
+        self._log.debug("Plugins: GetValueQueue")
+
+        return self._valuequeue
+
+    def getscriptqueue(self):
+        self._log.debug("Plugins: GetScriptQueue")
 
         return self._scriptqueue
+
+    def getrulequeue(self):
+        self._log.debug("Plugins: GetRuleQueue")
+
+        return self._rulequeue
 
     async def asyncdevices(self):
         # Async coroutine to process all plugin work todo 
@@ -274,3 +286,42 @@ class plugins(object):
                                 self._plugin[device['name']]._lock.set()
                         await asyncio.sleep(0)
             await asyncio.sleep_ms(10)
+
+    async def asyncvalues(self):
+        # Async coroutine to process all script work todo 
+        self._log.debug("Plugins: Async processing values")
+
+        # get loop
+        loop = asyncio.get_event_loop()
+
+        while True:
+            # get scriptqueue message
+            devicedata = {}
+            try:
+                while await(self._valuequeue.get()) != core.QUEUE_MESSAGE_START:
+                    # Give async a change to schedule something else
+                    await asyncio.sleep_ms(100)
+                devicedata['name'] = self._valuequeue.get_nowait()
+                devicedata['valuename'] = self._valuequeue.get_nowait()
+                devicedata['value'] = self._valuequeue.get_nowait()
+            except Exception as e:
+                self._log.error("Plugins: valuequeue proces Exception: "+repr(e))
+
+            # Assemble triggername
+            devicedata['triggername'] = devicedata['name']+'#'+devicedata['valuename']
+
+            # process all devices
+            devices=db.deviceTable.public()
+                    
+            # Get all device values!
+            for device in devices:
+                # skip not enabled devices
+                if device['enable'] == 'on' and devicedata['triggername'] in device['valuesubscription']: 
+                    plugin_function = getattr(self._plugin[device['name']], 'write')
+                    if plugin_function: 
+                        # Write data to plugin
+                        self._plugin[device['name']].write(devicedata)
+                await asyncio.sleep(0)
+                    
+            # Give async a change to schedule something else
+            await asyncio.sleep_ms(100)

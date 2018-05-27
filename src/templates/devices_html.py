@@ -2,100 +2,94 @@
 def render(info,devices, plugins, controllers):
     yield """
 <script type=\"text/javascript\">
-function deviceDelete(id) """
+    function deviceDelete(id) """
     yield """{
-  $.ajax("""
+        $.ajax("""
     yield """{
-    url: \"/api/v1.0/device/\" + id,
-    type: 'DELETE',
-    success: function (product) """
+            url: \"/api/v1.0/device/\" + id,
+            type: 'DELETE',
+            success: function(product) """
     yield """{
-      $(ctl).parents(\"tr\").remove();
-    },
-    error: function (request, message, error) """
+                $(ctl).parents(\"tr\").remove();
+            },
+            error: function(request, message, error) """
     yield """{
-      handleException(request, message, error);
+                handleException(request, message, error);
+            }
+        });
+        setTimeout(\"location.href = '/devices'\", 3000); // milliseconds, so 3 seconds = 3000ms
     }
-  });
-}
 </script>
-    <table cellpadding='4' border='1' frame='box' rules='all'>
-       <TH>
-       <TH>ID
-       <TH>Name
-       <TH>Device
-       <TH>Dx Pin
-       <TH>Controller
-       <TH>Cntr.ID
-       <TH>Values
-       <TH>Enabled
-       <TH>
-       """
+<table cellpadding='4' border='1' frame='box' rules='all'>
+    <TH>
+        <TH>ID
+            <TH>Name
+                <TH>Device
+                    <TH>Dx Pin
+                        <TH>Controller
+                            <TH>Cntr.ID
+                                <TH>Values
+                                    <TH>Enabled
+                                        <TH>
+                                            """
     for device in devices:
-        yield """
-           """
+        yield """ """
         if device['id'] != 0:
-            yield """ 
-           <TR>
-              <TD><a class=\"button link\" href=\"/device_setting?id="""
+            yield """
+                                            <TR>
+                                                <TD><a class=\"button link\" href=\"/device_setting?id="""
             yield str(device['id'])
             yield """\">Edit</a>
-              <TD>"""
+                                                    <TD>"""
             yield str(device['id'])
             yield """
-              <TD>"""
+                                                        <TD>"""
             yield str(device['name'])
             yield """
-              <TD>"""
+                                                            <TD>"""
             for plugin in plugins:
-                yield """
-                       """
+                yield """ """
                 if plugin['id'] == device['pluginid']:
                     yield """ """
                     yield str(plugin['name'])
                     yield """ """
-                yield """
-                  """
+                yield """ """
             yield """
-              <TD>"""
+                                                                <TD>"""
             if device['dxpin'] != '':
                 yield """ """
                 yield str(device['dxpin'])
-                yield """ 
-                  """
+                yield """ """
             elif device['i2c'] > 0:
                 yield """ I2C("""
                 yield str(device['i2c'])
-                yield """) 
-                  """
+                yield """) """
             elif device['spi'] > 0:
                 yield """ SPI("""
                 yield str(device['spi'])
-                yield """) 
-                  """
+                yield """) """
             elif device['uart'] > 0:
                 yield """ UART("""
                 yield str(device['uart'])
-                yield """) """
+                yield """)
+                                                                    """
             yield """
-              <TD>"""
+                                                                    <TD>"""
             for controller in controllers:
-                yield """
-                       """
+                yield """ """
                 if controller['id'] == device['controller']:
                     yield """ """
                     yield str(controller['protocol'])
                     yield """ """
-                yield """
-                  """
+                yield """ """
             yield """
-              <TD>"""
+                                                                        <TD>"""
             yield str(device['controllerid'])
             yield """
-              <TD>"""
+                                                                            <TD>"""
             yield str(device['values'])
             yield """
-              <TD><span style=\"color:"""
+                                                                                <TD><span style=\"color:"""
             if device['enable'] == 'on':
                 yield """Green"""
             else:
@@ -106,15 +100,12 @@ function deviceDelete(id) """
             else:
                 yield """No"""
             yield """</span>
-              <TD><a class=\"button link\" onclick=\"deviceDelete("""
+                                                                                    <TD><a class=\"button link\" onclick=\"deviceDelete("""
             yield str(device['id'])
-            yield """);\">Del</a>
-           """
-        yield """
-       """
+            yield """);\">Del</a> """
+        yield """ """
     yield """
-       <TR>
-          <TD><a class=\"button link\" href=\"/device_setting?id=0\">Add</a>
-          <TD colspan=\"9\">
-    </table>
-"""
+                                                                                        <TR>
+                                                                                            <TD><a class=\"button link\" href=\"/device_setting?id=0\">Add</a>
+                                                                                                <TD colspan=\"9\">
+</table>"""

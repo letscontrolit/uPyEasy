@@ -1,35 +1,31 @@
 {% args info, menu, advanced %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="cache-control" content="no-cache" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>uPyEasy</title>
+    <title>{{info['srcname']}}</title>
     <link rel="stylesheet" href="static/upyeasy.css" type="text/css" />
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="static/upyeasy.js"></script>
-  </head>
-   <body class='bodymenu'>
-      <header class="headermenu">
-         <h1>uPyEasy: {{info['name']}} </h1>
-         <div class="menubar">
-             <a class="menu{% if menu==1 %} active{% endif %}" href=".">Main</a>
-             <a class="menu{% if menu==2 %} active{% endif %}" href="config">Config</a>
-             <a class="menu{% if menu==3 %} active{% endif %}" href="controllers">Controllers</a>
-             <a class="menu{% if menu==4 %} active{% endif %}" href="hardware">Hardware</a>
-             <a class="menu{% if menu==5 %} active{% endif %}" href="devices">Devices</a>
-             {% if advanced["rules"] == 'on' %}
-             <a class="menu{% if menu==6 %} active{% endif %}" href="rules">Rules</a>
-             {% endif %}
-             {% if advanced["scripts"] == 'on' %}
-             <a class="menu{% if menu==7 %} active{% endif %}" href="scripts">Scripts</a>
-             {% endif %}
-             {% if advanced["notifications"] == 'on' %}
-             <a class="menu{% if menu==8 %} active{% endif %}" href="notifications">Notifications</a>
-             {% endif %}
-             <a class="menu{% if menu==9 %} active{% endif %}" href="tools">Tools</a>
-             <a class="menu{% if menu==10 %} active{% endif %}" href="advanced">Advanced</a>
-         </div>
-      </header>
+</head>
+
+<body class='bodymenu'>
+    <header class="headermenu">
+        <h1>{{info['srcname']}}: {{info['name']}} </h1>
+        <div class="menubar">
+            <a class="menu{% if menu==1 %} active{% endif %}" href=".">Main</a>
+            <a class="menu{% if menu==2 %} active{% endif %}" href="config">Config</a>
+            <a class="menu{% if menu==3 %} active{% endif %}" href="controllers">Controllers</a>
+            <a class="menu{% if menu==4 %} active{% endif %}" href="hardware">Hardware</a>
+            <a class="menu{% if menu==5 %} active{% endif %}" href="devices">Devices</a> {% if advanced["rules"] == 'on' %}
+            <a class="menu{% if menu==6 %} active{% endif %}" href="rules">Rules</a> {% endif %} {% if advanced["scripts"] == 'on' %}
+            <a class="menu{% if menu==7 %} active{% endif %}" href="scripts">Scripts</a> {% endif %} {% if advanced["notifications"] == 'on' %}
+            <a class="menu{% if menu==8 %} active{% endif %}" href="notifications">Notifications</a> {% endif %}
+            <a class="menu{% if menu==9 %} active{% endif %}" href="tools">Tools</a>
+            <a class="menu{% if menu==10 %} active{% endif %}" href="advanced">Advanced</a>
+        </div>
+    </header>

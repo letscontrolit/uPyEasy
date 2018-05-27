@@ -2,54 +2,54 @@
 def render(info,controllers):
     yield """
 <script type=\"text/javascript\">
-function controllerDelete(id) """
+    function controllerDelete(id) """
     yield """{
-  $.ajax("""
+        $.ajax("""
     yield """{
-    url: \"/api/v1.0/controller/\" + id,
-    type: 'DELETE',
-    success: function (product) """
+            url: \"/api/v1.0/controller/\" + id,
+            type: 'DELETE',
+            success: function(product) """
     yield """{
-      $(ctl).parents(\"tr\").remove();
-    },
-    error: function (request, message, error) """
+                $(ctl).parents(\"tr\").remove();
+            },
+            error: function(request, message, error) """
     yield """{
-      handleException(request, message, error);
+                handleException(request, message, error);
+            }
+        });
+        setTimeout(\"location.href = '/controllers'\", 3000); // milliseconds, so 3 seconds = 3000ms
     }
-  });
-}
 </script>
-    <table cellpadding='4' border='1' frame='box' rules='all'>
-       <TH>
-       <TH>ID
-       <TH>Protocol
-       <TH>Hostname
-       <TH>Port
-       <TH>Enabled
-       <TH>
-       """
+<table cellpadding='4' border='1' frame='box' rules='all'>
+    <TH>
+        <TH>ID
+            <TH>Protocol
+                <TH>Hostname
+                    <TH>Port
+                        <TH>Enabled
+                            <TH>
+                                """
     for controller in controllers:
-        yield """
-           """
+        yield """ """
         if controller['id'] != 0:
-            yield """ 
-           <TR>
-              <TD><a class=\"button link\" href=\"/controller_setting?id="""
+            yield """
+                                <TR>
+                                    <TD><a class=\"button link\" href=\"/controller_setting?id="""
             yield str(controller['id'])
             yield """\">Edit</a>
-              <TD>"""
+                                        <TD>"""
             yield str(controller['id'])
             yield """
-              <TD>"""
+                                            <TD>"""
             yield str(controller['protocol'])
             yield """
-              <TD>"""
+                                                <TD>"""
             yield str(controller['hostname'])
             yield """
-              <TD>"""
+                                                    <TD>"""
             yield str(controller['port'])
             yield """
-              <TD><span style=\"color:"""
+                                                        <TD><span style=\"color:"""
             if controller['enable']=='on':
                 yield """green"""
             else:
@@ -60,15 +60,12 @@ function controllerDelete(id) """
             else:
                 yield """No"""
             yield """</span>
-              <TD><a class=\"button link\" onclick=\"controllerDelete("""
+                                                            <TD><a class=\"button link\" onclick=\"controllerDelete("""
             yield str(controller['id'])
-            yield """);\">Del</a>
-           """
-        yield """
-       """
+            yield """);\">Del</a> """
+        yield """ """
     yield """
-       <TR>
-          <TD><a class=\"button link\" href=\"/controller_setting?id=0\">Add</a>
-          <TD colspan=\"5\">
-    </table>
-"""
+                                                                <TR>
+                                                                    <TD><a class=\"button link\" href=\"/controller_setting?id=0\">Add</a>
+                                                                        <TD colspan=\"5\">
+</table>"""

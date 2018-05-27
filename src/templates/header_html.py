@@ -3,76 +3,76 @@ def render(info, menu, advanced):
     yield """
 <!DOCTYPE html>
 <html lang=\"en\">
-  <head>
+
+<head>
     <meta charset=\"utf-8\">
     <meta http-equiv=\"cache-control\" content=\"no-cache\" />
     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-    <title>uPyEasy</title>
+    <title>"""
+    yield str(info['srcname'])
+    yield """</title>
     <link rel=\"stylesheet\" href=\"static/upyeasy.css\" type=\"text/css\" />
     <script src=\"https://code.jquery.com/jquery-1.10.2.js\"></script>
     <script type=\"text/javascript\" src=\"static/upyeasy.js\"></script>
-  </head>
-   <body class='bodymenu'>
-      <header class=\"headermenu\">
-         <h1>uPyEasy: """
+</head>
+
+<body class='bodymenu'>
+    <header class=\"headermenu\">
+        <h1>"""
+    yield str(info['srcname'])
+    yield """: """
     yield str(info['name'])
     yield """ </h1>
-         <div class=\"menubar\">
-             <a class=\"menu"""
+        <div class=\"menubar\">
+            <a class=\"menu"""
     if menu==1:
         yield """ active"""
     yield """\" href=\".\">Main</a>
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==2:
         yield """ active"""
     yield """\" href=\"config\">Config</a>
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==3:
         yield """ active"""
     yield """\" href=\"controllers\">Controllers</a>
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==4:
         yield """ active"""
     yield """\" href=\"hardware\">Hardware</a>
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==5:
         yield """ active"""
-    yield """\" href=\"devices\">Devices</a>
-             """
+    yield """\" href=\"devices\">Devices</a> """
     if advanced["rules"] == 'on':
         yield """
-             <a class=\"menu"""
+            <a class=\"menu"""
         if menu==6:
             yield """ active"""
-        yield """\" href=\"rules\">Rules</a>
-             """
-    yield """
-             """
+        yield """\" href=\"rules\">Rules</a> """
+    yield """ """
     if advanced["scripts"] == 'on':
         yield """
-             <a class=\"menu"""
+            <a class=\"menu"""
         if menu==7:
             yield """ active"""
-        yield """\" href=\"scripts\">Scripts</a>
-             """
-    yield """
-             """
+        yield """\" href=\"scripts\">Scripts</a> """
+    yield """ """
     if advanced["notifications"] == 'on':
         yield """
-             <a class=\"menu"""
+            <a class=\"menu"""
         if menu==8:
             yield """ active"""
-        yield """\" href=\"notifications\">Notifications</a>
-             """
+        yield """\" href=\"notifications\">Notifications</a> """
     yield """
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==9:
         yield """ active"""
     yield """\" href=\"tools\">Tools</a>
-             <a class=\"menu"""
+            <a class=\"menu"""
     if menu==10:
         yield """ active"""
     yield """\" href=\"advanced\">Advanced</a>
-         </div>
-      </header>"""
+        </div>
+    </header>"""

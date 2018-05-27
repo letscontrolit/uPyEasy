@@ -15,6 +15,7 @@ from . import core, db, utils
 from .app  import app
 from .hal import hal
 from .db import _dbc
+from copy import deepcopy
 
 _plugins    = core._plugins
 _protocols  = core._protocols
@@ -27,6 +28,9 @@ _scripts    = core._scripts
 def auth_page(request, response):
     # Are you authorized to use uPyEasy?
     _log.debug("Pages: Authorized User?")
+
+    # release mem
+    gc.collect()
 
     # Get admin password if any
     config = db.configTable.getrow()
@@ -68,6 +72,7 @@ def get_home_page(request, response):
         
         # set info array
         info={}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -98,6 +103,7 @@ def get_home_page(request, response):
         
         # set info array
         info={}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = "Set SSID!"
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -150,6 +156,7 @@ def post_home_page(request, response):
 
     # set info array
     info={}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = "Set SSID!"
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -176,7 +183,7 @@ def post_home_page(request, response):
         yield from response.awrite("Content-Type: text/html\r\n")
         yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
 
-        # Reboot in 1 seconds!
+        # Reboot in 3 seconds!
         loop = asyncio.get_event_loop()
         loop.call_later(3,_hal.reboot_async())
     else:
@@ -238,6 +245,7 @@ def get_config_page(request, response):
 
     info={}
 
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = config['name']
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -354,6 +362,7 @@ def get_controllers_page(request, response):
     _log.debug("Pages: Entering Controllers Page")
 
     info={}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -398,6 +407,7 @@ def get_controller_setting_page(request, response):
         _log.debug("Pages: Edit Controller: "+str(id))
         
         info={}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -459,6 +469,7 @@ def get_controller_setting_page(request, response):
         protocols = sorted(protocols, key=lambda k: k['name'])
 
         info={}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -563,6 +574,7 @@ def post_controller_settingpage(request, response):
                     break
 
             info={}
+            info['srcname'] = core.initial_upyeasyname
             info['name']=_utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -570,7 +582,7 @@ def post_controller_settingpage(request, response):
             info['protocolname']=protocol['name']
 
             # empty controller
-            controller = db.controllerTable.__schema__
+            controller = deepcopy(db.controllerTable.__schema__)
             
             # menu settings
             menu = 3
@@ -607,7 +619,7 @@ def post_controller_settingpage(request, response):
             _log.debug("Pages: Controller Count: {}".format(cnt))
              
             # Empty controller
-            _dbcontroller = db.controllerTable.__schema__
+            _dbcontroller = deepcopy(db.controllerTable.__schema__)
 
             controller = _utils.map_form2db(_dbcontroller, uform)
             print(controller)
@@ -683,6 +695,7 @@ def get_hardware_page(request, response):
 
     #General info
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -768,6 +781,7 @@ def get_dxbootstate_page(request, response):
 
     #General info
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -832,6 +846,7 @@ def get_devices_page(request, response):
     _log.debug("Pages: Entering Devices Page")
 
     info={}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -841,9 +856,6 @@ def get_devices_page(request, response):
 
     #devices
     devices=db.deviceTable.public()
-    
-    # Get current plugin values
-    plugindata = {}
     
     # Get all plugin values!
     for device in devices:
@@ -936,12 +948,25 @@ def get_devicesetting_page(request, response):
             controllers = db.controllerTable.public()
 
             # Get list of plugins
+            pluginfound = False
             plugins = db.pluginTable.public()
             for plugin in plugins:
                 if plugin['id'] == device['pluginid']:
+                   pluginfound = True
                    break
-           
+            
+            # no plugin? Exit!
+            if not pluginfound: 
+                _log.error("Pages: Failed to create device entry: no plugin found!")
+                #return to devices page
+                yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+                yield from response.awrite("Location: /devices\r\n")
+                yield from response.awrite("Content-Type: text/html\r\n")
+                yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+                return False
+                
             info={}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -949,11 +974,14 @@ def get_devicesetting_page(request, response):
             info['pluginid'] = device['pluginid']
             info['pluginname'] = plugin['name']
 
-            plugindata = {}
+            # init device!
+            _plugins.initdevice(device)
+
+            plugindata = deepcopy(plugin)
             plugindata['name'] = device['name']
             # get plugin data from plugin
             _plugins.loadform(plugindata)
- 
+
             # Get dxpin config
             dxpin = db.dxpinTable.getrow()
 
@@ -994,6 +1022,7 @@ def get_devicesetting_page(request, response):
             plugins = sorted(plugins, key=lambda k: k['name'])
 
             info={}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1176,12 +1205,25 @@ def post_devicesetting_page(request, response):
                 controllers=db.controllerTable.public()
                 
                 # Get list of plugins
+                pluginfound = False
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
-                    if plugin['id'] == pluginid:
-                        break
+                    if plugin['id'] == device['pluginid']:
+                       pluginfound = True
+                       break
+            
+                # no plugin? Exit!
+                if not pluginfound: 
+                   _log.error("Pages: Failed to create device entry: no plugin found!")
+                   #return to devices page
+                   yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+                   yield from response.awrite("Location: /devices\r\n")
+                   yield from response.awrite("Content-Type: text/html\r\n")
+                   yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+                   return False
 
                 info={}
+                info['srcname'] = core.initial_upyeasyname
                 info['name'] = _utils.get_upyeasy_name()
                 info['copyright']=core.__copyright__
                 info['holder']= core.__author__
@@ -1196,17 +1238,17 @@ def post_devicesetting_page(request, response):
                 hardware = db.hardwareTable.getrow()
 
                 # Empty device, dict converted to list
-                device = db.deviceTable.__schema__
+                device = deepcopy(db.deviceTable.__schema__)
 
                 # init temp device!
-                device['name'] = 'dummy'
+                device['name'] = plugin['name']
                 device['pluginid'] = pluginid
                 _plugins.initdevice(device)
 
                 # Get dxpin config
                 dxpin = db.dxpinTable.getrow()
 
-                plugindata = {}
+                plugindata = deepcopy(plugin)
                 # use dummy instead of devicename which we don't have yet.
                 plugindata['name'] = device['name']
                 # get plugin data from plugin
@@ -1256,7 +1298,7 @@ def post_devicesetting_page(request, response):
                     
                 # set form values
                 # Empty device, dict converted to list
-                db_device = db.deviceTable.__schema__
+                db_device = deepcopy(db.deviceTable.__schema__)
                 device = _utils.map_form2db(db_device, uform)
 
                 # Get correct plugin
@@ -1269,6 +1311,7 @@ def post_devicesetting_page(request, response):
 
                 # no plugin? Exit!
                 if not plugfound: 
+                    _log.error("Pages: Failed to create device entry: no plugin found!")
                     #return to devices page
                     yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
                     yield from response.awrite("Location: /devices\r\n")
@@ -1321,6 +1364,7 @@ def get_rule_page(request, response):
     _log.debug("Pages GET: Display Rules Page")
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -1370,6 +1414,7 @@ def get_rulesetting_page(request, response):
             _log.debug("Pages: Edit rule: "+str(id))
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1460,6 +1505,7 @@ def get_rulesetting_page(request, response):
             _log.debug("Pages: Add rule")
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1534,6 +1580,7 @@ def get_script_page(request, response):
     _log.debug("Pages GET: Display Scripts Page")
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -1583,6 +1630,7 @@ def get_scriptsetting_page(request, response):
             _log.debug("Pages: Edit script: "+str(id))
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1675,6 +1723,7 @@ def get_scriptsetting_page(request, response):
             _log.debug("Pages: Add script")
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1749,6 +1798,7 @@ def get_notification_page(request, response):
     _log.debug("Pages GET: Display Notifications Page")
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -1800,6 +1850,7 @@ def get_notificationsetting_page(request, response):
             _dbc.connect()
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1878,6 +1929,7 @@ def get_notificationsetting_page(request, response):
             _dbc.close()
 
             info={}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -1886,7 +1938,7 @@ def get_notificationsetting_page(request, response):
 
             
             # Empty notification
-            notification = db.notificationTable.__schema__
+            notification = deepcopy(db.notificationTable.__schema__)
             notification['id'] = info ['id']
             
             # menu settings
@@ -1990,6 +2042,7 @@ def post_notificationsetting_page(request, response):
                 _dbc.close()
 
                 info={}
+                info['srcname'] = core.initial_upyeasyname
                 info['name'] = _utils.get_upyeasy_name()
                 info['copyright']=core.__copyright__
                 info['holder']= core.__author__
@@ -2003,7 +2056,7 @@ def post_notificationsetting_page(request, response):
                 hardware = db.hardwareTable.getrow()
 
                 # Empty notification
-                notification = db.notificationTable.__schema__
+                notification = deepcopy(db.notificationTable.__schema__)
                 notification['id'] = info ['id']
 
                 # menu settings
@@ -2039,6 +2092,7 @@ def post_notificationsetting_page(request, response):
                 _dbc.connect()
                 
                 info = {}
+                info['srcname'] = core.initial_upyeasyname
                 info['name'] = _utils.get_upyeasy_name()
                 info['copyright']=core.__copyright__
                 info['holder']= core.__author__
@@ -2051,7 +2105,7 @@ def post_notificationsetting_page(request, response):
                 _dbc.close()
 
                 # Empty notification
-                notification = db.notificationTable.__schema__
+                notification = deepcopy(db.notificationTable.__schema__)
 
                 # menu settings
                 menu = 8
@@ -2112,6 +2166,7 @@ def get_tool_page(request, response):
     if not cmd:
         _log.debug("Pages: Display Tools Page")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2131,10 +2186,20 @@ def get_tool_page(request, response):
         yield from app.render_template(response, "footer.html",(info,))
     elif cmd == "reboot":
         _log.debug("Pages: Reboot command given")
-        _hal.reboot()
+
+        # redirect to homepage!
+        yield from response.awrite("HTTP/1.0 301 Moved Permanently\r\n")
+        yield from response.awrite("Location: /\r\n")
+        yield from response.awrite("Content-Type: text/html\r\n")
+        yield from response.awrite("<html><head><title>Moved</title></head><body><h1>Moved</h1></body></html>\r\n")
+
+        # Reboot in 3 seconds!
+        loop = asyncio.get_event_loop()
+        loop.call_later(3,_hal.reboot_async())
     elif cmd == "log":
         _log.debug("Pages: Log command given")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2155,6 +2220,7 @@ def get_tool_page(request, response):
     elif cmd == "wifiscanner":
         _log.debug("Pages: wifiscanner command given")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2174,6 +2240,7 @@ def get_tool_page(request, response):
     elif cmd == "i2cscanner":
         _log.debug("Pages: i2cscanner command given")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2195,6 +2262,7 @@ def get_tool_page(request, response):
     elif cmd == "savesettings":
         _log.debug("Pages: savesettings command given")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2251,6 +2319,7 @@ def get_tool_page(request, response):
     elif cmd == "loadsettings":
         _log.debug("Pages: loadsettings command given")
         info = {}
+        info['srcname'] = core.initial_upyeasyname
         info['name'] = _utils.get_upyeasy_name()
         info['copyright']=core.__copyright__
         info['holder']= core.__author__
@@ -2337,6 +2406,7 @@ def get_files_page(request, response):
     _log.debug('Parsed name: '.join(qs_name))
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -2402,6 +2472,7 @@ def get_filesetting_page(request, response):
             _log.debug("Pages: Edit file: "+qs_name)
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -2466,6 +2537,7 @@ def get_filesetting_page(request, response):
             _log.debug("Pages: Edit file: "+qs_name)
             
             info = {}
+            info['srcname'] = core.initial_upyeasyname
             info['name'] = _utils.get_upyeasy_name()
             info['copyright']=core.__copyright__
             info['holder']= core.__author__
@@ -2537,6 +2609,7 @@ def get_advanced_page(request, response):
 
     _log.debug("Pages GET: Entering Advanced Page")
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -2605,6 +2678,7 @@ def get_dxpins_page(request, response):
     _log.debug("Pages: Entering Dxpins Page")
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -2637,6 +2711,7 @@ def get_info_page(request, response):
     _log.debug("Pages: Entering info Page")
 
     info = {}
+    info['srcname'] = core.initial_upyeasyname
     info['name'] = _utils.get_upyeasy_name()
     info['copyright']=core.__copyright__
     info['holder']= core.__author__
@@ -2647,15 +2722,7 @@ def get_info_page(request, response):
     info['dbversion']= _utils.get_dbversion()
     info["micropython"] = _hal.python()
     info["board"] = _hal.board()
-    import machine
-    if hasattr(machine,'unique_id'): 
-        try:
-            info['unique'] = str(machine.unique_id(), 'utf8')
-        except UnicodeError as e:
-            _log.error("Pages: Entering info Page unicode machine id error: "+repr(e))
-            info['unique'] = str(machine.unique_id())
-    else: info['unique'] = '-'
-    #if hasattr(machine,'freq'): info['freq'] = str(machine.freq())
+    info['unique'] = _utils.get_machine_id()
     info['freq'] = '-'
     info['time'] = _hal.get_time()
     info['platform'] = _utils.get_platform()

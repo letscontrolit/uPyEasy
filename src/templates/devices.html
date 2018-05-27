@@ -1,52 +1,44 @@
 {% args info,devices, plugins, controllers %}
 <script type="text/javascript">
-function deviceDelete(id) {
-  $.ajax({
-    url: "/api/v1.0/device/" + id,
-    type: 'DELETE',
-    success: function (product) {
-      $(ctl).parents("tr").remove();
-    },
-    error: function (request, message, error) {
-      handleException(request, message, error);
+    function deviceDelete(id) {
+        $.ajax({
+            url: "/api/v1.0/device/" + id,
+            type: 'DELETE',
+            success: function(product) {
+                $(ctl).parents("tr").remove();
+            },
+            error: function(request, message, error) {
+                handleException(request, message, error);
+            }
+        });
+        setTimeout("location.href = '/devices'", 3000); // milliseconds, so 3 seconds = 3000ms
     }
-  });
-}
 </script>
-    <table cellpadding='4' border='1' frame='box' rules='all'>
-       <TH>
-       <TH>ID
-       <TH>Name
-       <TH>Device
-       <TH>Dx Pin
-       <TH>Controller
-       <TH>Cntr.ID
-       <TH>Values
-       <TH>Enabled
-       <TH>
-       {% for device in devices %}
-           {% if device['id'] != 0 %} 
-           <TR>
-              <TD><a class="button link" href="/device_setting?id={{device['id']}}">Edit</a>
-              <TD>{{device['id']}}
-              <TD>{{device['name']}}
-              <TD>{% for plugin in plugins %}
-                       {% if plugin['id'] == device['pluginid'] %} {{plugin['name']}} {% endif %}
-                  {% endfor %}
-              <TD>{% if device['dxpin'] != '' %} {{device['dxpin']}} 
-                  {% elif device['i2c'] > 0 %} I2C({{device['i2c']}}) 
-                  {% elif device['spi'] > 0  %} SPI({{device['spi']}}) 
-                  {% elif device['uart'] > 0 %} UART({{device['uart']}}) {% endif %}
-              <TD>{% for controller in controllers %}
-                       {% if controller['id'] == device['controller'] %} {{controller['protocol']}} {% endif %}
-                  {% endfor %}
-              <TD>{{device['controllerid']}}
-              <TD>{{device['values']}}
-              <TD><span style="color:{% if device['enable'] == 'on' %}Green{% else %}Red{% endif %}">{% if device['enable'] == 'on' %}Yes{% else %}No{% endif %}</span>
-              <TD><a class="button link" onclick="deviceDelete({{device['id']}});">Del</a>
-           {% endif %}
-       {% endfor %}
-       <TR>
-          <TD><a class="button link" href="/device_setting?id=0">Add</a>
-          <TD colspan="9">
-    </table>
+<table cellpadding='4' border='1' frame='box' rules='all'>
+    <TH>
+        <TH>ID
+            <TH>Name
+                <TH>Device
+                    <TH>Dx Pin
+                        <TH>Controller
+                            <TH>Cntr.ID
+                                <TH>Values
+                                    <TH>Enabled
+                                        <TH>
+                                            {% for device in devices %} {% if device['id'] != 0 %}
+                                            <TR>
+                                                <TD><a class="button link" href="/device_setting?id={{device['id']}}">Edit</a>
+                                                    <TD>{{device['id']}}
+                                                        <TD>{{device['name']}}
+                                                            <TD>{% for plugin in plugins %} {% if plugin['id'] == device['pluginid'] %} {{plugin['name']}} {% endif %} {% endfor %}
+                                                                <TD>{% if device['dxpin'] != '' %} {{device['dxpin']}} {% elif device['i2c'] > 0 %} I2C({{device['i2c']}}) {% elif device['spi'] > 0 %} SPI({{device['spi']}}) {% elif device['uart'] > 0 %} UART({{device['uart']}})
+                                                                    {% endif %}
+                                                                    <TD>{% for controller in controllers %} {% if controller['id'] == device['controller'] %} {{controller['protocol']}} {% endif %} {% endfor %}
+                                                                        <TD>{{device['controllerid']}}
+                                                                            <TD>{{device['values']}}
+                                                                                <TD><span style="color:{% if device['enable'] == 'on' %}Green{% else %}Red{% endif %}">{% if device['enable'] == 'on' %}Yes{% else %}No{% endif %}</span>
+                                                                                    <TD><a class="button link" onclick="deviceDelete({{device['id']}});">Del</a> {% endif %} {% endfor %}
+                                                                                        <TR>
+                                                                                            <TD><a class="button link" href="/device_setting?id=0">Add</a>
+                                                                                                <TD colspan="9">
+</table>

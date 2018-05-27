@@ -84,10 +84,10 @@ class bme280_plugin:
         # release lock, ready for next measurement
         self._lock.clear()
         
-    def init(self, plugin, device, queue, scriptqueue):        
+    def init(self, plugin, device, queue, scriptqueue, rulequeue, valuequeue):        
         self._log.debug("Plugin: bme280 init")
         # plugin generic section
-        self._utils.plugin_initdata(self, plugin, device, queue, scriptqueue)
+        self._utils.plugin_initdata(self, plugin, device, queue, scriptqueue, rulequeue, valuequeue)
         self.content            = plugin.get('content',content)
         self.pincnt             = pincnt
         self.valuecnt           = valuecnt

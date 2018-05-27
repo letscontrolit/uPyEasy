@@ -53,7 +53,7 @@ def render(info):
             <TR>
                <TD>CPU Frequency
                <TD>"""
-    yield str(info['unique'])
+    yield str(info['freq'])
     yield """
            <TR>
                <TD colspan='2'>

@@ -122,7 +122,12 @@ class hal(object):
                     self._nic = wifi.WLAN(wifi.AP_IF)
                     core._nic = self._nic
                     self._nic.active(True)
-                    self._nic.config(essid="uPyEasy")
+                    machinename = self._utils.get_upyeasy_name()
+                    if machinename == core.initial_upyeasyname:
+                        ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                    else:
+                        ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
+                    self._nic.config(essid=ssidname)
                     ip_address_v4 = self._nic.ifconfig()[0]
                     core.initial_upyeasywifi = core.NET_AP
                 else:
@@ -158,7 +163,12 @@ class hal(object):
                             self._log.debug("Hal: init esp32 network: STA+AP mode")
                             self._apnic = wifi.WLAN(wifi.AP_IF)
                             self._apnic.active(True)
-                            self._apnic.config(essid="uPyEasy")                    
+                            machinename = self._utils.get_upyeasy_name()
+                            if machinename == core.initial_upyeasyname:
+                                ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                            else:
+                                ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
+                            self._apnic.config(essid=ssidname)
                             core.initial_upyeasywifi = core.NET_STA_AP
                         else:
                             core.initial_upyeasywifi = core.NET_STA
@@ -171,7 +181,12 @@ class hal(object):
                         self._nic = wifi.WLAN(wifi.AP_IF)
                         core._nic = self._nic
                         self._nic.active(True)
-                        self._nic.config(essid="uPyEasy")
+                        machinename = self._utils.get_upyeasy_name()
+                        if machinename == core.initial_upyeasyname:
+                            ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                        else:
+                            ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
+                        self._nic.config(essid=ssidname)
                         ip_address_v4 = self._nic.ifconfig()[0]
                         core.initial_upyeasywifi = core.NET_AP
                 
