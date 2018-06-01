@@ -18,11 +18,11 @@ __author__              = "Lisa Esselink"
 __copyright__           = "Copyright 2018"
 __credits__             = ["Lisa Esselink"]
 __license__             = "Creative Commons Attribution-NonCommercial 4.0 International License"
-__version__             = "0.3.0."
+__version__             = "0.3.1."
 __email__               = "info@upyeasy.com"
 __status__              = "Beta"
 __logname__             = "uPyEasy"
-__build__               = "84e5d06"
+__build__               = "9ebffbd"
 
 upyeasy_starttime       = 0
 initial_upyeasyname     = "uPyEasy"

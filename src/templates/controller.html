@@ -1,0 +1,20 @@
+{% args info, protocols %}
+<form name='frmselect' method='post'>
+<table>
+<TH>Protocol Controller
+<TH>Value
+<TR>
+   <TD>Protocol:
+   <TD>
+      <select name='protocolid'>
+      {% for protocol in protocols %}
+      <option value='{{protocol["id"]}}'>{{protocol["name"]}}</option>
+      {% endfor %}
+      </select>
+      <input type='hidden' name='id' maxlength='40' value='0'>
+      <a class="button link" href="" target="_blank">?</a>
+    <TR>
+       <TD>
+       <TD><a class="button link" href="controllers">Close</a><input class="button link" type='submit' value='Submit'>
+</table>
+</form>

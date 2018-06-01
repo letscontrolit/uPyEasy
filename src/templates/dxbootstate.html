@@ -1,0 +1,52 @@
+{% args info, hardware, dx_label, dxpin %}
+   <script type="text/javascript">
+    function copyDiv() {
+        selectHTML = `<select name='dx'>
+               <option value='0'>Off</option>
+               <option value='1'>Input</option>
+               <option value='2'>Output Pull None</option>
+               <option value='3'>Output Pull Up</option>
+               <option value='4'>Output Pull Down</option>
+               <option value='5'>Output Open Drain</option>
+               <option value='6'>Output Alt Pull Up</option>
+               <option value='7'>Output Alt Pull Down</option>
+               <option value='8'>Disabled</option>
+            </select>`;
+        {% for cnt in range(0,dx_label["count"]) %}
+            {% set dstr = 'd{}'.format(cnt) %}
+            document.getElementById('{{dstr}}').innerHTML = selectHTML.replace(/dx/,"{{dstr}}");
+            document.querySelector('#{{dstr}} [value="' + document.getElementById('{{dstr}}').getAttribute("dxpin") + '"]').selected = true;
+            if (document.getElementById('{{dstr}}').getAttribute("disabled") ) {
+                $("#{{dstr}}").children().attr("disabled","disabled");            }
+        {% endfor %}
+    };
+        
+    $(document).ready(function(){
+        // Copies all contents of boardled select into all other selects
+        copyDiv();
+   });
+   </script>
+   <form  method='post'>
+   <table>
+      <TH>Pin BootState Settings
+      <TH>
+      <TR>
+         <TD colspan='2'>
+            <h3>Dx boot states</h3>
+         {% for cnt in range(0,dx_label["count"]) %}
+         {% set dstr = 'd{}'.format(cnt) %}
+      <TR>
+         <TD>Pin mode {{dx_label[dstr]}}:
+         <TD>
+            <div id="{{dstr}}" dxpin="{{hardware[dstr]}}" disabled="{{dxpin[dstr]}}">
+            </div>
+         {% endfor %}
+      <TR>
+         <TD colspan='2'>
+            <hr>
+      <TR>
+         <TD colspan='2'><a class="button link" href="hardware">Close</a><input class="button link" type='submit' value='Submit'>
+      <TR>
+         <TD>
+   </table>
+</form>

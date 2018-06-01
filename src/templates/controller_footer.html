@@ -1,0 +1,12 @@
+{% args info,controller %}
+          <TR>
+             <TD>Enabled:
+             <TD><input type=checkbox id='enable' name='enable' {% if controller['enable'] == 'on' %}checked{% endif %}>
+          <TR>
+             <TD colspan='2'>
+                <hr>
+          <TR>
+             <TD>
+             <TD><a class="button link" href="controllers">Close</a><input class="button link" type='submit' value='Submit'>
+       </table>
+    </form>

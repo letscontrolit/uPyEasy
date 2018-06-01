@@ -1,0 +1,9 @@
+{% args info,protocol %}
+    <form name='frmselect' method='post'>
+       <table>
+          <TH>Controller Settings
+          <TH>
+          <TR>
+             <TD>Protocol:
+             <TD style="font-size: 12pt; font-weight: bold; color: blue">{{protocol['name']}}
+             <input type='hidden' name='protocol' value='{{protocol["name"]}}'>

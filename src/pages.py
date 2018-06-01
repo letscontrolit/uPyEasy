@@ -16,6 +16,7 @@ from .app  import app
 from .hal import hal
 from .db import _dbc
 from copy import deepcopy
+from ucollections import OrderedDict
 
 _plugins    = core._plugins
 _protocols  = core._protocols
@@ -582,7 +583,7 @@ def post_controller_settingpage(request, response):
             info['protocolname']=protocol['name']
 
             # empty controller
-            controller = deepcopy(db.controllerTable.__schema__)
+            controller = OrderedDict(db.controllerTable.__schema__)
             
             # menu settings
             menu = 3
@@ -619,7 +620,7 @@ def post_controller_settingpage(request, response):
             _log.debug("Pages: Controller Count: {}".format(cnt))
              
             # Empty controller
-            _dbcontroller = deepcopy(db.controllerTable.__schema__)
+            _dbcontroller = OrderedDict(db.controllerTable.__schema__)
 
             controller = _utils.map_form2db(_dbcontroller, uform)
             print(controller)
@@ -992,7 +993,6 @@ def get_devicesetting_page(request, response):
             # Get hardware config
             hardware = db.hardwareTable.getrow()
 
-
             # Convert pin settings
             dxpins = device["dxpin"].split(';')
             for cnt in range(0,plugindata["pincnt"]):
@@ -1162,7 +1162,7 @@ def post_devicesetting_page(request, response):
             #contract dxpin fields
             dbdevice['dxpin'] = ""
             for dxcnt in range(0,plugin['pincnt']):
-                dxpin[uform['dxpin'+str(dxcnt)]] = dbdevice['name']
+                dxpin["d{}".format(dxcnt)] = dbdevice['name']
                 dbdevice['dxpin'] += str(uform['dxpin'+str(dxcnt)])
                 if dxcnt < plugin['pincnt']-1: dbdevice['dxpin'] += ";"
                 
@@ -1208,7 +1208,7 @@ def post_devicesetting_page(request, response):
                 pluginfound = False
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
-                    if plugin['id'] == device['pluginid']:
+                    if plugin['id'] == pluginid:
                        pluginfound = True
                        break
             
@@ -1238,7 +1238,7 @@ def post_devicesetting_page(request, response):
                 hardware = db.hardwareTable.getrow()
 
                 # Empty device, dict converted to list
-                device = deepcopy(db.deviceTable.__schema__)
+                device = OrderedDict(db.deviceTable.__schema__)
 
                 # init temp device!
                 device['name'] = plugin['name']
@@ -1247,7 +1247,6 @@ def post_devicesetting_page(request, response):
 
                 # Get dxpin config
                 dxpin = db.dxpinTable.getrow()
-
                 plugindata = deepcopy(plugin)
                 # use dummy instead of devicename which we don't have yet.
                 plugindata['name'] = device['name']
@@ -1298,14 +1297,14 @@ def post_devicesetting_page(request, response):
                     
                 # set form values
                 # Empty device, dict converted to list
-                db_device = deepcopy(db.deviceTable.__schema__)
+                db_device = OrderedDict(db.deviceTable.__schema__)
                 device = _utils.map_form2db(db_device, uform)
 
                 # Get correct plugin
                 plugfound = False
                 plugins = db.pluginTable.public()
                 for plugin in plugins:
-                    if plugin['id'] == device['pluginid']:
+                    if plugin['id'] == pluginid:
                        plugfound = True
                        break
 
@@ -1323,12 +1322,12 @@ def post_devicesetting_page(request, response):
                 if plugin['pincnt'] > 0:
                     # Get dxpin config
                     dxpin = db.dxpinTable.getrow()
-
+                    print(device)
                     #contract dxpin fields
                     device['dxpin'] = ""
                     for dxcnt in range(0,plugin['pincnt']):
-                        dxpin["d"+str(device['dxpin'+str(dxcnt)])] = device['name']
-                        device['dxpin'] += str(device['dxpin'+str(dxcnt)])
+                        dxpin["d{}".format(dxcnt)] = device['name']
+                        device['dxpin'] += dxpin["d{}".format(dxcnt)]
                         if dxcnt < plugin['pincnt']-1: device['dxpin'] += ";"
                     
                     # Update pins
@@ -1938,7 +1937,7 @@ def get_notificationsetting_page(request, response):
 
             
             # Empty notification
-            notification = deepcopy(db.notificationTable.__schema__)
+            notification = OrderedDict(db.notificationTable.__schema__)
             notification['id'] = info ['id']
             
             # menu settings
@@ -2056,7 +2055,7 @@ def post_notificationsetting_page(request, response):
                 hardware = db.hardwareTable.getrow()
 
                 # Empty notification
-                notification = deepcopy(db.notificationTable.__schema__)
+                notification = OrderedDict(db.notificationTable.__schema__)
                 notification['id'] = info ['id']
 
                 # menu settings
@@ -2105,7 +2104,7 @@ def post_notificationsetting_page(request, response):
                 _dbc.close()
 
                 # Empty notification
-                notification = deepcopy(db.notificationTable.__schema__)
+                notification = OrderedDict(db.notificationTable.__schema__)
 
                 # menu settings
                 menu = 8

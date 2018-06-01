@@ -124,7 +124,7 @@ class hal(object):
                     self._nic.active(True)
                     machinename = self._utils.get_upyeasy_name()
                     if machinename == core.initial_upyeasyname:
-                        ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                        ssidname = "{}-{}".format(core.initial_upyeasyname,self._utils.get_machine_id())
                     else:
                         ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
                     self._nic.config(essid=ssidname)
@@ -165,7 +165,7 @@ class hal(object):
                             self._apnic.active(True)
                             machinename = self._utils.get_upyeasy_name()
                             if machinename == core.initial_upyeasyname:
-                                ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                                ssidname = "{}-{}".format(core.initial_upyeasyname,self._utils.get_machine_id())
                             else:
                                 ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
                             self._apnic.config(essid=ssidname)
@@ -183,7 +183,7 @@ class hal(object):
                         self._nic.active(True)
                         machinename = self._utils.get_upyeasy_name()
                         if machinename == core.initial_upyeasyname:
-                            ssidname = "{}-{}".format(core.initial_upyeasyname,_utils.get_machine_id())
+                            ssidname = "{}-{}".format(core.initial_upyeasyname,self._utils.get_machine_id())
                         else:
                             ssidname = "{}-{}".format(core.initial_upyeasyname,machinename)
                         self._nic.config(essid=ssidname)
@@ -729,7 +729,8 @@ class hal(object):
             #reboot!
             sys.exit()
         elif self._utils.get_platform() == 'pyboard':
-            pass
+            import machine
+            machine.reset()
         elif self._utils.get_platform() == 'esp32':
             import machine
             machine.reset()

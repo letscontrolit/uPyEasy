@@ -44,6 +44,7 @@ def main(**params):
     init_ok = init(_debug)
     
     if init_ok.init():
+        core._log.info("Main: Async loop, log level: {}".format(_debug))
         # load pages
         from . import pages
         
@@ -84,9 +85,12 @@ def main(**params):
         # Run main loop
         core._log.info("Main: uPyEasy Main Async Loop on IP adress: "+ip_address+":"+str(port))
         while True:
-            if _debug < 2: app.run(host=ip_address, port=port, debug=False, log=core._log)
+            if _debug < 2: 
+                core._log.debug("Main: Async debug loop, no exception protection")
+                app.run(host=ip_address, port=port, debug=False, log=core._log)
             else:
                 try:
+                    core._log.debug("Main: Async debug loop, with exception protection")
                     app.run(host=ip_address, port=port, debug=False, log=core._log)
                 except Exception as e:
                     core._log.debug("Main: Async loop exception: {}".format(repr(e)))
