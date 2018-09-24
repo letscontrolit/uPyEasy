@@ -4,11 +4,11 @@ uPyEasy allows you to turn an ESP or STM32 module into a multifunction sensor an
 
 Build status: **BETA**
 
-Introduction and wiki: https://www.letscontrolit.com/wiki/index.php/uPyEasy#Introduction
+Introduction and wiki: https://www.letscontrolit.com/wiki/index.php/uPyEasy
 
 This is the development branch of uPyEasy. All new untested features go into this branch. Fixes from stable branches will also be merged in this one.
 
-Check here to learn how to use this branch and help us improving uPyEasy: http://www.letscontrolit.com/wiki/index.php/uPyEasy#Source_code_development
+Check here to learn how to use this branch and help us improving uPyEasy: https://github.com/letscontrolit/uPyEasy/tree/master/docs
 
 
 ## Binary releases
@@ -42,6 +42,6 @@ upyeasy_v021_20180218_test_stm32-pybv3_1024.dfu  | STM32 with 1Mb flash    | Bet
 
 For further details please check this [guide](https://www.letscontrolit.com/forum/viewtopic.php?f=22&t=3906).
 
-## More info
+## How to build firmware from sources
 
-Details and discussion are on the uPyEasy forum: https://www.letscontrolit.com/forum/viewtopic.php?f=20&t=3577
+Build instructions for more platforms (inc. ESP8266) are documented [there](https://github.com/letscontrolit/uPyEasy/blob/master/docs/uPyEasy%20Building%20Environment.pdf).
